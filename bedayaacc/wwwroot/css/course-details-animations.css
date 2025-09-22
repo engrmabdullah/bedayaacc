@@ -1,0 +1,812 @@
+﻿/* ========================================
+   Course Details Animations & Effects
+   ======================================== */
+
+/* Page Load Animations */
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    0% {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInFromTop {
+    0% {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Apply animations to page elements */
+.course-header {
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.breadcrumb {
+    animation: slideInFromTop 0.6s ease-out both;
+}
+
+.course-card {
+    animation: fadeInUp 0.6s ease-out both;
+}
+
+    .course-card:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .course-card:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .course-card:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .course-card:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    .course-card:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
+.pricing-card {
+    animation: fadeInRight 0.8s ease-out 0.3s both;
+}
+
+/* Staggered Animation for Accordion Items */
+.accordion-item {
+    animation: fadeInLeft 0.5s ease-out both;
+}
+
+    .accordion-item:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .accordion-item:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .accordion-item:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .accordion-item:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    .accordion-item:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
+/* Lesson Items Animation */
+.lesson-item {
+    animation: fadeInUp 0.4s ease-out both;
+}
+
+    .lesson-item:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .lesson-item:nth-child(2) {
+        animation-delay: 0.15s;
+    }
+
+    .lesson-item:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+
+    .lesson-item:nth-child(4) {
+        animation-delay: 0.25s;
+    }
+
+    .lesson-item:nth-child(5) {
+        animation-delay: 0.3s;
+    }
+
+    .lesson-item:nth-child(6) {
+        animation-delay: 0.35s;
+    }
+
+/* Content List Animation */
+.content-list li {
+    animation: fadeInLeft 0.4s ease-out both;
+}
+
+    .content-list li:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .content-list li:nth-child(2) {
+        animation-delay: 0.15s;
+    }
+
+    .content-list li:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+
+    .content-list li:nth-child(4) {
+        animation-delay: 0.25s;
+    }
+
+    .content-list li:nth-child(5) {
+        animation-delay: 0.3s;
+    }
+
+/* ========================================
+   Hover Animations
+   ======================================== */
+
+/* Accordion Button Hover Effect */
+.accordion-button {
+    position: relative;
+    overflow: hidden;
+}
+
+    .accordion-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.6s;
+    }
+
+    .accordion-button:hover::before {
+        left: 100%;
+    }
+
+/* Card Hover Animations */
+.course-card {
+    transform-origin: center bottom;
+}
+
+    .course-card:hover {
+        animation: cardFloat 0.6s ease-in-out;
+    }
+
+@keyframes cardFloat {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-5px) scale(1.01);
+    }
+}
+
+/* Lesson Item Hover Effect */
+.lesson-item:hover .lesson-icon {
+    animation: iconBounce 0.5s ease-in-out;
+}
+
+@keyframes iconBounce {
+    0%, 20%, 60%, 100% {
+        transform: scale(1);
+    }
+
+    40% {
+        transform: scale(1.1);
+    }
+
+    80% {
+        transform: scale(1.05);
+    }
+}
+
+/* Content List Check Animation */
+.content-list li::before {
+    animation: checkPop 0.3s ease-in-out 0.2s both;
+}
+
+@keyframes checkPop {
+    0% {
+        transform: translateY(-50%) scale(0);
+    }
+
+    50% {
+        transform: translateY(-50%) scale(1.2);
+    }
+
+    100% {
+        transform: translateY(-50%) scale(1);
+    }
+}
+
+/* ========================================
+   Button Animations
+   ======================================== */
+
+/* Register Button Pulse Effect */
+.register-button {
+    position: relative;
+    overflow: hidden;
+}
+
+    .register-button::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .register-button:hover::after {
+        width: 300px;
+        height: 300px;
+    }
+
+    .register-button:active {
+        animation: buttonPress 0.1s ease-in-out;
+    }
+
+@keyframes buttonPress {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(0.98);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* ========================================
+   Progress Animations
+   ======================================== */
+
+/* Progress Bar for Course Sections */
+@keyframes progressFill {
+    0% {
+        width: 0;
+    }
+
+    100% {
+        width: var(--progress-width, 0%);
+    }
+}
+
+.progress-bar {
+    height: 4px;
+    background: var(--border-light);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-gradient);
+    border-radius: 2px;
+    animation: progressFill 1.5s ease-out;
+}
+
+/* ========================================
+   Text Animations
+   ======================================== */
+
+/* Typing Effect for Course Title */
+.course-title.typing {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 2s steps(30, end), blink-caret 0.75s step-end infinite;
+    border-right: 3px solid var(--primary-color);
+}
+
+@keyframes typing {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 100%;
+    }
+}
+
+@keyframes blink-caret {
+    from, to {
+        border-color: transparent;
+    }
+
+    50% {
+        border-color: var(--primary-color);
+    }
+}
+
+/* Counter Animation */
+.animated-counter {
+    animation: countUp 2s ease-out;
+}
+
+@keyframes countUp {
+    0% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ========================================
+   Interactive Animations
+   ======================================== */
+
+/* Accordion Expand Animation */
+.accordion-collapse.collapsing {
+    animation: accordionSlide 0.35s ease-in-out;
+}
+
+@keyframes accordionSlide {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tab Content Fade */
+.tab-content-fade {
+    animation: tabFadeIn 0.4s ease-in-out;
+}
+
+@keyframes tabFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ========================================
+   Scroll-Based Animations
+   ======================================== */
+
+/* Reveal on Scroll */
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+    .reveal-on-scroll.revealed {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+/* Parallax Effect for Background Elements */
+.parallax-bg {
+    transform: translateY(var(--scroll-y, 0));
+    transition: transform 0.1s ease-out;
+}
+
+/* ========================================
+   Loading Animations
+   ======================================== */
+
+/* Skeleton Loading Animation */
+@keyframes skeletonShimmer {
+    0% {
+        background-position: -200px 0;
+    }
+
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.skeleton-loading {
+    background: linear-gradient(90deg, #f0f0f0 0px, #e8e8e8 40px, #f0f0f0 80px);
+    background-size: 600px;
+    animation: skeletonShimmer 1.6s ease-in-out infinite;
+}
+
+/* Pulse Animation for Loading States */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.pulse-loading {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Spinner Animation */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* ========================================
+   Special Effects
+   ======================================== */
+
+/* Floating Animation for Badges */
+.floating-badge {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Glow Effect */
+.glow-effect {
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 5px var(--primary-color), 0 0 10px var(--primary-color);
+    }
+
+    to {
+        box-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color);
+    }
+}
+
+/* Ripple Effect for Clicks */
+.ripple-effect {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* ========================================
+   Micro-interactions
+   ======================================== */
+
+/* Icon Rotation on Hover */
+.rotating-icon {
+    transition: transform 0.3s ease-in-out;
+}
+
+    .rotating-icon:hover {
+        transform: rotate(360deg);
+    }
+
+/* Scale Animation for Interactive Elements */
+.scale-on-hover {
+    transition: transform 0.2s ease-in-out;
+}
+
+    .scale-on-hover:hover {
+        transform: scale(1.05);
+    }
+
+    .scale-on-hover:active {
+        transform: scale(0.95);
+    }
+
+/* ========================================
+   Stagger Animations
+   ======================================== */
+
+/* Staggered Fade-in for Lists */
+.stagger-item {
+    opacity: 0;
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+    .stagger-item:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .stagger-item:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .stagger-item:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .stagger-item:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    .stagger-item:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
+    .stagger-item:nth-child(6) {
+        animation-delay: 0.6s;
+    }
+
+    .stagger-item:nth-child(7) {
+        animation-delay: 0.7s;
+    }
+
+    .stagger-item:nth-child(8) {
+        animation-delay: 0.8s;
+    }
+
+    .stagger-item:nth-child(9) {
+        animation-delay: 0.9s;
+    }
+
+    .stagger-item:nth-child(10) {
+        animation-delay: 1.0s;
+    }
+
+/* ========================================
+   Form Animations
+   ======================================== */
+
+/* Input Focus Animation */
+.animated-input {
+    position: relative;
+}
+
+    .animated-input input:focus {
+        animation: inputFocus 0.3s ease-out;
+    }
+
+@keyframes inputFocus {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Label Float Animation */
+.floating-label {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    transition: all 0.2s ease-out;
+    pointer-events: none;
+    color: var(--text-muted);
+}
+
+    .floating-label.active {
+        top: -8px;
+        font-size: 0.75rem;
+        color: var(--primary-color);
+        background: white;
+        padding: 0 4px;
+    }
+
+/* ========================================
+   Modal and Overlay Animations
+   ======================================== */
+
+/* Modal Fade In */
+.modal-fade-in {
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Backdrop Fade */
+.backdrop-fade {
+    animation: backdropFadeIn 0.3s ease-out;
+}
+
+@keyframes backdropFadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 0.5;
+    }
+}
+
+/* ========================================
+   Performance Optimizations
+   ======================================== */
+
+/* GPU Acceleration for Smooth Animations */
+.gpu-accelerated {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000;
+    -webkit-perspective: 1000;
+}
+
+/* Will-change for elements that will be animated */
+.will-animate {
+    will-change: transform, opacity;
+}
+
+/* ========================================
+   Accessibility Considerations
+   ======================================== */
+
+/* Respect user preferences for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .typing {
+        animation: none;
+        border-right: none;
+        overflow: visible;
+        white-space: normal;
+    }
+
+    .floating-badge {
+        animation: none;
+    }
+
+    .course-card:hover {
+        transform: none;
+    }
+
+    .scale-on-hover:hover {
+        transform: none;
+    }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+    .glow-effect {
+        animation: none;
+        box-shadow: none;
+    }
+
+    .ripple-effect {
+        background: currentColor;
+    }
+}
+
+/* ========================================
+   Theme Variations
+   ======================================== */
+
+/* Dark theme animations (if implemented) */
+@media (prefers-color-scheme: dark) {
+    .skeleton-loading {
+        background: linear-gradient(90deg, #2a2a2a 0px, #3a3a3a 40px, #2a2a2a 80px);
+    }
+
+    .floating-label.active {
+        background: var(--bg-dark, #1a1a1a);
+    }
+}
+
+/* ========================================
+   Print Styles
+   ======================================== */
+
+@media print {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .course-card::before {
+        display: none;
+    }
+
+    .register-button::before,
+    .register-button::after {
+        display: none;
+    }
+}

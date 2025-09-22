@@ -1,0 +1,279 @@
+﻿@using bedayaacc.Services
+@inherits LayoutComponentBase
+@inject NavigationManager Nav
+@inject TranslationService TranslationService
+@inject IJSRuntime JSRuntime
+
+@code {
+    private bool isMobileMenuOpen = false;
+    private bool isScrolled = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await TranslationService.EnsureInitAfterRenderAsync();
+            await JSRuntime.InvokeVoidAsync("initializeScrollHandler", DotNetObjectReference.Create(this));
+        }
+        StateHasChanged();
+    }
+
+    string Tr(string k) => TranslationService.Translate(k);
+
+    private async Task SetAr()
+    {
+        await TranslationService.SetLanguageAsync("ar");
+        StateHasChanged();
+    }
+
+    private async Task SetEn()
+    {
+        await TranslationService.SetLanguageAsync("en");
+        StateHasChanged();
+    }
+
+    private void ToggleMobileMenu()
+    {
+        isMobileMenuOpen = !isMobileMenuOpen;
+    }
+
+    [JSInvokable]
+    public void OnScroll(bool scrolled)
+    {
+        isScrolled = scrolled;
+        InvokeAsync(StateHasChanged);
+    }
+
+    protected override void OnInitialized()
+    {
+        Nav.LocationChanged += HandleLocationChanged;
+    }
+
+    private void HandleLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        isMobileMenuOpen = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= HandleLocationChanged;
+    }
+}
+
+<div class="site-wrapper @(TranslationService.CurrentLanguage == "ar" ? "rtl" : "ltr")">
+    <!-- Navigation Header -->
+    <header class="site-header @(isScrolled ? "scrolled" : "")">
+        <div class="header-background"></div>
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo -->
+                <a class="logo" href="/">
+                    <div class="logo-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <span class="logo-text">@Tr("Site.Name")</span>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <a href="/" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>@Tr("Nav.Home")</span>
+                    </a>
+                    <a href="/courses" class="nav-link">
+                        <i class="fas fa-book"></i>
+                        <span>@Tr("Nav.Courses")</span>
+                    </a>
+                    <a href="/blog" class="nav-link">
+                        <i class="fas fa-blog"></i>
+                        <span>@Tr("Nav.Blog")</span>
+                    </a>
+                    <a href="/events" class="nav-link">
+                        <i class="fas fa-calendar"></i>
+                        <span>@Tr("Nav.Events")</span>
+                    </a>
+                    <a href="/contact" class="nav-link">
+                        <i class="fas fa-envelope"></i>
+                        <span>@Tr("Nav.Contact")</span>
+                    </a>
+                </nav>
+
+                <!-- Language Switcher & Mobile Menu Toggle -->
+                <div class="header-actions">
+                    <div class="lang-switcher">
+                        <button class="lang-btn @(TranslationService.CurrentLanguage == "ar" ? "active" : "")"
+                                @onclick="SetAr">
+                            ع
+                        </button>
+                        <button class="lang-btn @(TranslationService.CurrentLanguage == "en" ? "active" : "")"
+                                @onclick="SetEn">
+                            EN
+                        </button>
+                    </div>
+
+                    <button class="mobile-menu-toggle @(isMobileMenuOpen ? "active" : "")"
+                            @onclick="ToggleMobileMenu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div class="mobile-nav @(isMobileMenuOpen ? "open" : "")">
+            <div class="mobile-nav-backdrop" @onclick="ToggleMobileMenu"></div>
+            <div class="mobile-nav-content">
+                <div class="mobile-nav-header">
+                    <div class="mobile-logo">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>@Tr("Site.Name")</span>
+                    </div>
+                    <button class="mobile-close" @onclick="ToggleMobileMenu">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <nav class="mobile-nav-links" style="
+    background-color: white;
+">
+                    <a href="/" class="mobile-nav-link" @onclick="ToggleMobileMenu">
+                        <i class="fas fa-home"></i>
+                        <span>@Tr("Nav.Home")</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a href="/courses" class="mobile-nav-link" @onclick="ToggleMobileMenu">
+                        <i class="fas fa-book"></i>
+                        <span>@Tr("Nav.Courses")</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a href="/blog" class="mobile-nav-link" @onclick="ToggleMobileMenu">
+                        <i class="fas fa-blog"></i>
+                        <span>@Tr("Nav.Blog")</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a href="/events" class="mobile-nav-link" @onclick="ToggleMobileMenu">
+                        <i class="fas fa-calendar"></i>
+                        <span>@Tr("Nav.Events")</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a href="/contact" class="mobile-nav-link" @onclick="ToggleMobileMenu">
+                        <i class="fas fa-envelope"></i>
+                        <span>@Tr("Nav.Contact")</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </nav>
+
+                <div class="mobile-nav-footer">
+                    <div class="mobile-lang-switcher">
+                        <p>@Tr("Site.Language"):</p>
+                        <div class="mobile-lang-buttons">
+                            <button class="mobile-lang-btn @(TranslationService.CurrentLanguage == "ar" ? "active" : "")"
+                                    @onclick="SetAr">
+                                العربية
+                            </button>
+                            <button class="mobile-lang-btn @(TranslationService.CurrentLanguage == "en" ? "active" : "")"
+                                    @onclick="SetEn">
+                                English
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="site-main">
+        <div class="page-transition">
+            @Body
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-background">
+            <div class="footer-pattern"></div>
+        </div>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>@Tr("Site.Name")</span>
+                    </div>
+                    <p class="footer-description">@Tr("Site.Description")</p>
+                </div>
+
+                <div class="footer-links">
+                    <div class="footer-section">
+                        <h4>@Tr("Footer.QuickLinks")</h4>
+                        <ul>
+                            <li><a href="/">@Tr("Nav.Home")</a></li>
+                            <li><a href="/courses">@Tr("Nav.Courses")</a></li>
+                            <li><a href="/blog">@Tr("Nav.Blog")</a></li>
+                            <li><a href="/events">@Tr("Nav.Events")</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-section">
+                        <h4>@Tr("Footer.Support")</h4>
+                        <ul>
+                            <li><a href="/help">@Tr("Footer.Help")</a></li>
+                            <li><a href="/faq">@Tr("Footer.FAQ")</a></li>
+                            <li><a href="/contact">@Tr("Nav.Contact")</a></li>
+                            <li><a href="/privacy">@Tr("Footer.Privacy")</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-section">
+                        <h4>@Tr("Footer.Connect")</h4>
+                        <div class="social-links">
+                            <a href="#" class="social-link facebook" title="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-link twitter" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-link instagram" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link linkedin" title="LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; @DateTime.Now.Year @Tr("Site.Name"). @Tr("Footer.Rights")</p>
+                <div class="footer-bottom-links">
+                    <a href="/terms">@Tr("Footer.Terms")</a>
+                    <a href="/privacy">@Tr("Footer.Privacy")</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top @(isScrolled ? "visible" : "")" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+</div>
+
+<script>
+    window.initializeScrollHandler = (dotNetObject) => {
+        let isScrolled = false;
+
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY > 100;
+            if (scrolled !== isScrolled) {
+                isScrolled = scrolled;
+                dotNetObject.invokeMethodAsync('OnScroll', scrolled);
+            }
+        });
+    };
+</script>

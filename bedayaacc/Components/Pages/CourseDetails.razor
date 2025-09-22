@@ -1,0 +1,283 @@
+﻿@page "/courses/{id:int}"
+@using bedayaacc.Models
+@using bedayaacc.Components.Layout
+@layout ExternalLayout
+@inject bedayaacc.Services.TranslationService T
+@inject bedayaacc.Services.Repositories.ICourseRepository CourseRepo
+
+@implements IDisposable
+
+@if (_course is null)
+{
+    <div class="container py-5">...</div>
+}
+else
+{
+    <div class="container py-4">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">@T.Translate("Nav.Home")</a></li>
+                <li class="breadcrumb-item"><a href="/courses">@T.Translate("Courses.Title")</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@_course.Title(T.CurrentLanguage)</li>
+            </ol>
+        </nav>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <h1 class="h3 mb-2">@_course.Title(T.CurrentLanguage)</h1>
+                <div class="text-muted mb-3">
+                    @T.Translate("Course.Level"): @LevelText(_course.Level) •
+                    @T.Translate("Course.Duration"): @FormatDuration(_course.DurationMinutes)
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h2 class="h5 mb-2">@T.Translate("Course.Summary")</h2>
+                        <p class="mb-0">@_course.Summary(T.CurrentLanguage)</p>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">@T.Translate("Course.Curriculum")</h2>
+
+                        @if (_course.Sections?.Any() == true)
+                        {
+                            <div class="accordion" id="curriculum">
+                                @foreach (var section in _course.Sections.OrderBy(s => s.Order))
+                                {
+                                    var sid = $"sec-{section.Order}";
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="h-@sid">
+                                            <button class="accordion-button collapsed"
+                                                    type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#@sid">
+                                                @(section.Title(T.CurrentLanguage))
+                                            </button>
+                                        </h2>
+                                        <div id="@sid" class="accordion-collapse collapse" data-bs-parent="#curriculum">
+                                            <div class="accordion-body">
+                                                @if (section.Lessons?.Any() == true)
+                                                {
+                                                    <ul class="list-unstyled mb-0">
+                                                        @foreach (var l in section.Lessons.OrderBy(x => x.Order))
+                                                        {
+                                                            <li class="d-flex align-items-center justify-content-between py-1 border-bottom">
+                                                                <span>@l.Title(T.CurrentLanguage)</span>
+                                                                @if (l.DurationMinutes.HasValue)
+                                                                {
+                                                                    <small class="text-muted">@FormatDuration(l.DurationMinutes.Value)</small>
+                                                                }
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                }
+                                                else
+                                                {
+                                                    <div class="text-muted">—</div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-muted">—</div>
+                        }
+
+                        @if (_course.Track is not null)
+                        {
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h2 class="h5 mb-2">@T.Translate("Course.Track")</h2>
+                                    <div class="fw-semibold mb-1">@_course.Track.Title(T.CurrentLanguage)</div>
+                                    @if (!string.IsNullOrWhiteSpace(_course.Track.Description(T.CurrentLanguage)))
+                                    {
+                                        <div class="text-muted">@_course.Track.Description(T.CurrentLanguage)</div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        @if (_course.OutcomesAr.Any() || _course.OutcomesEn.Any())
+                        {
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h2 class="h5 mb-2">@T.Translate("Course.Outcomes")</h2>
+                                    <ul class="mb-0">
+                                        @foreach (var item in LangList(_course.OutcomesAr, _course.OutcomesEn))
+                                        {
+                                            <li>@item</li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        }
+
+                        @if (_course.RequirementsAr.Any() || _course.RequirementsEn.Any())
+                        {
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h2 class="h5 mb-2">@T.Translate("Course.Requirements")</h2>
+                                    <ul class="mb-0">
+                                        @foreach (var item in LangList(_course.RequirementsAr, _course.RequirementsEn))
+                                        {
+                                            <li>@item</li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        }
+
+                        @if (_course.AudienceAr.Any() || _course.AudienceEn.Any())
+                        {
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h2 class="h5 mb-2">@T.Translate("Course.Audience")</h2>
+                                    <ul class="mb-0">
+                                        @foreach (var item in LangList(_course.AudienceAr, _course.AudienceEn))
+                                        {
+                                            <li>@item</li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">@T.Translate("Course.FAQ")</h2>
+                        @if (_course.Faq?.Any() == true)
+                        {
+                            <div class="accordion" id="faq">
+                                @foreach (var f in _course.Faq.OrderBy(x => x.Order))
+                                {
+                                    var fid = $"faq-{f.Order}";
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="h-@fid">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@fid">@f.Q(T.CurrentLanguage)</button>
+                                        </h2>
+                                        <div id="@fid" class="accordion-collapse collapse" data-bs-parent="#faq">
+                                            <div class="accordion-body">
+                                                @f.A(T.CurrentLanguage)
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-muted">—</div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card sticky-top" style="top: 1rem;">
+                    <img class="card-img-top" src="@_course.ThumbnailUrl" alt="@_course.Title(T.CurrentLanguage)" />
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-muted">@T.Translate("Course.Price")</span>
+                            <strong>@PriceText(_course.Price)</strong>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted">@T.Translate("Course.Instructor")</span><br />
+                            <strong>@_course.Instructor(T.CurrentLanguage)</strong>
+                        </div>
+                        <a class="btn btn-primary w-100" href="@_course.RegisterUrl">@T.Translate("Course.Register")</a>
+                    </div>
+                </div>
+            </div>
+
+            @if (_related.Any())
+            {
+                <hr />
+                <div class="mb-2 fw-semibold">@T.Translate("Related.Courses")</div>
+                <ul class="list-unstyled mb-0">
+                    @foreach (var rc in _related)
+                    {
+                        <li class="mb-2">
+                            <a class="text-decoration-none" href="@($"/courses/{rc.Id}")">
+                                @rc.Title(T.CurrentLanguage)
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+
+        </div>
+    </div>
+}
+
+
+
+
+@code {
+    [Parameter] public int id { get; set; }
+    private CourseDetailsDto? _course;
+
+    private IEnumerable<string> LangList(List<string> ar, List<string> en)
+    => T.CurrentLanguage == "ar" ? ar : en;
+
+
+    protected override void OnInitialized()
+    {
+        // علشان لو غيرت اللغة وإنت واقف على الصفحة دي، تتحدّث
+        T.OnLanguageChanged += OnLangChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await T.EnsureInitAfterRenderAsync();       // آمن للـprerender
+            await LoadAsync();
+            StateHasChanged();
+        }
+    }
+
+    private IReadOnlyList<CourseDto> _related = Array.Empty<CourseDto>();
+
+    private async Task LoadAsync()
+    {
+        _course = await CourseRepo.GetByIdAsync(id, T.CurrentLanguage);
+        if (_course != null)
+            _related = await CourseRepo.GetRelatedAsync(_course.Id, 4, T.CurrentLanguage);
+    }
+
+
+    private void OnLangChanged()
+    {
+        // فقط غيّر الريندر (العناوين/النصوص تستخدم CurrentLanguage)
+        InvokeAsync(StateHasChanged);
+    }
+
+    private string LevelText(CourseLevel level) => level switch
+    {
+        CourseLevel.Beginner => T.Translate("Courses.Beginner"),
+        CourseLevel.Intermediate => T.Translate("Courses.Intermediate"),
+        CourseLevel.Advanced => T.Translate("Courses.Advanced"),
+        _ => ""
+    };
+
+    private string FormatDuration(int minutes)
+        => minutes >= 60
+            ? $"{minutes / 60}{T.Translate("Course.Hours")} {(minutes % 60 > 0 ? $"{minutes % 60}{T.Translate("Course.Minutes")}" : "")}"
+            : $"{minutes}{T.Translate("Course.Minutes")}";
+
+    private string PriceText(decimal price)
+        => price <= 0 ? T.Translate("Courses.Free") : $"{price:0} SAR";
+
+    public void Dispose()
+    {
+        T.OnLanguageChanged -= OnLangChanged;
+    }
+}

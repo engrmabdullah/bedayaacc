@@ -1,0 +1,43 @@
+﻿@inherits LayoutComponentBase
+
+
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await TranslationService.EnsureInitAfterRenderAsync();
+        StateHasChanged();
+    }
+    string Tr(string k) => TranslationService.Translate(k);
+    private async Task SetAr() => await TranslationService.SetLanguageAsync("ar");
+    private async Task SetEn() => await TranslationService.SetLanguageAsync("en");
+}
+
+<div class="dashboard instructor @(TranslationService.CurrentLanguage == "ar" ? "rtl" : "ltr")">
+    <aside class="sidebar">
+        <div class="brand">Instructor</div>
+        <ul class="menu">
+            <li><a href="/instructor">@Tr("Nav.Dashboard")</a></li>
+            <li><a href="/instructor/courses">@Tr("Nav.MyCourses")</a></li>
+            <li><a href="/instructor/lessons">@Tr("Nav.Lessons")</a></li>
+            <li><a href="/instructor/events">@Tr("Nav.Events")</a></li>
+            <li><a href="/instructor/messages">@Tr("Nav.Messages")</a></li>
+            <li><a href="/logout">@Tr("Nav.Logout")</a></li>
+        </ul>
+        <div class="lang-switch">
+            <button class="btn btn-sm" @onclick="SetAr">ع</button>
+            <button class="btn btn-sm" @onclick="SetEn">EN</button>
+        </div>
+
+    </aside>
+
+    <section class="content">
+        <header class="topbar">
+            <h1>@Tr("Instructor.Title")</h1>
+        </header>
+        <main>
+            @Body
+        </main>
+    </section>
+</div>

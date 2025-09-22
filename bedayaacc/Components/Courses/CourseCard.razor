@@ -1,0 +1,83 @@
+﻿@using bedayaacc.Models
+@inject bedayaacc.Services.TranslationService T
+
+<div class="course-card" data-course-level="@Course.Level.ToString().ToLower()">
+    <div class="course-image-container">
+        <img class="course-image" src="@Course.ThumbnailUrl" alt="@Course.Title(T.CurrentLanguage)" loading="lazy">
+        <div class="course-badge">
+            @LevelText(Course.Level)
+        </div>
+        @if (Course.Price <= 0)
+        {
+            <div class="free-badge">
+                @T.Translate("Courses.Free")
+            </div>
+        }
+    </div>
+
+    <div class="course-content">
+        <div class="course-header">
+            <h3 class="course-title">@Course.Title(T.CurrentLanguage)</h3>
+            <div class="course-meta">
+                <span class="course-duration">
+                    <i class="fas fa-clock"></i>
+                    @FormatDuration(Course.DurationMinutes)
+                </span>
+            </div>
+        </div>
+
+        <div class="course-footer">
+            <div class="course-price">
+                @if (Course.Price <= 0)
+                {
+                    <span class="price-free">@T.Translate("Courses.Free")</span>
+                }
+                else
+                {
+                    <span class="price-amount">@($"{Course.Price:0}")</span>
+                    <span class="price-currency">[ريال]</span>
+                }
+            </div>
+
+            <a class="course-button" href="@($"/courses/{Course.Id}")">
+                <span>@T.Translate("Course.View")</span>
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public CourseDto Course { get; set; } = default!;
+
+    string LevelText(CourseLevel level) => level switch
+    {
+        CourseLevel.Beginner => T.Translate("Courses.Beginner"),
+        CourseLevel.Intermediate => T.Translate("Courses.Intermediate"),
+        CourseLevel.Advanced => T.Translate("Courses.Advanced"),
+        _ => ""
+    };
+
+    string FormatDuration(int minutes)
+        => minutes >= 60 ? $"{minutes / 60}{T.Translate("Course.Hours")} {(minutes % 60 > 0 ? $"{minutes % 60}{T.Translate("Course.Minutes")}" : "")}"
+                         : $"{minutes}{T.Translate("Course.Minutes")}";
+
+    string PriceText(decimal price)
+        => price <= 0 ? T.Translate("Courses.Free") : $"{price:0} SAR";
+
+
+    protected override void OnInitialized()
+    {
+        T.OnLanguageChanged += OnLangChanged;
+    }
+
+    private void OnLangChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        T.OnLanguageChanged -= OnLangChanged;
+    }
+}

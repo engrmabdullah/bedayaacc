@@ -1,0 +1,345 @@
+﻿@page "/"
+@using bedayaacc.Components.Courses
+@using bedayaacc.Components.Layout
+@layout ExternalLayout
+@inject bedayaacc.Services.TranslationService T
+@inject bedayaacc.Services.Repositories.ICourseRepository CourseRepo
+
+<!-- Hero Section with Modern Design -->
+<section class="hero-section">
+    <div class="container-fluid">
+        <div class="row min-vh-100 align-items-center">
+            <div class="col-lg-6 order-lg-1">
+                <div class="hero-content" data-aos="fade-up">
+                    <span class="hero-badge">@T.Translate("Home.Badge")</span>
+                    <h1 class="hero-title">
+                        @T.Translate("Home.Title")
+                    </h1>
+                    <p class="hero-subtitle">
+                        @T.Translate("Home.Sub")
+                    </p>
+
+                    <!-- Modern Stats Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                            <span class="stat-number">15K+</span>
+                            <span class="stat-label">@T.Translate("Home.Stats.Students")</span>
+                        </div>
+                        <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+                            <span class="stat-number">240+</span>
+                            <span class="stat-label">@T.Translate("Home.Stats.Courses")</span>
+                        </div>
+                        <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+                            <span class="stat-number">85+</span>
+                            <span class="stat-label">@T.Translate("Home.Stats.Instructors")</span>
+                        </div>
+                    </div>
+
+                    <div class="hero-actions" data-aos="fade-up" data-aos-delay="400">
+                        <a href="/courses" class="btn btn-primary">
+                            <span>@T.Translate("Home.CTA")</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                        <a href="/about" class="btn btn-outline">
+                            <span>@T.Translate("Home.LearnMore")</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 order-lg-2">
+                <div class="hero-visual" data-aos="fade-left">
+                    <div class="dashboard-mockup">
+                        <div class="mockup-header">
+                            <div class="header-controls">
+                                <span></span><span></span><span></span>
+                            </div>
+                            <h6>@T.Translate("Home.Visual.FinancialDashboard")</h6>
+                        </div>
+
+                        <div class="mockup-content">
+                            <div class="chart-container">
+                                <div class="chart-bars">
+                                    <div class="bar" style="--height: 60%"></div>
+                                    <div class="bar" style="--height: 80%"></div>
+                                    <div class="bar active" style="--height: 100%"></div>
+                                    <div class="bar" style="--height: 75%"></div>
+                                    <div class="bar" style="--height: 90%"></div>
+                                </div>
+                            </div>
+
+                            <div class="metrics-grid">
+                                <div class="metric-item success">
+                                    <span class="metric-label">@T.Translate("Home.Visual.Revenue")</span>
+                                    <span class="metric-value">$125,430</span>
+                                </div>
+                                <div class="metric-item primary">
+                                    <span class="metric-label">@T.Translate("Home.Visual.Profit")</span>
+                                    <span class="metric-value">$45,230</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Floating Feature Cards -->
+                        <div class="floating-features">
+                            <div class="feature-pill" data-aos="zoom-in" data-aos-delay="500">
+                                <i class="fas fa-calculator"></i>
+                                <span>@T.Translate("Home.Visual.Accounting")</span>
+                            </div>
+                            <div class="feature-pill" data-aos="zoom-in" data-aos-delay="600">
+                                <i class="fas fa-chart-pie"></i>
+                                <span>@T.Translate("Home.Visual.Analysis")</span>
+                            </div>
+                            <div class="feature-pill" data-aos="zoom-in" data-aos-delay="700">
+                                <i class="fas fa-coins"></i>
+                                <span>@T.Translate("Home.Visual.Investment")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modern Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">@T.Translate("Home.Features.Badge")</span>
+            <h2 class="section-title">@T.Translate("Home.Features.Title")</h2>
+            <p class="section-subtitle">@T.Translate("Home.Features.Subtitle")</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-icon">
+                    <i class="fas fa-certificate"></i>
+                </div>
+                <h4>@T.Translate("Home.Features.Item1.Title")</h4>
+                <p>@T.Translate("Home.Features.Item1.Description")</p>
+            </div>
+
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-icon">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <h4>@T.Translate("Home.Features.Item2.Title")</h4>
+                <p>@T.Translate("Home.Features.Item2.Description")</p>
+            </div>
+
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <h4>@T.Translate("Home.Features.Item3.Title")</h4>
+                <p>@T.Translate("Home.Features.Item3.Description")</p>
+            </div>
+
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="feature-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h4>@T.Translate("Home.Features.Item4.Title")</h4>
+                <p>@T.Translate("Home.Features.Item4.Description")</p>
+            </div>
+
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h4>@T.Translate("Home.Features.Item5.Title")</h4>
+                <p>@T.Translate("Home.Features.Item5.Description")</p>
+            </div>
+
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h4>@T.Translate("Home.Features.Item6.Title")</h4>
+                <p>@T.Translate("Home.Features.Item6.Description")</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modern Courses Section -->
+<section class="courses-section">
+    <div class="container">
+        <div class="courses-header" data-aos="fade-up">
+            <div class="header-content">
+                <span class="section-badge">@T.Translate("Home.Courses.Badge")</span>
+                <h2 class="section-title">@T.Translate("Home.LatestCourses")</h2>
+                <p class="section-subtitle">@T.Translate("Home.LatestCourses.Subtitle")</p>
+            </div>
+            <a href="/courses" class="btn btn-outline">
+                <span>@T.Translate("Courses.Title")</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+
+        @if (_latest is null)
+        {
+            <div class="courses-grid">
+                @for (int i = 0; i < 6; i++)
+                {
+                    <div class="course-skeleton">
+                        <div class="skeleton-image"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton-title"></div>
+                            <div class="skeleton-text"></div>
+                            <div class="skeleton-price"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="courses-grid">
+                @foreach (var c in _latest)
+                {
+                    <div data-aos="fade-up">
+                        <CourseCard Course="c" />
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Modern Testimonials Section -->
+<section class="testimonials-section">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge light">@T.Translate("Home.Testimonials.Badge")</span>
+            <h2 class="section-title">@T.Translate("Home.Testimonials.Title")</h2>
+            <p class="section-subtitle">@T.Translate("Home.Testimonials.Subtitle")</p>
+        </div>
+
+        <div class="testimonials-grid">
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">"@T.Translate("Home.Testimonials.Item1.Text")"</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <img src="/images/avatar1.jpg" alt="@T.Translate("Home.Testimonials.Item1.Name")" />
+                    </div>
+                    <div class="author-info">
+                        <h5>@T.Translate("Home.Testimonials.Item1.Name")</h5>
+                        <span>@T.Translate("Home.Testimonials.Item1.Role")</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">"@T.Translate("Home.Testimonials.Item2.Text")"</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <img src="/images/avatar2.jpg" alt="@T.Translate("Home.Testimonials.Item2.Name")" />
+                    </div>
+                    <div class="author-info">
+                        <h5>@T.Translate("Home.Testimonials.Item2.Name")</h5>
+                        <span>@T.Translate("Home.Testimonials.Item2.Role")</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="testimonial-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p class="testimonial-text">"@T.Translate("Home.Testimonials.Item3.Text")"</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <img src="/images/avatar3.jpg" alt="@T.Translate("Home.Testimonials.Item3.Name")" />
+                    </div>
+                    <div class="author-info">
+                        <h5>@T.Translate("Home.Testimonials.Item3.Name")</h5>
+                        <span>@T.Translate("Home.Testimonials.Item3.Role")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modern CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content" data-aos="fade-up">
+            <span class="section-badge">@T.Translate("Home.CTA.Badge")</span>
+            <h2 class="cta-title">@T.Translate("Home.CTA.Title")</h2>
+            <p class="cta-subtitle">@T.Translate("Home.CTA.Subtitle")</p>
+
+            <div class="cta-actions">
+                <a href="/register" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i>
+                    <span>@T.Translate("Home.CTA.Register")</span>
+                </a>
+                <a href="/courses" class="btn btn-outline">
+                    <i class="fas fa-compass"></i>
+                    <span>@T.Translate("Home.CTA.Explore")</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    private IReadOnlyList<bedayaacc.Models.CourseDto>? _latest;
+
+    protected override void OnInitialized()
+    {
+        T.OnLanguageChanged += HandleLanguageChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await T.EnsureInitAfterRenderAsync();
+            _latest = await CourseRepo.GetLatestAsync(6, T.CurrentLanguage);
+            StateHasChanged();
+        }
+    }
+
+    private async void HandleLanguageChanged()
+    {
+        try
+        {
+            var latest = await CourseRepo.GetLatestAsync(6, T.CurrentLanguage);
+            await InvokeAsync(() =>
+            {
+                _latest = latest;
+                StateHasChanged();
+            });
+        }
+        catch
+        {
+            // Handle error silently
+        }
+    }
+
+    public void Dispose()
+    {
+        T.OnLanguageChanged -= HandleLanguageChanged;
+    }
+}

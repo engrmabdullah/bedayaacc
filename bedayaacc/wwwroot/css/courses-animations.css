@@ -1,0 +1,676 @@
+﻿/* ========================================
+   Advanced Animations & Effects
+   ======================================== */
+
+/* AOS (Animate On Scroll) Custom Animations */
+[data-aos="fade-up"] {
+    transform: translateY(50px);
+    opacity: 0;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    [data-aos="fade-up"].aos-animate {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+/* Staggered Animation for Course Cards */
+.courses-grid > div:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.courses-grid > div:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.courses-grid > div:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.courses-grid > div:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+.courses-grid > div:nth-child(5) {
+    animation-delay: 0.4s;
+}
+
+.courses-grid > div:nth-child(6) {
+    animation-delay: 0.5s;
+}
+
+/* Floating Animation for Page Badge */
+.page-badge {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Pulse Animation for Loading */
+.loading-section p {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Shimmer Effect for Course Cards Loading */
+.course-card.loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Bounce Animation for Buttons */
+.btn-primary:active {
+    animation: bounce 0.3s ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 20%, 60%, 100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-4px);
+    }
+
+    80% {
+        transform: translateY(-2px);
+    }
+}
+
+/* Glow Effect for Course Cards on Hover */
+.course-card:hover {
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 0 20px rgb(99 102 241 / 0.15);
+}
+
+/* Typing Animation for Page Title */
+.page-title {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 2s steps(20, end), blink-caret 0.75s step-end infinite;
+    border-right: 3px solid var(--primary-color);
+}
+
+@keyframes typing {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 100%;
+    }
+}
+
+@keyframes blink-caret {
+    from, to {
+        border-color: transparent;
+    }
+
+    50% {
+        border-color: var(--primary-color);
+    }
+}
+
+/* Smooth Reveal for Filter Elements */
+.filter-group {
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideUp 0.6s ease-out forwards;
+}
+
+    .filter-group:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .filter-group:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .filter-group:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .filter-group:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    .filter-group:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
+    .filter-group:nth-child(6) {
+        animation-delay: 0.6s;
+    }
+
+@keyframes slideUp {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Magnetic Effect for Course Buttons */
+.course-button {
+    position: relative;
+    overflow: hidden;
+}
+
+    .course-button::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: width 0.6s, height 0.6s, top 0.6s, left 0.6s;
+        transform: translate(-50%, -50%);
+    }
+
+    .course-button:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+/* Progressive Image Loading Effect */
+.course-image {
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in-out 0.3s forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Morphing Search Icon */
+.search-input i {
+    transition: transform 0.3s ease-in-out;
+}
+
+.form-input:focus + i,
+.search-input:hover i {
+    transform: translateY(-50%) rotate(90deg) scale(1.1);
+}
+
+/* Elastic Scale for Filter Apply Button */
+.btn-primary:hover {
+    animation: elasticScale 0.6s ease-in-out;
+}
+
+@keyframes elasticScale {
+    0% {
+        transform: scale(1);
+    }
+
+    30% {
+        transform: scale(1.05);
+    }
+
+    40% {
+        transform: scale(0.98);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+
+    60% {
+        transform: scale(0.99);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Reveal Animation for Pagination */
+.pagination-nav {
+    transform: translateY(30px);
+    opacity: 0;
+    animation: slideUpFade 0.6s ease-out 0.4s forwards;
+}
+
+@keyframes slideUpFade {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Ripple Effect for Clickable Elements */
+.ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+    .ripple::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s, opacity 0.6s;
+    }
+
+    .ripple:active::after {
+        width: 200px;
+        height: 200px;
+        opacity: 1;
+        transition: width 0s, height 0s, opacity 0s;
+    }
+
+/* Smooth Color Transitions for Course Badges */
+.course-badge,
+.free-badge {
+    transition: all 0.3s ease-in-out;
+}
+
+.course-card:hover .course-badge,
+.course-card:hover .free-badge {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgb(0 0 0 / 0.15);
+}
+
+/* Breathing Animation for Empty State Icon */
+.no-results-icon {
+    animation: breathe 2s ease-in-out infinite;
+}
+
+@keyframes breathe {
+    0%, 100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Slide Animation for Results Counter */
+.count-number {
+    animation: slideInFromLeft 0.8s ease-out;
+}
+
+@keyframes slideInFromLeft {
+    0% {
+        transform: translateX(-50px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Gradient Animation for Primary Buttons */
+.btn-primary {
+    background-size: 200% 100%;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Micro-interactions for Form Elements */
+.form-input:valid {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgb(16 185 129 / 0.1);
+}
+
+.form-select:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236366f1' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+
+/* Parallax Effect for Page Header Background */
+.page-header {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+    .page-header::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Interactive Hover States for Filter Labels */
+.filter-label {
+    position: relative;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+    .filter-label::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--primary-gradient);
+        transition: width 0.3s ease;
+    }
+
+.filter-group:hover .filter-label::after {
+    width: 100%;
+}
+
+/* Smooth Morphing for Reset Button */
+.btn-reset i {
+    transition: transform 0.3s ease-in-out;
+}
+
+.btn-reset:hover i {
+    transform: rotate(180deg);
+}
+
+/* Cascading Animation for Course Grid */
+@keyframes cascadeIn {
+    0% {
+        transform: translateY(60px) rotateX(30deg);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0) rotateX(0deg);
+        opacity: 1;
+    }
+}
+
+.courses-grid .course-card {
+    animation: cascadeIn 0.8s ease-out;
+    animation-fill-mode: both;
+}
+
+/* Staggered delays for grid items */
+.courses-grid > div:nth-child(1) .course-card {
+    animation-delay: 0.1s;
+}
+
+.courses-grid > div:nth-child(2) .course-card {
+    animation-delay: 0.2s;
+}
+
+.courses-grid > div:nth-child(3) .course-card {
+    animation-delay: 0.3s;
+}
+
+.courses-grid > div:nth-child(4) .course-card {
+    animation-delay: 0.4s;
+}
+
+.courses-grid > div:nth-child(5) .course-card {
+    animation-delay: 0.5s;
+}
+
+.courses-grid > div:nth-child(6) .course-card {
+    animation-delay: 0.6s;
+}
+
+.courses-grid > div:nth-child(7) .course-card {
+    animation-delay: 0.7s;
+}
+
+.courses-grid > div:nth-child(8) .course-card {
+    animation-delay: 0.8s;
+}
+
+.courses-grid > div:nth-child(9) .course-card {
+    animation-delay: 0.9s;
+}
+
+/* Dynamic Shadow for Floating Elements */
+.filters-card {
+    animation: floatShadow 4s ease-in-out infinite;
+}
+
+@keyframes floatShadow {
+    0%, 100% {
+        transform: translateY(0px);
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    }
+
+    50% {
+        transform: translateY(-2px);
+        box-shadow: 0 25px 35px -5px rgb(0 0 0 / 0.15);
+    }
+}
+
+/* Liquid Button Effect */
+.btn-primary {
+    position: relative;
+    overflow: hidden;
+}
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+/* Smooth Page Transitions */
+.page-transition {
+    animation: pageSlideIn 0.6s ease-out;
+}
+
+@keyframes pageSlideIn {
+    0% {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Interactive Focus Ring */
+.course-card:focus-within {
+    outline: 3px solid var(--primary-color);
+    outline-offset: 4px;
+    transform: translateY(-2px);
+}
+
+/* Smooth Color Pulse for Active Elements */
+.btn-pagination.active {
+    animation: colorPulse 2s ease-in-out infinite;
+}
+
+@keyframes colorPulse {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(99, 102, 241, 0.6);
+    }
+}
+
+/* Morphing Search Bar */
+.search-input:focus-within {
+    animation: searchExpand 0.3s ease-out;
+}
+
+@keyframes searchExpand {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Loading State Improvements */
+.loading-spinner {
+    background: conic-gradient(from 0deg, var(--primary-color), var(--primary-color) 30%, transparent 30%);
+    border: none;
+    animation: spin 1s linear infinite;
+}
+
+/* Card Flip Animation for Course Details */
+.course-card {
+    perspective: 1000px;
+}
+
+.course-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.course-card:hover .course-card-inner {
+    transform: rotateY(5deg);
+}
+
+/* Glitch Effect for Error States (Optional) */
+.error-state {
+    animation: glitch 1s infinite;
+}
+
+@keyframes glitch {
+    0% {
+        transform: translate(0);
+    }
+
+    20% {
+        transform: translate(-2px, 2px);
+    }
+
+    40% {
+        transform: translate(-2px, -2px);
+    }
+
+    60% {
+        transform: translate(2px, 2px);
+    }
+
+    80% {
+        transform: translate(2px, -2px);
+    }
+
+    100% {
+        transform: translate(0);
+    }
+}
+
+/* Smooth Height Transitions */
+.collapsible {
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+/* Performance Optimization for Animations */
+.course-card,
+.btn,
+.form-input,
+.form-select {
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .course-card:hover {
+        transform: none;
+    }
+
+    .btn:hover {
+        transform: none;
+    }
+}
+
+/* High Performance GPU Acceleration */
+.course-card,
+.filters-card,
+.btn-primary,
+.course-button {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
