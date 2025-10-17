@@ -1,0 +1,16 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<button @onclick="HandleLogout" class="btn btn-danger">
+    <i class="fas fa-sign-out-alt"></i> Logout
+</button>
+
+@code {
+    private async Task HandleLogout()
+    {
+        var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null);
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}

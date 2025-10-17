@@ -1,0 +1,392 @@
+﻿@page "/instructor/exams/{ExamId:int}/results"
+@attribute [Authorize(Roles = "Instructor")]
+@using bedayaacc.Models
+@using bedayaacc.Services
+@inject IExamService ExamService
+@inject NavigationManager Navigation
+
+<div class="instructor-results-page">
+    <div class="exam-container">
+        <!-- Header -->
+        <div class="exam-page-header">
+            <div>
+                <button class="btn-back" @onclick="GoBack">
+                    <i class="fas fa-arrow-right"></i>
+                    العودة للاختبارات
+                </button>
+                <h1 class="exam-page-title">نتائج الاختبار - @exam?.ExamTitleAr</h1>
+                <p class="exam-page-subtitle">
+                    @attempts.Count محاولة من @uniqueStudents طالب
+                </p>
+            </div>
+            <button class="btn btn-primary" @onclick="ExportResults">
+                <i class="fas fa-download"></i>
+                تصدير النتائج
+            </button>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="results-stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@uniqueStudents</div>
+                    <div class="stat-label">طالب</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon info">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@attempts.Count</div>
+                    <div class="stat-label">محاولة</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@passedCount</div>
+                    <div class="stat-label">ناجح</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@averageScore.ToString("F1")%</div>
+                    <div class="stat-label">المتوسط</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon success-alt">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@highestScore.ToString("F1")%</div>
+                    <div class="stat-label">أعلى درجة</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon danger">
+                    <i class="fas fa-arrow-down"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">@lowestScore.ToString("F1")%</div>
+                    <div class="stat-label">أقل درجة</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="results-filters">
+            <select class="filter-select" @bind="statusFilter" @bind:after="ApplyFilters">
+                <option value="all">جميع المحاولات</option>
+                <option value="passed">الناجحين فقط</option>
+                <option value="failed">الراسبين فقط</option>
+                <option value="completed">المكتملة فقط</option>
+                <option value="pending">قيد التصحيح</option>
+            </select>
+
+            <select class="filter-select" @bind="sortBy" @bind:after="ApplyFilters">
+                <option value="date">الأحدث أولاً</option>
+                <option value="score-desc">الأعلى درجة</option>
+                <option value="score-asc">الأقل درجة</option>
+                <option value="student">حسب الطالب</option>
+            </select>
+
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text"
+                       placeholder="ابحث عن طالب..."
+                       @bind="searchQuery"
+                       @bind:event="oninput"
+                       @onkeyup="ApplyFilters" />
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        @if (isLoading)
+        {
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p>جاري تحميل النتائج...</p>
+            </div>
+        }
+        else if (filteredAttempts.Count == 0)
+        {
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>لا توجد نتائج</h3>
+                <p>لا توجد محاولات تطابق معايير البحث</p>
+            </div>
+        }
+        else
+        {
+            <div class="results-table-container">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>اسم الطالب</th>
+                            <th>رقم المحاولة</th>
+                            <th>التاريخ</th>
+                            <th>الوقت المستغرق</th>
+                            <th>الدرجة</th>
+                            <th>النسبة</th>
+                            <th>الحالة</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (attempt, index) in filteredAttempts.Select((a, i) => (a, i)))
+                        {
+                            <tr class="@(attempt.IsPassed ? "passed-row" : "failed-row")">
+                                <td>@(index + 1)</td>
+                                <td>
+                                    <div class="student-cell">
+                                        <div class="student-avatar">
+                                            @GetInitials(attempt.StudentName)
+                                        </div>
+                                        <span class="student-name">@attempt.StudentName</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="attempt-badge">المحاولة @attempt.AttemptNumber</span>
+                                </td>
+                                <td>
+                                    <div class="date-cell">
+                                        <i class="fas fa-calendar"></i>
+                                        @attempt.StartedAt.ToString("yyyy/MM/dd")
+                                        <br />
+                                        <small>@attempt.StartedAt.ToString("hh:mm tt")</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="time-badge">
+                                        <i class="fas fa-clock"></i>
+                                        @attempt.TimeSpentMinutes دقيقة
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong>@attempt.ObtainedMarks / @attempt.TotalMarks</strong>
+                                </td>
+                                <td>
+                                    <div class="percentage-bar">
+                                        <div class="percentage-fill @(attempt.IsPassed ? "passed" : "failed")"
+                                             style="width: @attempt.Percentage%">
+                                        </div>
+                                        <span class="percentage-text">@attempt.Percentage.ToString("F1")%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (attempt.Status == "SUBMITTED" && !attempt.IsCompleted)
+                                    {
+                                        <span class="status-badge pending">
+                                            <i class="fas fa-hourglass-half"></i>
+                                            قيد التصحيح
+                                        </span>
+                                    }
+                                    else if (attempt.IsPassed)
+                                    {
+                                        <span class="status-badge success">
+                                            <i class="fas fa-check-circle"></i>
+                                            ناجح
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge danger">
+                                            <i class="fas fa-times-circle"></i>
+                                            راسب
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-sm btn-outline"
+                                                @onclick="() => ViewDetails(attempt.AttemptId)"
+                                                title="عرض التفاصيل">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        @if (attempt.Status == "SUBMITTED" && !attempt.IsCompleted)
+                                        {
+                                            <button class="btn btn-sm btn-primary"
+                                                    @onclick="() => GradeAttempt(attempt.AttemptId)"
+                                                    title="تصحيح">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <!-- Performance Distribution Chart -->
+        <div class="performance-distribution">
+            <h3><i class="fas fa-chart-bar"></i> توزيع الدرجات</h3>
+            <div class="distribution-bars">
+                @foreach (var range in scoreRanges)
+                {
+                    <div class="distribution-item">
+                        <div class="range-label">@range.Label</div>
+                        <div class="range-bar">
+                            <div class="range-fill" style="width: @range.Percentage%"></div>
+                        </div>
+                        <div class="range-count">@range.Count طالب</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int ExamId { get; set; }
+
+    private Exam? exam;
+    private List<ExamAttempt> attempts = new();
+    private List<ExamAttempt> filteredAttempts = new();
+    private bool isLoading = true;
+
+    private string statusFilter = "all";
+    private string sortBy = "date";
+    private string searchQuery = "";
+
+    private int uniqueStudents => attempts.GroupBy(a => a.UserId).Count();
+    private int passedCount => attempts.Count(a => a.IsPassed);
+    private decimal averageScore => attempts.Any() ? attempts.Average(a => (decimal)a.Percentage) : 0;
+    private decimal highestScore => attempts.Any() ? attempts.Max(a => (decimal)a.Percentage) : 0;
+    private decimal lowestScore => attempts.Any() ? attempts.Min(a => (decimal)a.Percentage) : 0;
+
+    private List<ScoreRange> scoreRanges = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+
+        exam = await ExamService.GetExamAsync(ExamId);
+
+        // Get all attempts for this exam (you'll need to add this method to the service)
+        // For now, we'll simulate it
+        attempts = new List<ExamAttempt>(); // TODO: Load actual attempts
+
+        CalculateScoreRanges();
+        ApplyFilters();
+
+        isLoading = false;
+    }
+
+    private void CalculateScoreRanges()
+    {
+        var ranges = new List<(string Label, decimal Min, decimal Max)>
+        {
+            ("ممتاز (90-100)", 90, 100),
+            ("جيد جداً (80-89)", 80, 89),
+            ("جيد (70-79)", 70, 79),
+            ("مقبول (60-69)", 60, 69),
+            ("راسب (0-59)", 0, 59)
+        };
+
+        scoreRanges = ranges.Select(r => new ScoreRange
+        {
+            Label = r.Label,
+            Count = attempts.Count(a => a.Percentage >= r.Min && a.Percentage <= r.Max),
+            Percentage = attempts.Any()
+                ? (attempts.Count(a => a.Percentage >= r.Min && a.Percentage <= r.Max) * 100.0 / attempts.Count)
+                : 0
+        }).ToList();
+    }
+
+    private void ApplyFilters()
+    {
+        filteredAttempts = attempts;
+
+        // Status filter
+        filteredAttempts = statusFilter switch
+        {
+            "passed" => filteredAttempts.Where(a => a.IsPassed).ToList(),
+            "failed" => filteredAttempts.Where(a => !a.IsPassed && a.IsCompleted).ToList(),
+            "completed" => filteredAttempts.Where(a => a.IsCompleted).ToList(),
+            "pending" => filteredAttempts.Where(a => a.Status == "SUBMITTED" && !a.IsCompleted).ToList(),
+            _ => filteredAttempts
+        };
+
+        // Search filter
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            var query = searchQuery.ToLower();
+            filteredAttempts = filteredAttempts.Where(a =>
+                a.StudentName?.ToLower().Contains(query) ?? false
+            ).ToList();
+        }
+
+        // Sort
+        filteredAttempts = sortBy switch
+        {
+            "score-desc" => filteredAttempts.OrderByDescending(a => a.Percentage).ToList(),
+            "score-asc" => filteredAttempts.OrderBy(a => a.Percentage).ToList(),
+            "student" => filteredAttempts.OrderBy(a => a.StudentName).ToList(),
+            _ => filteredAttempts.OrderByDescending(a => a.StartedAt).ToList()
+        };
+
+        StateHasChanged();
+    }
+
+    private string GetInitials(string? fullName)
+    {
+        if (string.IsNullOrEmpty(fullName)) return "?";
+
+        var parts = fullName.Split(' ');
+        if (parts.Length >= 2)
+            return $"{parts[0][0]}{parts[1][0]}";
+        return fullName[0].ToString();
+    }
+
+    private void ViewDetails(int attemptId)
+    {
+        Navigation.NavigateTo($"/instructor/attempts/{attemptId}/details");
+    }
+
+    private void GradeAttempt(int attemptId)
+    {
+        Navigation.NavigateTo($"/instructor/attempts/{attemptId}/grade");
+    }
+
+    private void ExportResults()
+    {
+        // TODO: Implement export functionality
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/instructor/exams");
+    }
+
+    private class ScoreRange
+    {
+        public string Label { get; set; } = "";
+        public int Count { get; set; }
+        public double Percentage { get; set; }
+    }
+}

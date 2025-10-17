@@ -1,0 +1,23 @@
+﻿@inject NavigationManager Nav
+
+@code {
+    protected override void OnInitialized()
+    {
+        // لازم URI كامل هنا؛ الدالة نفسها هتطلع النسبي
+        var relative = Nav.ToBaseRelativePath(Nav.Uri); // مثال: "", "admin?page=1", "login?x=y"
+        var lower = relative?.ToLowerInvariant() ?? string.Empty;
+
+        // لو احنا بالفعل في /login (أو على الروت "/") ما تبعتش ReturnUrl عشان ما يحصلش لوب
+        if (string.IsNullOrEmpty(lower) || lower == "login" || lower.StartsWith("login?"))
+        {
+            // لو مش على /login، روح لـ /login من غير ReturnUrl
+            if (lower != "login")
+                Nav.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+
+        // غير كده: ابنِ ReturnUrl آمن على نفس الدومين
+        var returnUrl = Uri.EscapeDataString("/" + relative);
+        Nav.NavigateTo($"/login?ReturnUrl={returnUrl}", forceLoad: true);
+    }
+}

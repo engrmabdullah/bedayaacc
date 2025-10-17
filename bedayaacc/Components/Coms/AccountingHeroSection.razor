@@ -1,0 +1,104 @@
+﻿@using bedayaacc.Services
+@inject NavigationManager Navigation
+@inject TranslationService TranslationService
+@inject IJSRuntime JSRuntime
+
+<div class="hero-enhanced">
+    <div class="hero-wave-enhanced"></div>
+
+    <div class="hero-container-enhanced">
+        <div class="hero-content-enhanced">
+            <!-- Text Section -->
+            <div class="hero-text-enhanced">
+                <div class="hero-badge-enhanced">
+                    <i class="fas fa-star" aria-hidden="true"></i>
+                    <span>@Tr("Hero.Badge")</span>
+                </div>
+
+                <h1 class="hero-title-enhanced">
+                    @Tr("Hero.Title")
+                    <span class="hero-gradient-text">@Tr("Hero.TitleHighlight")</span>
+                </h1>
+
+                <p class="hero-subtitle-enhanced">
+                    @Tr("Hero.Subtitle")
+                </p>
+
+                <!-- Stats Section -->
+                <div class="hero-stats-enhanced">
+                    <div class="hero-stat-item-enhanced">
+                        <div class="hero-stat-number-enhanced">10K+</div>
+                        <div class="hero-stat-label-enhanced">@Tr("Hero.Students")</div>
+                    </div>
+                    <div class="hero-stat-item-enhanced">
+                        <div class="hero-stat-number-enhanced">500+</div>
+                        <div class="hero-stat-label-enhanced">@Tr("Hero.Courses")</div>
+                    </div>
+                    <div class="hero-stat-item-enhanced">
+                        <div class="hero-stat-number-enhanced">4.9★</div>
+                        <div class="hero-stat-label-enhanced">@Tr("Hero.Rating")</div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="hero-buttons-enhanced">
+                    <a href="/courses" class="btn-enhanced btn-primary-enhanced">
+                        <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                        <span>@Tr("Hero.BrowseCourses")</span>
+                    </a>
+                    <a href="#demo" class="btn-enhanced btn-ghost-enhanced">
+                        <i class="fas fa-play-circle" aria-hidden="true"></i>
+                        <span>@Tr("Hero.WatchDemo")</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Image Section -->
+            <div class="hero-image-enhanced">
+                <div class="hero-image-wrapper-enhanced">
+                    <!-- Main Card -->
+                    <div class="hero-image-card-enhanced">
+                        <div class="hero-image-placeholder-enhanced">
+                            <i class="fas fa-chart-line" aria-hidden="true"></i>
+                        </div>
+                    </div>
+
+                    <!-- Floating Card Top -->
+                    <div class="hero-floating-card-enhanced card-top">
+                        <div class="hero-card-icon-enhanced">
+                            <i class="fas fa-users" aria-hidden="true"></i>
+                        </div>
+                        <div class="hero-card-content-enhanced">
+                            <div class="hero-card-label-enhanced">@Tr("Hero.ActiveNow")</div>
+                            <div class="hero-card-value-enhanced">2,847</div>
+                        </div>
+                    </div>
+
+                    <!-- Floating Card Bottom -->
+                    <div class="hero-floating-card-enhanced card-bottom">
+                        <div class="hero-card-icon-enhanced">
+                            <i class="fas fa-trophy" aria-hidden="true"></i>
+                        </div>
+                        <div class="hero-card-content-enhanced">
+                            <div class="hero-card-label-enhanced">@Tr("Hero.Completed")</div>
+                            <div class="hero-card-value-enhanced">15K+</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string Tr(string key) => TranslationService.Translate(key);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await TranslationService.EnsureInitAfterRenderAsync();
+        }
+        StateHasChanged();
+    }
+}

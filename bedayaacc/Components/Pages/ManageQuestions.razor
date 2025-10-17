@@ -1,0 +1,452 @@
+﻿@page "/instructor/exams/{ExamId:int}/questions"
+@attribute [Authorize(Roles = "Instructor")]
+@using bedayaacc.Components.Layout
+@using bedayaacc.Models
+@using bedayaacc.Services
+@inject IExamService ExamService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@inject TranslationService T
+
+
+@layout ExternalLayout
+<div class="questions-manage-page">
+    <div class="exam-container">
+        <!-- Header -->
+        <div class="exam-page-header">
+            <div>
+                <button class="btn-back" @onclick="GoBack">
+                    <i class="fas fa-arrow-right"></i>
+                    العودة للاختبارات
+                </button>
+                <h1 class="exam-page-title">إدارة الأسئلة - @exam?.ExamTitleAr</h1>
+                <p class="exam-page-subtitle">@questions.Count سؤال | @exam?.TotalMarks درجة</p>
+            </div>
+            <button class="btn btn-primary" @onclick="ShowAddQuestionModal">
+                <i class="fas fa-plus"></i>
+                إضافة سؤال
+            </button>
+        </div>
+
+        <!-- Loading -->
+        @if (isLoading)
+        {
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p>جاري التحميل...</p>
+            </div>
+        }
+        else if (questions.Count == 0)
+        {
+            <div class="empty-state">
+                <i class="fas fa-question-circle"></i>
+                <h3>لا توجد أسئلة</h3>
+                <p>ابدأ بإضافة أسئلة للاختبار</p>
+                <button class="btn btn-primary" @onclick="ShowAddQuestionModal">
+                    إضافة سؤال
+                </button>
+            </div>
+        }
+        else
+        {
+            <!-- Questions List -->
+            <div class="questions-list">
+                @foreach (var (question, index) in questions.Select((q, i) => (q, i)))
+                {
+                    <div class="question-card">
+                        <div class="question-header">
+                            <div class="question-number">سؤال @(index + 1)</div>
+                            <div class="question-type-badge">@question.TypeNameAr</div>
+                            <div class="question-marks">@question.Marks درجة</div>
+                        </div>
+
+                        <div class="question-body">
+                            <div class="question-text">
+                                @((MarkupString)(question?.QuestionTextAr ?? string.Empty))
+                            </div>
+
+
+                            @if (!string.IsNullOrEmpty(question.QuestionImageUrl))
+                            {
+                                <img src="@question.QuestionImageUrl" alt="صورة السؤال" class="question-image" />
+                            }
+
+                            @if (question.Options.Any())
+                            {
+                                <div class="question-options">
+                                    @foreach (var option in question.Options)
+                                    {
+                                        <div class="option-item @(option.IsCorrect ? "correct-option" : "")">
+                                            <span class="option-indicator">
+                                                @if (option.IsCorrect)
+                                                {
+                                                    <i class="fas fa-check-circle"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="far fa-circle"></i>
+                                                }
+                                            </span>
+                                            <span class="option-text">@option.OptionTextAr</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else if (!string.IsNullOrEmpty(question.CorrectAnswer))
+                            {
+                                <div class="correct-answer-box">
+                                    <strong>الإجابة المتوقعة:</strong>
+                                    <p>@question.CorrectAnswer</p>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="question-footer">
+                            <button class="btn btn-sm btn-outline" @onclick="() => EditQuestion(question.QuestionId)">
+                                <i class="fas fa-edit"></i>
+                                تعديل
+                            </button>
+                            <button class="btn btn-sm btn-danger-outline" @onclick="() => DeleteQuestion(question.QuestionId)">
+                                <i class="fas fa-trash"></i>
+                                حذف
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Add/Edit Question Modal -->
+    @if (showQuestionModal)
+    {
+        <div class="modal-fullscreen-overlay">
+            <div class="modal-fullscreen-content">
+                <div class="modal-fullscreen-header">
+                    <h3>@(isEditMode ? "تعديل السؤال" : "إضافة سؤال جديد")</h3>
+                    <button class="modal-fullscreen-close" @onclick="HideQuestionModal">&times;</button>
+                </div>
+
+                <div class="modal-fullscreen-body">
+                    <EditForm Model="questionModel" OnValidSubmit="SaveQuestion">
+                        <DataAnnotationsValidator />
+
+                        <div class="form-group">
+                            <label>نوع السؤال *</label>
+                            <select class="form-control" @bind="questionModel.QuestionTypeId" @bind:after="OnQuestionTypeChanged">
+                                <option value="0">اختر نوع السؤال</option>
+                                @foreach (var type in questionTypes)
+                                {
+                                    <option value="@type.QuestionTypeId">@type.TypeNameAr</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>نص السؤال (عربي) *</label>
+                            <RichHtmlEditor @bind-Value="questionModel.QuestionTextAr"
+                                            Dir="@(T.CurrentLanguage == "ar" ? "rtl" : "ltr")"
+                                            Placeholder="@Tr("WriteHere")"
+                                            Height="320px" />
+                            <ValidationMessage For="@(() => questionModel.QuestionTextAr)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>نص السؤال (إنجليزي)</label>
+                            <RichHtmlEditor @bind-Value="questionModel.QuestionTextEn"
+                                            Dir="@(T.CurrentLanguage == "ar" ? "rtl" : "ltr")"
+                                            Placeholder="@Tr("WriteHere")"
+                                            Height="320px" />
+                        </div>
+                        <div class="form-group">
+                            <label>شرح الإجابة (عربي)</label>
+                            <RichHtmlEditor @bind-Value="questionModel.ExplanationAr"
+                                            Dir="@(T.CurrentLanguage == "ar" ? "rtl" : "ltr")"
+                                            Placeholder="@Tr("WriteHere")"
+                                            Height="320px" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>شرح الإجابة (إنجليزي)</label>
+                            <RichHtmlEditor @bind-Value="questionModel.ExplanationEn"
+                                            Dir="@(T.CurrentLanguage == "ar" ? "rtl" : "ltr")"
+                                            Placeholder="@Tr("WriteHere")"
+                                            Height="320px" />
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>الدرجة *</label>
+                                <InputNumber class="form-control" @bind-Value="questionModel.Marks" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>الدرجات السالبة</label>
+                                <InputNumber class="form-control" @bind-Value="questionModel.NegativeMarks" />
+                            </div>
+                        </div>
+
+                        <!-- MCQ/MSQ/TF Options -->
+                        @if (selectedQuestionType != null && selectedQuestionType.RequiresOptions)
+                        {
+                            <div class="options-section">
+                                <div class="section-header">
+                                    <h4>الخيارات</h4>
+                                    <button type="button" class="btn btn-sm btn-secondary" @onclick="AddOption">
+                                        <i class="fas fa-plus"></i>
+                                        إضافة خيار
+                                    </button>
+                                </div>
+
+                                @if (selectedQuestionType.TypeCode == "TF")
+                                {
+                                    <!-- True/False Options -->
+                                    <div class="tf-options">
+                                        <label class="radio-option">
+                                            <input type="radio" name="tfAnswer" @onchange="() => SetTrueFalseAnswer(true)" />
+                                            <span>صح</span>
+                                        </label>
+                                        <label class="radio-option">
+                                            <input type="radio" name="tfAnswer" @onchange="() => SetTrueFalseAnswer(false)" />
+                                            <span>خطأ</span>
+                                        </label>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <!-- MCQ/MSQ Options -->
+                                    <div class="options-list">
+                                        @for (int i = 0; i < questionModel.Options.Count; i++)
+                                        {
+                                            var index = i;
+                                            var option = questionModel.Options[index];
+
+                                            <div class="option-input-group">
+                                                <input type="checkbox"
+                                                       class="option-checkbox"
+                                                       @bind="option.IsCorrect"
+                                                       disabled="@(selectedQuestionType.TypeCode == "MCQ" && questionModel.Options.Any(o => o != option && o.IsCorrect))" />
+
+                                                <input type="text"
+                                                       class="form-control"
+                                                       placeholder="نص الخيار"
+                                                       @bind="option.OptionTextAr" />
+
+                                                <button type="button"
+                                                        class="btn btn-sm btn-danger-outline"
+                                                        @onclick="() => RemoveOption(index)">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        <!-- Short Answer/Essay -->
+                        @if (selectedQuestionType != null && (selectedQuestionType.TypeCode == "SHORT" || selectedQuestionType.TypeCode == "ESSAY" || selectedQuestionType.TypeCode == "FILLBLANK"))
+                        {
+                            <div class="form-group">
+                                <label>الإجابة المتوقعة (اختياري - للمرجع)</label>
+                                <InputTextArea class="form-control" rows="4" @bind-Value="questionModel.CorrectAnswer" />
+                                <small>هذه الإجابة للمرجع فقط، سيتم تصحيح السؤال يدوياً</small>
+                            </div>
+                        }
+
+                        <div class="modal-fullscreen-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="HideQuestionModal">إلغاء</button>
+                            <button type="submit" class="btn btn-primary">
+                                @(isEditMode ? "حفظ التعديلات" : "إضافة السؤال")
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+@code {
+    [Parameter]
+    public int ExamId { get; set; }
+
+    private Exam? exam;
+    private List<Question> questions = new();
+    private List<QuestionType> questionTypes = new();
+    private QuestionType? selectedQuestionType;
+
+    private bool isLoading = true;
+    private bool showQuestionModal = false;
+    private bool isEditMode = false;
+
+    private CreateQuestionModel questionModel = new();
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+
+            await LoadExam();
+            await LoadQuestionTypes();
+            await LoadQuestions();
+        }
+    }
+
+
+
+    private async Task LoadExam()
+    {
+        exam = await ExamService.GetExamAsync(ExamId);
+    }
+
+    private async Task LoadQuestionTypes()
+    {
+        questionTypes = await ExamService.GetQuestionTypesAsync();
+    }
+
+    private async Task LoadQuestions()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        questions = await ExamService.GetExamQuestionsForTakingAsync(ExamId, 0);
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ShowAddQuestionModal()
+    {
+        questionModel = new CreateQuestionModel
+        {
+            ExamId = ExamId,
+            Options = new List<CreateQuestionOptionModel>()
+        };
+        isEditMode = false;
+        selectedQuestionType = null;
+        showQuestionModal = true;
+    }
+
+    private void HideQuestionModal()
+    {
+        showQuestionModal = false;
+    }
+
+    private void OnQuestionTypeChanged()
+    {
+        selectedQuestionType = questionTypes.FirstOrDefault(qt => qt.QuestionTypeId == questionModel.QuestionTypeId);
+
+        // Initialize True/False options
+        if (selectedQuestionType?.TypeCode == "TF")
+        {
+            questionModel.Options = new List<CreateQuestionOptionModel>
+            {
+                new CreateQuestionOptionModel { OptionTextAr = "صح", IsCorrect = false, DisplayOrder = 1 },
+                new CreateQuestionOptionModel { OptionTextAr = "خطأ", IsCorrect = false, DisplayOrder = 2 }
+            };
+        }
+        else if (selectedQuestionType?.RequiresOptions == true && questionModel.Options.Count == 0)
+        {
+            // Add 4 default options for MCQ
+            for (int i = 0; i < 4; i++)
+            {
+                questionModel.Options.Add(new CreateQuestionOptionModel { DisplayOrder = i + 1 });
+            }
+        }
+    }
+
+    private void SetTrueFalseAnswer(bool isTrue)
+    {
+        if (questionModel.Options.Count >= 2)
+        {
+            questionModel.Options[0].IsCorrect = isTrue;
+            questionModel.Options[1].IsCorrect = !isTrue;
+        }
+    }
+
+    private void AddOption()
+    {
+        questionModel.Options.Add(new CreateQuestionOptionModel
+        {
+            DisplayOrder = questionModel.Options.Count + 1
+        });
+    }
+
+    private void RemoveOption(int index)
+    {
+        if (questionModel.Options.Count > 2)
+        {
+            questionModel.Options.RemoveAt(index);
+        }
+    }
+
+    private async Task SaveQuestion()
+    {
+        // Validate
+        if (selectedQuestionType?.RequiresOptions == true)
+        {
+            if (questionModel.Options.Count < 2)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "يجب إضافة خيارين على الأقل");
+                return;
+            }
+
+            if (!questionModel.Options.Any(o => o.IsCorrect))
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "يجب تحديد الإجابة الصحيحة");
+                return;
+            }
+
+            if (questionModel.Options.Any(o => string.IsNullOrWhiteSpace(o.OptionTextAr)))
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "يجب ملء جميع نصوص الخيارات");
+                return;
+            }
+        }
+
+        var result = await ExamService.AddQuestionAsync(questionModel);
+
+        if (result.Success)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "تم إضافة السؤال بنجاح");
+            HideQuestionModal();
+            await LoadQuestions();
+            await LoadExam();
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", result.Message);
+        }
+    }
+
+    private void EditQuestion(int questionId)
+    {
+        // TODO: Load and edit question
+        ShowAddQuestionModal();
+    }
+
+    private async Task DeleteQuestion(int questionId)
+    {
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "هل أنت متأكد من حذف هذا السؤال؟");
+        if (confirmed)
+        {
+            var success = await ExamService.DeleteQuestionAsync(questionId);
+            if (success)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "تم حذف السؤال بنجاح");
+                await LoadQuestions();
+                await LoadExam();
+            }
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/instructor/exams");
+    }
+
+    private string Tr(string k) => T.Translate(k);
+}

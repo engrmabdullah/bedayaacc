@@ -1,0 +1,322 @@
+﻿@page "/register"
+@using bedayaacc.Components.Layout
+@using bedayaacc.Models
+@using bedayaacc.Services
+@using bedayaacc.Repositories
+@using Microsoft.AspNetCore.Components.Forms
+@inject NavigationManager Navigation
+@inject TranslationService TranslationService
+@inject IJSRuntime JSRuntime
+@inject IAuthenticationService AuthService
+@layout ExternalLayout
+
+<PageTitle>@Tr("Register.Title") - @Tr("Site.Name")</PageTitle>
+
+<div class="register-page-enhanced">
+    <div class="register-container-enhanced">
+
+        <!-- Form Section -->
+        <div class="register-form-section-enhanced">
+
+            <!-- Header -->
+            <div class="register-header-enhanced">
+                <div class="register-logo-enhanced">
+                    <div class="register-logo-icon-enhanced">
+                        <i class="fas fa-user-plus" aria-hidden="true"></i>
+                    </div>
+                    <h1 class="register-title-enhanced">@Tr("Register.Title")</h1>
+                </div>
+                <p class="register-subtitle-enhanced">@Tr("Register.Subtitle")</p>
+            </div>
+
+            <!-- Form -->
+            <EditForm Model="registerModel" OnValidSubmit="HandleRegister" class="register-form-enhanced">
+                <DataAnnotationsValidator />
+
+                <!-- Error Alert -->
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="register-alert-enhanced register-alert-error-enhanced">
+                        <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                        <span>@errorMessage</span>
+                    </div>
+                }
+
+                <!-- Success Alert -->
+                @if (!string.IsNullOrEmpty(successMessage))
+                {
+                    <div class="register-alert-enhanced register-alert-success-enhanced">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i>
+                        <span>@successMessage</span>
+                    </div>
+                }
+
+                <!-- Name Row -->
+                <div class="register-form-row-enhanced">
+                    <div class="register-form-group-enhanced">
+                        <label for="firstName" class="register-form-label-enhanced">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                            <span>@Tr("Register.FirstName")</span>
+                        </label>
+                        <InputText id="firstName"
+                                   class="register-form-input-enhanced"
+                                   @bind-Value="registerModel.FirstName"
+                                   placeholder="@Tr("Register.FirstName.Placeholder")" />
+                        <ValidationMessage For="@(() => registerModel.FirstName)"
+                                           class="register-validation-message-enhanced" />
+                    </div>
+
+                    <div class="register-form-group-enhanced">
+                        <label for="lastName" class="register-form-label-enhanced">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                            <span>@Tr("Register.LastName")</span>
+                        </label>
+                        <InputText id="lastName"
+                                   class="register-form-input-enhanced"
+                                   @bind-Value="registerModel.LastName"
+                                   placeholder="@Tr("Register.LastName.Placeholder")" />
+                        <ValidationMessage For="@(() => registerModel.LastName)"
+                                           class="register-validation-message-enhanced" />
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="register-form-group-enhanced">
+                    <label for="email" class="register-form-label-enhanced">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                        <span>@Tr("Register.Email")</span>
+                    </label>
+                    <InputText id="email"
+                               type="email"
+                               class="register-form-input-enhanced"
+                               @bind-Value="registerModel.Email"
+                               placeholder="@Tr("Register.Email.Placeholder")" />
+                    <ValidationMessage For="@(() => registerModel.Email)"
+                                       class="register-validation-message-enhanced" />
+                </div>
+
+                <!-- Phone -->
+                <div class="register-form-group-enhanced">
+                    <label for="phone" class="register-form-label-enhanced">
+                        <i class="fas fa-phone" aria-hidden="true"></i>
+                        <span>@Tr("Register.Phone")</span>
+                    </label>
+                    <InputText id="phone"
+                               type="tel"
+                               class="register-form-input-enhanced"
+                               @bind-Value="registerModel.Phone"
+                               placeholder="@Tr("Register.Phone.Placeholder")" />
+                    <ValidationMessage For="@(() => registerModel.Phone)"
+                                       class="register-validation-message-enhanced" />
+                </div>
+
+                <!-- Password Row -->
+                <div class="register-form-row-enhanced">
+                    <div class="register-form-group-enhanced">
+                        <label for="password" class="register-form-label-enhanced">
+                            <i class="fas fa-lock" aria-hidden="true"></i>
+                            <span>@Tr("Register.Password")</span>
+                        </label>
+                        <div class="register-password-container-enhanced">
+                            <InputText id="password"
+                                       type="@(showPassword ? "text" : "password")"
+                                       class="register-form-input-enhanced"
+                                       @bind-Value="registerModel.Password"
+                                       placeholder="@Tr("Register.Password.Placeholder")" />
+                            <button type="button"
+                                    class="register-password-toggle-enhanced"
+                                    @onclick="TogglePasswordVisibility"
+                                    title="@Tr("Register.Password.Toggle")">
+                                <i class="@(showPassword ? "fas fa-eye-slash" : "fas fa-eye")" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <ValidationMessage For="@(() => registerModel.Password)"
+                                           class="register-validation-message-enhanced" />
+                    </div>
+
+                    <div class="register-form-group-enhanced">
+                        <label for="confirmPassword" class="register-form-label-enhanced">
+                            <i class="fas fa-lock" aria-hidden="true"></i>
+                            <span>@Tr("Register.ConfirmPassword")</span>
+                        </label>
+                        <div class="register-password-container-enhanced">
+                            <InputText id="confirmPassword"
+                                       type="@(showConfirmPassword ? "text" : "password")"
+                                       class="register-form-input-enhanced"
+                                       @bind-Value="registerModel.ConfirmPassword"
+                                       placeholder="@Tr("Register.ConfirmPassword.Placeholder")" />
+                            <button type="button"
+                                    class="register-password-toggle-enhanced"
+                                    @onclick="ToggleConfirmPasswordVisibility"
+                                    title="@Tr("Register.ConfirmPassword.Toggle")">
+                                <i class="@(showConfirmPassword ? "fas fa-eye-slash" : "fas fa-eye")" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <ValidationMessage For="@(() => registerModel.ConfirmPassword)"
+                                           class="register-validation-message-enhanced" />
+                    </div>
+                </div>
+
+                <!-- Terms Checkbox -->
+                <div class="register-form-group-enhanced">
+                    <label class="register-checkbox-container-enhanced">
+                        <InputCheckbox @bind-Value="registerModel.AcceptTerms" />
+                        <span class="register-checkbox-checkmark-enhanced"></span>
+                        <span>
+                            @Tr("Register.Terms")
+                            <a href="/terms" class="register-terms-link-enhanced" target="_blank">@Tr("Register.Terms.Link")</a>
+                            @Tr("Register.Terms.And")
+                            <a href="/privacy" class="register-terms-link-enhanced" target="_blank">@Tr("Register.Privacy.Link")</a>
+                        </span>
+                    </label>
+                    <ValidationMessage For="@(() => registerModel.AcceptTerms)"
+                                       class="register-validation-message-enhanced" />
+                </div>
+
+                <!-- Marketing Checkbox -->
+                <div class="register-form-group-enhanced">
+                    <label class="register-checkbox-container-enhanced">
+                        <InputCheckbox @bind-Value="registerModel.AcceptMarketing" />
+                        <span class="register-checkbox-checkmark-enhanced"></span>
+                        <span>@Tr("Register.Marketing")</span>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit"
+                        class="register-btn-enhanced"
+                        disabled="@isSubmitting">
+                    @if (isSubmitting)
+                    {
+                        <span class="register-spinner-enhanced"></span>
+                        <span>@Tr("Register.Submitting")</span>
+                    }
+                    else
+                    {
+                        <i class="fas fa-user-plus" aria-hidden="true"></i>
+                        <span>@Tr("Register.Submit")</span>
+                    }
+                </button>
+            </EditForm>
+
+            <!-- Footer -->
+            <div class="register-footer-enhanced">
+                <p class="register-footer-text-enhanced">
+                    @Tr("Register.Login.Question")
+                    <a href="/login" class="register-link-enhanced">@Tr("Register.Login.Link")</a>
+                </p>
+            </div>
+
+
+        </div>
+
+        <!-- Image Section -->
+        <div class="register-image-section-enhanced">
+            <div class="register-image-content-enhanced">
+                <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                <h3 class="register-image-title-enhanced">@Tr("Register.Image.Title")</h3>
+                <p class="register-image-subtitle-enhanced">@Tr("Register.Image.Subtitle")</p>
+
+                <div class="register-image-features-enhanced">
+                    <div class="register-image-feature-enhanced">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i>
+                        <span>@Tr("Register.Feature1")</span>
+                    </div>
+                    <div class="register-image-feature-enhanced">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i>
+                        <span>@Tr("Register.Feature2")</span>
+                    </div>
+                    <div class="register-image-feature-enhanced">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i>
+                        <span>@Tr("Register.Feature3")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    private RegisterModel registerModel = new RegisterModel();
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+    private bool isSubmitting = false;
+    private bool showPassword = false;
+    private bool showConfirmPassword = false;
+
+    private string Tr(string key) => TranslationService.Translate(key);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await TranslationService.EnsureInitAfterRenderAsync();
+            StateHasChanged();
+        }
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        showPassword = !showPassword;
+    }
+
+    private void ToggleConfirmPasswordVisibility()
+    {
+        showConfirmPassword = !showConfirmPassword;
+    }
+
+    private async Task HandleRegister()
+    {
+        isSubmitting = true;
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+        StateHasChanged();
+
+        try
+        {
+            var result = await AuthService.RegisterAsync(registerModel);
+
+            if (result.Success)
+            {
+                successMessage = result.Message ?? Tr("Register.Success.Message");
+                StateHasChanged();
+
+                // Redirect after 2 seconds
+                await Task.Delay(2000);
+                Navigation.NavigateTo("/login");
+            }
+            else
+            {
+                errorMessage = result.Message ?? Tr("Register.Error.Message");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = Tr("Register.Error.Message");
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleGoogleRegister()
+    {
+        // TODO: Implement Google OAuth
+        await JSRuntime.InvokeVoidAsync("alert", "Google registration coming soon!");
+    }
+
+    private async Task HandleFacebookRegister()
+    {
+        // TODO: Implement Facebook OAuth
+        await JSRuntime.InvokeVoidAsync("alert", "Facebook registration coming soon!");
+    }
+
+    private async Task HandleLinkedInRegister()
+    {
+        // TODO: Implement LinkedIn OAuth
+        await JSRuntime.InvokeVoidAsync("alert", "LinkedIn registration coming soon!");
+    }
+}

@@ -1,0 +1,169 @@
+﻿.rhe {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.rhe-disabled {
+    opacity: .6;
+    pointer-events: none;
+}
+
+.rhe-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem;
+    padding: .4rem .5rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 10px 10px 0 0;
+}
+
+.rhe-btn {
+    position: relative;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    border-radius: 8px;
+    padding: .35rem .55rem;
+    cursor: pointer;
+}
+
+    .rhe-btn:hover {
+        background: #f1f5f9;
+    }
+
+.rhe-sep {
+    width: 1px;
+    background: #e2e8f0;
+    margin: 0 .25rem;
+}
+
+.rhe-select {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: .25rem .5rem;
+    background: #fff;
+    min-width: 64px;
+}
+
+.rhe-editor {
+    padding: .75rem .9rem;
+    border-radius: 0 0 10px 10px;
+    min-height: 160px;
+    overflow: auto;
+}
+
+    .rhe-editor:focus {
+        outline: none;
+        box-shadow: inset 0 0 0 2px rgba(74, 155, 142, .2);
+    }
+
+    /* placeholder */
+    .rhe-editor[placeholder]:empty:before {
+        content: attr(placeholder);
+        color: #94a3b8;
+    }
+
+    .rhe-editor table.rhe-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: .25rem 0;
+    }
+
+        .rhe-editor table.rhe-table th,
+        .rhe-editor table.rhe-table td {
+            border: 1px solid #e2e8f0;
+            padding: .4rem .5rem;
+            vertical-align: top;
+        }
+
+        .rhe-editor table.rhe-table thead th {
+            background: #f8fafc;
+            font-weight: 700;
+        }
+
+
+/* الحاوية والمحرر */
+.rhe {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.rhe-disabled {
+    opacity: .6;
+    pointer-events: none;
+}
+
+.rhe-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem;
+    padding: .4rem .5rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 10px 10px 0 0;
+}
+
+.rhe-btn {
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    border-radius: 8px;
+    padding: .35rem .55rem;
+    cursor: pointer;
+}
+
+    .rhe-btn:hover {
+        background: #f1f5f9;
+    }
+
+.rhe-sep {
+    width: 1px;
+    background: #e2e8f0;
+    margin: 0 .25rem;
+}
+
+.rhe-select {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: .25rem .5rem;
+    background: #fff;
+    min-width: 64px;
+}
+
+.rhe-editor {
+    padding: .75rem .9rem;
+    border-radius: 0 0 10px 10px;
+    min-height: 160px;
+    overflow: auto;
+}
+
+    .rhe-editor:focus {
+        outline: none;
+        box-shadow: inset 0 0 0 2px rgba(74, 155, 142, .2);
+    }
+
+    /* placeholder */
+    .rhe-editor[placeholder]:empty:before {
+        content: attr(placeholder);
+        color: #94a3b8;
+    }
+
+    /* الجداول داخل المحرر */
+    .rhe-editor table.rhe-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: .25rem 0;
+    }
+
+        .rhe-editor table.rhe-table th,
+        .rhe-editor table.rhe-table td {
+            border: 1px solid #e2e8f0;
+            padding: .4rem .5rem;
+            vertical-align: top;
+        }
+
+        .rhe-editor table.rhe-table thead th {
+            background: #f8fafc;
+            font-weight: 700;
+        }

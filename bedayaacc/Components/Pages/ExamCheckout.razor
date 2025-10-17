@@ -1,0 +1,381 @@
+﻿@page "/exams/{ExamId:int}/checkout"
+
+@using bedayaacc.Components.Layout
+@using bedayaacc.Models
+@using bedayaacc.Repositories
+@using bedayaacc.Services
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Security.Claims
+@using System.ComponentModel.DataAnnotations
+
+@inject IExamService ExamService
+@inject IPaymentRepository PaymentRepository
+@inject IBankAccountRepository BankRepo
+@inject IFileStorage FileStorage
+@inject TranslationService TranslationService
+@inject IHttpContextAccessor Http
+@inject NavigationManager Navigation
+
+@layout ExternalLayout
+
+<link href="css/ExamCheckout.css" rel="stylesheet" />
+
+<PageTitle>@Tr("Checkout.Title") - @Tr("Site.Name")</PageTitle>
+
+@if (loading)
+{
+    <div class="loading-container"><div class="spinner"></div><p>@Tr("Checkout.Loading")</p></div>
+}
+else if (exam is null)
+{
+    <div class="empty-state"><i class="fas fa-exclamation-circle"></i><h3>@Tr("Checkout.NotFound")</h3></div>
+}
+else if (!IsAuthenticated)
+{
+    <div class="empty-state">
+        <i class="fas fa-lock"></i>
+        <h3>@Tr("Checkout.LoginRequired")</h3>
+        <button class="btn btn-primary" @onclick="GoLogin"><i class="fas fa-sign-in-alt"></i> @Tr("Checkout.LoginBtn")</button>
+    </div>
+}
+else if (alreadyOwned)
+{
+    <div class="empty-state">
+        <i class="fas fa-check-circle"></i>
+        <h3>@Tr("Checkout.AlreadyOwned")</h3>
+        <button class="btn btn-primary" @onclick="GoStart"><i class="fas fa-play-circle"></i> @Tr("Checkout.StartExam")</button>
+    </div>
+}
+@* ⬇️ شاشة “تم الاستلام وتحت المراجعة” بعد الرفع الناجح *@
+else if (paymentSubmitted)
+{
+    <div class="checkout-card success">
+        <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+        <h2>@Ts("Checkout.Pending.Title", "شكرًا — تم استلام إيصال التحويل")</h2>
+
+        <p class="lead">
+            @Ts("Checkout.Pending.Subtitle",
+            "طلبك قيد المراجعة الآن. سيقوم فريقنا بالتحقق من الدفع خلال وقت قصير، وبعد تأكيد السداد سيظهر لك زر “بدء الاختبار”.")
+    </p>
+
+    <div class="pending-summary">
+        <div><strong>@Ts("Checkout.Pending.Exam", "الاختبار"):</strong> @(string.IsNullOrWhiteSpace(exam!.ExamTitleAr) ? exam.ExamTitleEn : exam.ExamTitleAr)</div>
+        <div><strong>@Ts("Checkout.Pending.OrderNo", "رقم الطلب"):</strong> #@pendingOrderId</div>
+        <div><strong>@Ts("Checkout.Pending.Amount", "المبلغ"):</strong> @FormatPrice(exam.Price)</div>
+        @if (!string.IsNullOrWhiteSpace(receiptUrlSaved))
+            {
+                <div><strong>@Ts("Checkout.Pending.Receipt", "الإيصال"):</strong> <a href="@receiptUrlSaved" target="_blank">@Ts("Checkout.Pending.ViewReceipt", "عرض الإيصال")</a></div>
+            }
+        </div>
+
+        <ul class="pending-help">
+            <li>@Ts("Checkout.Pending.Note1", "ستصلك إشعار/رسالة عند إتمام المراجعة.")</li>
+            <li>@Ts("Checkout.Pending.Note2", "إذا احتجنا توضيحًا إضافيًا سنتواصل معك على البريد المسجّل.")</li>
+            <li>@Ts("Checkout.Pending.Note3", "يمكنك الرجوع لاحقًا لهذه الصفحة لمتابعة الحالة أو إعادة رفع إيصال أوضح.")</li>
+        </ul>
+
+        <div class="checkout-actions">
+            <button type="button" class="btn btn-primary" @onclick="GoBack">
+                <i class="fas fa-arrow-right"></i> @Ts("Checkout.Pending.BackToExams", "الرجوع لقائمة الاختبارات")
+            </button>
+            <button type="button" class="btn btn-outline" @onclick="ResetForReupload">
+                <i class="fas fa-upload"></i> @Ts("Checkout.Pending.Reupload", "رفع إيصال آخر")
+            </button>
+        </div>
+    </div>
+}
+else
+{
+    <div class="checkout-card">
+        <h2>@(string.IsNullOrWhiteSpace(exam.ExamTitleAr) ? exam.ExamTitleEn : exam.ExamTitleAr)</h2>
+        @if (!string.IsNullOrWhiteSpace(exam.DescriptionAr))
+        {
+            <p>@exam.DescriptionAr</p>
+        }
+
+        <div class="price-box">
+            <span>@Tr("Checkout.Price"):</span>
+            <strong>@FormatPrice(exam.Price)</strong>
+        </div>
+
+        <!-- بيانات البنك من الجدول -->
+        <div class="bank-info">
+            <h4>@Tr("Checkout.Bank.Title")</h4>
+
+            @if (bankAccounts.Count == 0)
+            {
+                <small>@Tr("Checkout.Bank.NoAccounts")</small>
+            }
+            else
+            {
+                @foreach (var acc in bankAccounts)
+                {
+                    <div class="bank-card">
+                        <ul>
+                            <li>@Tr("Checkout.Bank.Name"): <strong>@acc.BankName</strong></li>
+                            <li>@Tr("Checkout.Bank.AccountName"): <strong>@acc.AccountName</strong></li>
+                            <li>@Tr("Checkout.Bank.AccountNumber"): <strong>@acc.AccountNumber</strong></li>
+                            @if (!string.IsNullOrWhiteSpace(acc.IBAN))
+                            {
+                                <li>@Tr("Checkout.Bank.IBAN"): <strong>@acc.IBAN</strong></li>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(acc.SwiftCode))
+                            {
+                                <li>@Tr("Checkout.Bank.Swift"): <strong>@acc.SwiftCode</strong></li>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(acc.Branch))
+                            {
+                                <li>@Tr("Checkout.Bank.Branch"): <strong>@acc.Branch</strong></li>
+                            }
+                        </ul>
+                    </div>
+                }
+                <small>@Tr("Checkout.Bank.Note")</small>
+            }
+        </div>
+
+        <EditForm Model="uploadModel" OnValidSubmit="SubmitReceipt">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>@Tr("Checkout.Receipt.Upload")</label>
+
+                    <div class="file-input-wrap">
+                        <InputFile OnChange="OnFileChange" accept=".jpg,.jpeg,.png,.pdf" disabled="@fileBusy" />
+                        @if (fileBusy)
+                        {
+                            <span class="spinner-sm" title="@Tr("Common.Loading")"></span>
+                            <small class="muted">@Tr("Checkout.File.Preparing")</small>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(selectedFileName))
+                    {
+                        <div class="hint">
+                            @Tr("Checkout.Receipt.Selected"): <strong>@selectedFileName</strong>
+                        </div>
+                    }
+                </div>
+
+
+                <div class="form-group">
+                    <label>@Tr("Checkout.Bank.RefOptional")</label>
+                    <InputText class="form-control" @bind-Value="uploadModel.BankRef" />
+                </div>
+            </div>
+
+            <div class="checkout-actions">
+                <button type="submit"
+                        class="btn btn-accent"
+                        disabled="@(!canSubmit || submitting || fileBusy)">
+                    @if (submitting)
+                    {
+                        <span class="spinner"></span>
+                        <span>@Tr("Checkout.Submitting")</span>
+                    }
+                    else
+                    {
+                        <i class="fas fa-upload"></i>
+                        <span>@Tr("Checkout.PayByTransfer")</span>
+                    }
+                </button>
+                <button type="button" class="btn btn-secondary" @onclick="GoBack">@Tr("Checkout.Back")</button>
+            </div>
+        </EditForm>
+
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            <div class="alert-info">@message</div>
+        }
+    </div>
+
+    @* Overlay أثناء الرفع *@
+    @if (showOverlay)
+    {
+        <div class="ec-overlay">
+            <div class="ec-overlay-card">
+                <div class="spinner"></div>
+                <div class="ec-progress">
+                    <div class="ec-progress-bar" style="width:@($"{uploadProgress:0}%")"></div>
+                </div>
+                <div class="ec-progress-text">@($"{uploadProgress:0}%")</div>
+                <p>@Tr("Checkout.UploadingReceipt")</p>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public int ExamId { get; set; }
+
+    private Exam? exam;
+    private bool loading = true;
+    private bool submitting = false;
+    private bool showOverlay = false;
+    private string message = string.Empty;
+    private bool alreadyOwned = false;
+    private bool fileBusy = false;
+
+    private List<BankAccount> bankAccounts = new();
+
+    private ReceiptUploadModel uploadModel = new();
+
+    private IBrowserFile? receiptFile;
+    private string selectedFileName = string.Empty;
+    private bool canSubmit = false;
+
+    private double uploadProgress = 0;
+
+    // ⬇️ حالات شاشة “تم الاستلام”
+    private bool paymentSubmitted = false;
+    private long pendingOrderId = 0;
+    private string? receiptUrlSaved;
+
+    private string Tr(string k) => TranslationService.Translate(k);
+
+    // ترجمة مع بديل جاهز
+    private string Ts(string key, string fallback)
+    {
+        var v = TranslationService.Translate(key);
+        return string.IsNullOrWhiteSpace(v) || v == key ? fallback : v;
+    }
+
+    private bool IsAuthenticated =>
+        Http.HttpContext?.User?.Identity?.IsAuthenticated == true;
+
+    private int CurrentUserId =>
+        int.TryParse(Http.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        exam = await ExamService.GetExamAsync(ExamId);
+        if (exam is null) { loading = false; return; }
+
+        if (exam.Price == 0) { Navigation.NavigateTo($"/exams/{ExamId}/take"); return; }
+
+        bankAccounts = await BankRepo.GetActiveAccountsAsync();
+
+        if (IsAuthenticated)
+            alreadyOwned = await PaymentRepository.HasUserPaidExamAsync(ExamId, CurrentUserId);
+
+        loading = false;
+    }
+
+    private async Task OnFileChange(InputFileChangeEventArgs e)
+    {
+        fileBusy = true;
+        message = string.Empty;
+        StateHasChanged();
+
+        try
+        {
+            // إتاحة عرض اللودر فورًا
+            await Task.Yield();
+
+            receiptFile = e.File;
+            selectedFileName = e.File?.Name ?? string.Empty;
+
+            // تحقّق سريع من النوع/الحجم (اختياري)
+            var allowed = new[] { ".jpg", ".jpeg", ".png", ".pdf" };
+            var ext = System.IO.Path.GetExtension(selectedFileName)?.ToLowerInvariant() ?? "";
+            if (!allowed.Contains(ext))
+            {
+                receiptFile = null;
+                selectedFileName = string.Empty;
+                canSubmit = false;
+                message = Tr("Checkout.File.InvalidType"); // أضف النص في الترجمة
+                return;
+            }
+
+            // جاهز للإرسال
+            canSubmit = receiptFile is not null;
+        }
+        finally
+        {
+            fileBusy = false;
+            StateHasChanged();
+        }
+    }
+
+
+    private async Task SubmitReceipt()
+    {
+        if (!IsAuthenticated) { GoLogin(); return; }
+        if (exam is null || receiptFile is null) return;
+
+        submitting = true;
+        showOverlay = true;
+        uploadProgress = 0;
+        message = string.Empty;
+        StateHasChanged();
+
+        try
+        {
+            var existing = await PaymentRepository.GetPendingOrderAsync(CurrentUserId, exam.ExamId);
+            var orderId = existing?.OrderId ?? await PaymentRepository.CreateBankTransferOrderAsync(CurrentUserId, exam.ExamId, "EGP", 0);
+
+            var progress = new Progress<double>(p =>
+            {
+                uploadProgress = Math.Max(0, Math.Min(100, p));
+                InvokeAsync(StateHasChanged);
+            });
+
+            var (fileName, url) = await FileStorage.SaveReceiptAsync(receiptFile, progress);
+
+            var ok = await PaymentRepository.UploadReceiptAndMarkPaidUnverifiedAsync(orderId, exam.Price, fileName, url, uploadModel.BankRef);
+            if (ok)
+            {
+                // ✅ بدلاً من الانتقال للامتحان، نعرض شاشة "قيد المراجعة"
+                pendingOrderId = orderId;
+                receiptUrlSaved = url;
+                paymentSubmitted = true;
+                message = string.Empty;
+                StateHasChanged();
+                return;
+            }
+            else
+            {
+                message = Tr("Checkout.Fail");
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"{Tr("Checkout.Error")}: {ex.Message}";
+        }
+        finally
+        {
+            submitting = false;
+            showOverlay = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ResetForReupload()
+    {
+        paymentSubmitted = false;
+        message = string.Empty;
+        receiptFile = null;
+        selectedFileName = string.Empty;
+        canSubmit = false;
+    }
+
+    private void GoLogin()
+    {
+        var returnUrl = $"/exams/{ExamId}/checkout";
+        Navigation.NavigateTo($"/login?ReturnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+    }
+
+    private void GoBack() => Navigation.NavigateTo("/exams");
+    private void GoStart() => Navigation.NavigateTo($"/exams/{ExamId}/take");
+
+    private static string FormatPrice(decimal price)
+        => string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:0.##} {1}", price, "EGP");
+
+    private class ReceiptUploadModel
+    {
+        [StringLength(100)]
+        public string? BankRef { get; set; }
+    }
+}

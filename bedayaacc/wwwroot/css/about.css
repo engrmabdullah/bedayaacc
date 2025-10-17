@@ -1,0 +1,621 @@
+﻿/* Bedaya About Page Styles */
+.bedaya-about-page {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+    .bedaya-about-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(circle at 5% 5%, rgba(102, 126, 234, 0.03) 0%, transparent 25%), radial-gradient(circle at 95% 95%, rgba(118, 75, 162, 0.03) 0%, transparent 25%), repeating-linear-gradient(45deg, rgba(102, 126, 234, 0.01) 0px, rgba(102, 126, 234, 0.01) 1px, transparent 1px, transparent 11px), repeating-linear-gradient(-45deg, rgba(118, 75, 162, 0.01) 0px, rgba(118, 75, 162, 0.01) 1px, transparent 1px, transparent 11px);
+        z-index: 0;
+        opacity: 0.5;
+    }
+
+/* About Hero */
+.bedaya-about-hero {
+    padding: 100px 0 60px;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.bedaya-about-hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.bedaya-about-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    position: relative;
+    display: inline-block;
+}
+
+    .bedaya-about-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border-radius: 2px;
+        animation: bedaya-growWidth 1s ease-out 0.5s both;
+    }
+
+.bedaya-about-subtitle {
+    font-size: 1.3rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* About Mission */
+.bedaya-about-mission {
+    padding: 80px 0;
+    position: relative;
+    z-index: 2;
+    background: white;
+    margin: 40px 0;
+}
+
+.bedaya-about-mission-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.bedaya-about-text {
+    position: relative;
+    z-index: 2;
+}
+
+.bedaya-section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.bedaya-about-desc {
+    font-size: 1.1rem;
+    color: #64748b;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+}
+
+.bedaya-about-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.bedaya-stat-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+}
+
+    .bedaya-stat-item:hover {
+        transform: translateY(-5px);
+    }
+
+.bedaya-stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+}
+
+.bedaya-stat-label {
+    display: block;
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.bedaya-about-image {
+    position: relative;
+    z-index: 2;
+}
+
+.bedaya-about-image-placeholder {
+    width: 300px;
+    height: 300px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+    .bedaya-about-image-placeholder::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transform: rotate(45deg);
+        animation: bedaya-shine 3s infinite;
+    }
+
+    .bedaya-about-image-placeholder i {
+        font-size: 8rem;
+        opacity: 0.3;
+        position: relative;
+        z-index: 1;
+    }
+
+    .bedaya-about-image-placeholder:hover {
+        transform: scale(1.05) rotate(5deg);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+/* About Values */
+.bedaya-about-values {
+    padding: 80px 0;
+    position: relative;
+    z-index: 2;
+}
+
+.bedaya-about-values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.bedaya-value-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+    .bedaya-value-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .bedaya-value-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+        .bedaya-value-card:hover::before {
+            transform: scaleX(1);
+        }
+
+.bedaya-value-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: white;
+    font-size: 2rem;
+    transition: transform 0.3s ease;
+}
+
+.bedaya-value-card:hover .bedaya-value-icon {
+    transform: scale(1.1) rotate(10deg);
+}
+
+.bedaya-value-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 1rem;
+}
+
+.bedaya-value-desc {
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* About Team */
+.bedaya-about-team {
+    padding: 80px 0;
+    position: relative;
+    z-index: 2;
+    background: white;
+    margin: 40px 0;
+}
+
+.bedaya-about-team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2.5rem;
+    margin-top: 3rem;
+}
+
+.bedaya-team-member {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    text-align: center;
+}
+
+    .bedaya-team-member:hover {
+        transform: translateY(-10px);
+    }
+
+.bedaya-team-image {
+    padding: 2rem;
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+}
+
+.bedaya-team-image-placeholder {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 auto;
+    transition: transform 0.3s ease;
+}
+
+.bedaya-team-member:hover .bedaya-team-image-placeholder {
+    transform: scale(1.1);
+}
+
+.bedaya-team-info {
+    padding: 2rem;
+}
+
+.bedaya-team-name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.bedaya-team-role {
+    font-size: 1rem;
+    color: #667eea;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.bedaya-team-desc {
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* About Timeline */
+.bedaya-about-timeline {
+    padding: 80px 0;
+    position: relative;
+    z-index: 2;
+}
+
+.bedaya-timeline {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+    .bedaya-timeline::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        transform: translateX(-50%);
+    }
+
+.bedaya-timeline-item {
+    position: relative;
+    margin-bottom: 3rem;
+    padding: 0 2rem;
+    width: 50%;
+}
+
+    .bedaya-timeline-item:nth-child(odd) {
+        left: 0;
+    }
+
+    .bedaya-timeline-item:nth-child(even) {
+        left: 50%;
+    }
+
+.bedaya-timeline-date {
+    position: absolute;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+    z-index: 2;
+}
+
+.bedaya-timeline-item:nth-child(odd) .bedaya-timeline-date {
+    left: calc(50% - 20px);
+}
+
+.bedaya-timeline-item:nth-child(even) .bedaya-timeline-date {
+    left: calc(50% - 20px);
+}
+
+.bedaya-timeline-content {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    margin-top: 2rem;
+}
+
+.bedaya-timeline-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.bedaya-timeline-desc {
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* About CTA */
+.bedaya-about-cta {
+    padding: 80px 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    position: relative;
+    z-index: 2;
+    margin: 40px 0;
+}
+
+.bedaya-cta-content {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.bedaya-cta-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.bedaya-cta-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+.bedaya-cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.bedaya-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+    .bedaya-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+        z-index: -1;
+    }
+
+    .bedaya-btn:hover::before {
+        left: 100%;
+    }
+
+.bedaya-btn-primary {
+    background: white;
+    color: #667eea;
+}
+
+    .bedaya-btn-primary:hover {
+        background: #f8fafc;
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+.bedaya-btn-ghost {
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+}
+
+    .bedaya-btn-ghost:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+/* Animations */
+@keyframes bedaya-growWidth {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 100px;
+    }
+}
+
+@keyframes bedaya-shine {
+    0% {
+        transform: rotate(45deg) translateX(-100%);
+    }
+
+    100% {
+        transform: rotate(45deg) translateX(100%);
+    }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .bedaya-about-mission-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .bedaya-about-image {
+        justify-self: center;
+    }
+
+    .bedaya-about-image-placeholder {
+        width: 250px;
+        height: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .bedaya-about-hero {
+        padding: 60px 0 40px;
+    }
+
+    .bedaya-about-title {
+        font-size: 2.5rem;
+    }
+
+    .bedaya-section-title {
+        font-size: 1.8rem;
+    }
+
+    .bedaya-about-mission {
+        padding: 60px 0;
+    }
+
+    .bedaya-about-values,
+    .bedaya-about-team,
+    .bedaya-about-timeline,
+    .bedaya-about-cta {
+        padding: 60px 0;
+    }
+
+    .bedaya-timeline::before {
+        left: 20px;
+    }
+
+    .bedaya-timeline-item {
+        width: 100%;
+        padding: 0 0 0 4rem;
+        left: 0 !important;
+    }
+
+        .bedaya-timeline-item .bedaya-timeline-date {
+            left: 0 !important;
+        }
+
+    .bedaya-cta-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .bedaya-btn {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .bedaya-about-hero {
+        padding: 40px 0 30px;
+    }
+
+    .bedaya-about-title {
+        font-size: 2rem;
+    }
+
+    .bedaya-cta-title {
+        font-size: 2rem;
+    }
+
+    .bedaya-about-stats {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .bedaya-stat-item {
+        padding: 1rem;
+    }
+
+    .bedaya-about-image-placeholder {
+        width: 200px;
+        height: 200px;
+    }
+}

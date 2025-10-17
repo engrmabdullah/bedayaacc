@@ -1,0 +1,184 @@
+﻿@page "/about"
+@using bedayaacc.Components.Layout
+@using bedayaacc.Services
+@inject NavigationManager Navigation
+@inject TranslationService TranslationService
+@inject IJSRuntime JSRuntime
+@layout ExternalLayout
+
+
+<div class="bedaya-about-page">
+    <!-- Hero Section -->
+    <section class="bedaya-about-hero">
+        <div class="bedaya-container">
+            <div class="bedaya-about-hero-content">
+                <h1 class="bedaya-about-title">@Tr("About.Title")</h1>
+                <p class="bedaya-about-subtitle">@Tr("About.Subtitle")</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission Section -->
+    <section class="bedaya-about-mission">
+        <div class="bedaya-container">
+            <div class="bedaya-about-mission-content">
+                <div class="bedaya-about-text">
+                    <h2 class="bedaya-section-title">@Tr("About.Mission.Title")</h2>
+                    <p class="bedaya-about-desc">@Tr("About.Mission.Desc")</p>
+                    <div class="bedaya-about-stats">
+                        <div class="bedaya-stat-item">
+                            <span class="bedaya-stat-number">15,000+</span>
+                            <span class="bedaya-stat-label">@Tr("About.Mission.Students")</span>
+                        </div>
+                        <div class="bedaya-stat-item">
+                            <span class="bedaya-stat-number">200+</span>
+                            <span class="bedaya-stat-label">@Tr("About.Mission.Instructors")</span>
+                        </div>
+                        <div class="bedaya-stat-item">
+                            <span class="bedaya-stat-number">98%</span>
+                            <span class="bedaya-stat-label">@Tr("About.Mission.Success")</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bedaya-about-image">
+                    <div class="bedaya-about-image-placeholder">
+                        <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="bedaya-about-values">
+        <div class="bedaya-container">
+            <h2 class="bedaya-section-title">@Tr("About.Values.Title")</h2>
+            <div class="bedaya-about-values-grid">
+                <div class="bedaya-value-card">
+                    <div class="bedaya-value-icon">
+                        <i class="fas fa-lightbulb" aria-hidden="true"></i>
+                    </div>
+                    <h3 class="bedaya-value-title">@Tr("About.Values.Excellence.Title")</h3>
+                    <p class="bedaya-value-desc">@Tr("About.Values.Excellence.Desc")</p>
+                </div>
+                <div class="bedaya-value-card">
+                    <div class="bedaya-value-icon">
+                        <i class="fas fa-handshake" aria-hidden="true"></i>
+                    </div>
+                    <h3 class="bedaya-value-title">@Tr("About.Values.Integrity.Title")</h3>
+                    <p class="bedaya-value-desc">@Tr("About.Values.Integrity.Desc")</p>
+                </div>
+                <div class="bedaya-value-card">
+                    <div class="bedaya-value-icon">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                    </div>
+                    <h3 class="bedaya-value-title">@Tr("About.Values.Community.Title")</h3>
+                    <p class="bedaya-value-desc">@Tr("About.Values.Community.Desc")</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="bedaya-about-team">
+        <div class="bedaya-container">
+            <h2 class="bedaya-section-title">@Tr("About.Team.Title")</h2>
+            <div class="bedaya-about-team-grid">
+                <div class="bedaya-team-member">
+                    <div class="bedaya-team-image">
+                        <div class="bedaya-team-image-placeholder">JD</div>
+                    </div>
+                    <div class="bedaya-team-info">
+                        <h3 class="bedaya-team-name">@Tr("About.Team.John.Name")</h3>
+                        <p class="bedaya-team-role">@Tr("About.Team.John.Role")</p>
+                        <p class="bedaya-team-desc">@Tr("About.Team.John.Desc")</p>
+                    </div>
+                </div>
+                <div class="bedaya-team-member">
+                    <div class="bedaya-team-image">
+                        <div class="bedaya-team-image-placeholder">SJ</div>
+                    </div>
+                    <div class="bedaya-team-info">
+                        <h3 class="bedaya-team-name">@Tr("About.Team.Sarah.Name")</h3>
+                        <p class="bedaya-team-role">@Tr("About.Team.Sarah.Role")</p>
+                        <p class="bedaya-team-desc">@Tr("About.Team.Sarah.Desc")</p>
+                    </div>
+                </div>
+                <div class="bedaya-team-member">
+                    <div class="bedaya-team-image">
+                        <div class="bedaya-team-image-placeholder">MB</div>
+                    </div>
+                    <div class="bedaya-team-info">
+                        <h3 class="bedaya-team-name">@Tr("About.Team.Michael.Name")</h3>
+                        <p class="bedaya-team-role">@Tr("About.Team.Michael.Role")</p>
+                        <p class="bedaya-team-desc">@Tr("About.Team.Michael.Desc")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline Section -->
+    <section class="bedaya-about-timeline">
+        <div class="bedaya-container">
+            <h2 class="bedaya-section-title">@Tr("About.Timeline.Title")</h2>
+            <div class="bedaya-timeline">
+                <div class="bedaya-timeline-item">
+                    <div class="bedaya-timeline-date">@Tr("About.Timeline.2018.Date")</div>
+                    <div class="bedaya-timeline-content">
+                        <h3 class="bedaya-timeline-title">@Tr("About.Timeline.2018.Title")</h3>
+                        <p class="bedaya-timeline-desc">@Tr("About.Timeline.2018.Desc")</p>
+                    </div>
+                </div>
+                <div class="bedaya-timeline-item">
+                    <div class="bedaya-timeline-date">@Tr("About.Timeline.2020.Date")</div>
+                    <div class="bedaya-timeline-content">
+                        <h3 class="bedaya-timeline-title">@Tr("About.Timeline.2020.Title")</h3>
+                        <p class="bedaya-timeline-desc">@Tr("About.Timeline.2020.Desc")</p>
+                    </div>
+                </div>
+                <div class="bedaya-timeline-item">
+                    <div class="bedaya-timeline-date">@Tr("About.Timeline.2022.Date")</div>
+                    <div class="bedaya-timeline-content">
+                        <h3 class="bedaya-timeline-title">@Tr("About.Timeline.2022.Title")</h3>
+                        <p class="bedaya-timeline-desc">@Tr("About.Timeline.2022.Desc")</p>
+                    </div>
+                </div>
+                <div class="bedaya-timeline-item">
+                    <div class="bedaya-timeline-date">@Tr("About.Timeline.2024.Date")</div>
+                    <div class="bedaya-timeline-content">
+                        <h3 class="bedaya-timeline-title">@Tr("About.Timeline.2024.Title")</h3>
+                        <p class="bedaya-timeline-desc">@Tr("About.Timeline.2024.Desc")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="bedaya-about-cta">
+        <div class="bedaya-container">
+            <div class="bedaya-cta-content">
+                <h2 class="bedaya-cta-title">@Tr("About.CTA.Title")</h2>
+                <p class="bedaya-cta-subtitle">@Tr("About.CTA.Subtitle")</p>
+                <div class="bedaya-cta-buttons">
+                    <a href="/courses" class="bedaya-btn bedaya-btn-primary">@Tr("About.CTA.BrowseCourses")</a>
+                    <a href="/contact" class="bedaya-btn bedaya-btn-ghost">@Tr("About.CTA.Contact")</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@code {
+    string Tr(string key) => TranslationService.Translate(key);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await TranslationService.EnsureInitAfterRenderAsync();
+        }
+        StateHasChanged();
+    }
+}

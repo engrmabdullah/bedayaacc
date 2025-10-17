@@ -1,0 +1,222 @@
+﻿@* Add this component to your Header or TopBar *@
+@inject NavigationManager Navigation
+
+<div class="quick-access-menu">
+    @if (IsInstructor)
+    {
+        <!-- Instructor Quick Access -->
+        <div class="quick-menu-dropdown">
+            <button class="quick-menu-trigger">
+                <i class="fas fa-file-alt"></i>
+                <span>الاختبارات</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="quick-menu-content">
+                <a href="/instructor/exams" class="quick-menu-item">
+                    <i class="fas fa-list"></i>
+                    <div>
+                        <strong>جميع الاختبارات</strong>
+                        <span>إدارة وعرض الاختبارات</span>
+                    </div>
+                </a>
+                <a href="/instructor/exams" class="quick-menu-item">
+                    <i class="fas fa-plus-circle"></i>
+                    <div>
+                        <strong>إنشاء اختبار جديد</strong>
+                        <span>أنشئ اختبار من الصفر</span>
+                    </div>
+                </a>
+                <div class="quick-menu-divider"></div>
+                <a href="/instructor" class="quick-menu-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <div>
+                        <strong>لوحة التحكم</strong>
+                        <span>الإحصائيات والتقارير</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Student Quick Access -->
+        <div class="quick-menu-dropdown">
+            <button class="quick-menu-trigger">
+                <i class="fas fa-graduation-cap"></i>
+                <span>اختباراتي</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="quick-menu-content">
+                <a href="/exams" class="quick-menu-item">
+                    <i class="fas fa-list"></i>
+                    <div>
+                        <strong>الاختبارات المتاحة</strong>
+                        <span>تصفح جميع الاختبارات</span>
+                    </div>
+                </a>
+                <a href="/my-attempts" class="quick-menu-item">
+                    <i class="fas fa-history"></i>
+                    <div>
+                        <strong>محاولاتي</strong>
+                        <span>عرض النتائج والتقدم</span>
+                    </div>
+                </a>
+                <div class="quick-menu-divider"></div>
+                <a href="/dashboard" class="quick-menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    <div>
+                        <strong>إحصائياتي</strong>
+                        <span>متابعة الأداء العام</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    /* Quick Access Menu Styles */
+    .quick-access-menu {
+        position: relative;
+        display: inline-block;
+    }
+
+    .quick-menu-dropdown {
+        position: relative;
+    }
+
+    .quick-menu-trigger {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background: linear-gradient(135deg, #764ba2, #667eea);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
+    }
+
+        .quick-menu-trigger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
+        }
+
+        .quick-menu-trigger i:last-child {
+            font-size: 0.75rem;
+            margin-right: -0.25rem;
+        }
+
+    .quick-menu-content {
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        right: 0;
+        min-width: 320px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 1000;
+        border: 2px solid #f1f5f9;
+    }
+
+    .quick-menu-dropdown:hover .quick-menu-content {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .quick-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        color: #1e293b;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+        .quick-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .quick-menu-item:hover {
+            background: linear-gradient(135deg, rgba(118, 75, 162, 0.05), rgba(102, 126, 234, 0.05));
+            transform: translateX(-5px);
+        }
+
+        .quick-menu-item i {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            color: white;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .quick-menu-item div {
+            flex: 1;
+        }
+
+        .quick-menu-item strong {
+            display: block;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+            color: #1e293b;
+        }
+
+        .quick-menu-item span {
+            display: block;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+    .quick-menu-divider {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+        margin: 0.5rem 0;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .quick-menu-content {
+            right: auto;
+            left: 0;
+            min-width: 280px;
+        }
+
+        .quick-menu-trigger span {
+            display: none;
+        }
+
+        .quick-menu-trigger {
+            padding: 0.75rem;
+        }
+    }
+
+    /* Animation for dropdown arrow */
+    .quick-menu-dropdown:hover .quick-menu-trigger i:last-child {
+        transform: rotate(180deg);
+    }
+
+    .quick-menu-trigger i:last-child {
+        transition: transform 0.3s ease;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public bool IsInstructor { get; set; } = false;
+}

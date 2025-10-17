@@ -1,0 +1,184 @@
+﻿@using bedayaacc.Services
+@inject TranslationService TranslationService
+
+<section class="features-enhanced">
+    <div class="features-wave-top-enhanced"></div>
+    <div class="features-pattern-enhanced"></div>
+
+    <div class="features-container-enhanced">
+        <!-- Section Header -->
+        <div class="features-header-enhanced">
+            <div class="features-badge-enhanced">
+                <i class="fas fa-sparkles" aria-hidden="true"></i>
+                <span>@Tr("Features.Badge")</span>
+            </div>
+            <h2 class="features-title-enhanced">@Tr("Features.Title")</h2>
+            <p class="features-subtitle-enhanced">@Tr("Features.Subtitle")</p>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="features-grid-enhanced">
+
+            <!-- Feature Card 1: Expert Instructors -->
+            <div class="feature-card-enhanced">
+                <div class="feature-number-enhanced">01</div>
+                <div class="feature-icon-enhanced">
+                    <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i>
+                </div>
+                <div class="feature-content-enhanced">
+                    <h3 class="feature-title-enhanced">@Tr("Features.ExpertInstructors.Title")</h3>
+                    <p class="feature-desc-enhanced">@Tr("Features.ExpertInstructors.Desc")</p>
+                    <div class="feature-stats-enhanced">
+                        <div class="feature-stat-item-enhanced">
+                            <div class="feature-stat-value-enhanced">200+</div>
+                            <div class="feature-stat-label-enhanced">@Tr("Features.Instructors")</div>
+                        </div>
+                        <div class="feature-stat-item-enhanced">
+                            <div class="feature-stat-value-enhanced">15+</div>
+                            <div class="feature-stat-label-enhanced">@Tr("Features.YearsExp")</div>
+                        </div>
+                    </div>
+                    <a href="#instructors" class="feature-link-enhanced">
+                        <span>@Tr("Features.LearnMore")</span>
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Feature Card 2: Interactive Learning -->
+            <div class="feature-card-enhanced">
+                <div class="feature-number-enhanced">02</div>
+                <div class="feature-icon-enhanced">
+                    <i class="fas fa-laptop-code" aria-hidden="true"></i>
+                </div>
+                <div class="feature-content-enhanced">
+                    <h3 class="feature-title-enhanced">@Tr("Features.InteractiveLearning.Title")</h3>
+                    <p class="feature-desc-enhanced">@Tr("Features.InteractiveLearning.Desc")</p>
+                    <div class="feature-stats-enhanced">
+                        <div class="feature-stat-item-enhanced">
+                            <div class="feature-stat-value-enhanced">500+</div>
+                            <div class="feature-stat-label-enhanced">@Tr("Features.Exercises")</div>
+                        </div>
+                        <div class="feature-stat-item-enhanced">
+                            <div class="feature-stat-value-enhanced">24/7</div>
+                            <div class="feature-stat-label-enhanced">@Tr("Features.Access")</div>
+                        </div>
+                    </div>
+                    <a href="#learning" class="feature-link-enhanced">
+                        <span>@Tr("Features.LearnMore")</span>
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Feature Card 3: Industry Certifications -->
+            <div class="feature-card-enhanced">
+                <div class="feature-number-enhanced">03</div>
+                <div class="feature-icon-enhanced">
+                    <i class="fas fa-certificate" aria-hidden="true"></i>
+                </div>
+                <div class="feature-content-enhanced">
+                    <h3 class="feature-title-enhanced">@Tr("Features.IndustryCertifications.Title")</h3>
+                    <p class="feature-desc-enhanced">@Tr("Features.IndustryCertifications.Desc")</p>
+                    <div class="feature-stats-enhanced">
+                        <div class="feature-stat-item-enhanced">
+                            <div class="feature-stat-value-enhanced">50+</div>
+                            <div class="feature-stat-label-enhanced">@Tr("Features.Certificates")</div>
+                        </div>
+                        <div class="feature-stat-item-enhanced">
+                            <div class="feature-stat-value-enhanced">98%</div>
+                            <div class="feature-stat-label-enhanced">@Tr("Features.PassRate")</div>
+                        </div>
+                    </div>
+                    <a href="#certifications" class="feature-link-enhanced">
+                        <span>@Tr("Features.LearnMore")</span>
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Feature Card 4: Flexible Schedule (Optional - يمكن إضافته) -->
+            <div class="feature-card-enhanced">
+                <div class="feature-number-enhanced">04</div>
+                <div class="feature-icon-enhanced">
+                    <i class="fas fa-clock" aria-hidden="true"></i>
+                </div>
+                <div class="feature-content-enhanced">
+                    <h3 class="feature-title-enhanced">@Tr("Features.FlexibleSchedule.Title")</h3>
+                    <p class="feature-desc-enhanced">@Tr("Features.FlexibleSchedule.Desc")</p>
+                    <div class="feature-stats-enhanced">
+                        <div class="feature-stat-item-enhanced">
+                            <div class="feature-stat-value-enhanced">100%</div>
+                            <div class="feature-stat-label-enhanced">@Tr("Features.SelfPaced")</div>
+                        </div>
+                        <div class="feature-stat-item-enhanced">
+                            <div class="feature-stat-value-enhanced">∞</div>
+                            <div class="feature-stat-label-enhanced">@Tr("Features.Lifetime")</div>
+                        </div>
+                    </div>
+                    <a href="#schedule" class="feature-link-enhanced">
+                        <span>@Tr("Features.LearnMore")</span>
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Feature Card 5: Career Support (Optional) -->
+            <div class="feature-card-enhanced">
+                <div class="feature-number-enhanced">05</div>
+                <div class="feature-icon-enhanced">
+                    <i class="fas fa-briefcase" aria-hidden="true"></i>
+                </div>
+                <div class="feature-content-enhanced">
+                    <h3 class="feature-title-enhanced">@Tr("Features.CareerSupport.Title")</h3>
+                    <p class="feature-desc-enhanced">@Tr("Features.CareerSupport.Desc")</p>
+                    <div class="feature-stats-enhanced">
+                        <div class="feature-stat-item-enhanced">
+                            <div class="feature-stat-value-enhanced">85%</div>
+                            <div class="feature-stat-label-enhanced">@Tr("Features.JobRate")</div>
+                        </div>
+                        <div class="feature-stat-item-enhanced">
+                            <div class="feature-stat-value-enhanced">1000+</div>
+                            <div class="feature-stat-label-enhanced">@Tr("Features.Companies")</div>
+                        </div>
+                    </div>
+                    <a href="#career" class="feature-link-enhanced">
+                        <span>@Tr("Features.LearnMore")</span>
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Feature Card 6: Community (Optional) -->
+            <div class="feature-card-enhanced">
+                <div class="feature-number-enhanced">06</div>
+                <div class="feature-icon-enhanced">
+                    <i class="fas fa-users" aria-hidden="true"></i>
+                </div>
+                <div class="feature-content-enhanced">
+                    <h3 class="feature-title-enhanced">@Tr("Features.Community.Title")</h3>
+                    <p class="feature-desc-enhanced">@Tr("Features.Community.Desc")</p>
+                    <div class="feature-stats-enhanced">
+                        <div class="feature-stat-item-enhanced">
+                            <div class="feature-stat-value-enhanced">10K+</div>
+                            <div class="feature-stat-label-enhanced">@Tr("Features.Members")</div>
+                        </div>
+                        <div class="feature-stat-item-enhanced">
+                            <div class="feature-stat-value-enhanced">4.9★</div>
+                            <div class="feature-stat-label-enhanced">@Tr("Features.Rating")</div>
+                        </div>
+                    </div>
+                    <a href="#community" class="feature-link-enhanced">
+                        <span>@Tr("Features.LearnMore")</span>
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+@code {
+    private string Tr(string key) => TranslationService.Translate(key);
+}

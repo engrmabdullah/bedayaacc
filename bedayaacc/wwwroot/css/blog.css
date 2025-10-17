@@ -1,0 +1,642 @@
+﻿/* Bedaya Blog Page Styles */
+.bedaya-blog-page {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+    .bedaya-blog-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(circle at 10% 10%, rgba(102, 126, 234, 0.03) 0%, transparent 25%), radial-gradient(circle at 90% 90%, rgba(118, 75, 162, 0.03) 0%, transparent 25%), repeating-linear-gradient(45deg, rgba(102, 126, 234, 0.01) 0px, rgba(102, 126, 234, 0.01) 1px, transparent 1px, transparent 11px), repeating-linear-gradient(-45deg, rgba(118, 75, 162, 0.01) 0px, rgba(118, 75, 162, 0.01) 1px, transparent 1px, transparent 11px);
+        z-index: 0;
+        opacity: 0.5;
+    }
+
+/* Blog Header */
+.bedaya-blog-header {
+    padding: 80px 0 40px;
+    position: relative;
+    z-index: 2;
+}
+
+.bedaya-blog-header-content {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.bedaya-blog-page-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    position: relative;
+    display: inline-block;
+}
+
+    .bedaya-blog-page-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border-radius: 2px;
+        animation: bedaya-growWidth 1s ease-out 0.5s both;
+    }
+
+.bedaya-blog-page-subtitle {
+    font-size: 1.3rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Filter Section */
+.bedaya-blog-filter {
+    padding: 30px 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    z-index: 3;
+}
+
+.bedaya-blog-filter-content {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.bedaya-blog-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.bedaya-search-input {
+    padding: 0.8rem 1rem 0.8rem 3rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    width: 300px;
+    transition: all 0.3s ease;
+    background: white;
+    backdrop-filter: blur(10px);
+}
+
+    .bedaya-search-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+.bedaya-search-btn {
+    position: absolute;
+    left: 1rem;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+    .bedaya-search-btn:hover {
+        color: #667eea;
+    }
+
+.bedaya-blog-filters {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.bedaya-filter-select {
+    padding: 0.8rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+    .bedaya-filter-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+/* Blog Grid Section */
+.bedaya-blog-grid-section {
+    padding: 60px 0;
+    position: relative;
+    z-index: 2;
+}
+
+.bedaya-blog-grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.bedaya-blog-grid-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.bedaya-blog-count {
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Blog Grid */
+.bedaya-blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* Blog Card */
+.bedaya-blog-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    transform: translateY(0);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+    .bedaya-blog-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 3;
+    }
+
+    .bedaya-blog-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.02), rgba(118, 75, 162, 0.02));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1;
+    }
+
+    .bedaya-blog-card:hover {
+        transform: translateY(-20px) scale(1.03);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+    }
+
+        .bedaya-blog-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .bedaya-blog-card:hover::after {
+            opacity: 1;
+        }
+
+.bedaya-blog-image {
+    position: relative;
+    height: 250px;
+    overflow: hidden;
+}
+
+    .bedaya-blog-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+.bedaya-blog-card:hover .bedaya-blog-image img {
+    transform: scale(1.1);
+}
+
+.bedaya-blog-category {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    color: #1e293b;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    z-index: 2;
+}
+
+.bedaya-blog-content {
+    padding: 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.bedaya-blog-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+    .bedaya-blog-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+.bedaya-blog-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    transition: color 0.3s ease;
+}
+
+.bedaya-blog-card:hover .bedaya-blog-title {
+    color: #667eea;
+}
+
+.bedaya-blog-excerpt {
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    transition: opacity 0.3s ease;
+}
+
+.bedaya-blog-card:hover .bedaya-blog-excerpt {
+    opacity: 0.9;
+}
+
+.bedaya-blog-readmore {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+    .bedaya-blog-readmore::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #667eea;
+        transition: width 0.3s ease;
+    }
+
+    .bedaya-blog-readmore:hover {
+        color: #764ba2;
+    }
+
+        .bedaya-blog-readmore:hover::after {
+            width: 100%;
+        }
+
+/* Newsletter Section */
+.bedaya-blog-newsletter {
+    padding: 60px 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    position: relative;
+    z-index: 2;
+    margin: 60px 0;
+}
+
+.bedaya-newsletter-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.bedaya-newsletter-text {
+    flex: 1;
+    min-width: 300px;
+}
+
+.bedaya-newsletter-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.bedaya-newsletter-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.bedaya-newsletter-form {
+    display: flex;
+    gap: 1rem;
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+}
+
+.bedaya-newsletter-input {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.bedaya-newsletter-btn {
+    padding: 1rem 2rem;
+    background: white;
+    color: #667eea;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .bedaya-newsletter-btn:hover {
+        background: #f8fafc;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+/* Pagination */
+.bedaya-blog-pagination {
+    padding: 40px 0;
+    position: relative;
+    z-index: 2;
+}
+
+.bedaya-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    background: white;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.bedaya-pagination-btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e2e8f0;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .bedaya-pagination-btn:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+        transform: scale(1.1);
+    }
+
+.bedaya-pagination-current,
+.bedaya-pagination-total {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.bedaya-pagination-separator {
+    color: #64748b;
+}
+
+/* Card-specific animations */
+@keyframes bedaya-card-float-1 {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-3px) rotate(-0.2deg);
+    }
+}
+
+@keyframes bedaya-card-float-2 {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-5px) rotate(0.3deg);
+    }
+}
+
+@keyframes bedaya-card-float-3 {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-4px) rotate(-0.1deg);
+    }
+}
+
+@keyframes bedaya-card-float-4 {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-6px) rotate(0.2deg);
+    }
+}
+
+@keyframes bedaya-card-float-5 {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-2px) rotate(-0.1deg);
+    }
+}
+
+@keyframes bedaya-card-float-6 {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-7px) rotate(0.1deg);
+    }
+}
+
+.bedaya-blog-card-1 {
+    animation: bedaya-card-float-1 6s ease-in-out infinite 0s;
+}
+
+.bedaya-blog-card-2 {
+    animation: bedaya-card-float-2 6s ease-in-out infinite 0.5s;
+}
+
+.bedaya-blog-card-3 {
+    animation: bedaya-card-float-3 6s ease-in-out infinite 1s;
+}
+
+.bedaya-blog-card-4 {
+    animation: bedaya-card-float-4 6s ease-in-out infinite 1.5s;
+}
+
+.bedaya-blog-card-5 {
+    animation: bedaya-card-float-5 6s ease-in-out infinite 2s;
+}
+
+.bedaya-blog-card-6 {
+    animation: bedaya-card-float-6 6s ease-in-out infinite 2.5s;
+}
+
+/* Animations */
+@keyframes bedaya-growWidth {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 100px;
+    }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .bedaya-blog-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .bedaya-newsletter-content {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .bedaya-blog-header {
+        padding: 60px 0 30px;
+    }
+
+    .bedaya-blog-page-title {
+        font-size: 2.5rem;
+    }
+
+    .bedaya-blog-filter-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .bedaya-search-input {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .bedaya-blog-filters {
+        justify-content: center;
+    }
+
+    .bedaya-blog-grid-header {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+
+    .bedaya-newsletter-form {
+        flex-direction: column;
+        max-width: 100%;
+    }
+
+    .bedaya-newsletter-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .bedaya-blog-header {
+        padding: 40px 0 20px;
+    }
+
+    .bedaya-blog-page-title {
+        font-size: 2rem;
+    }
+
+    .bedaya-blog-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .bedaya-blog-filter {
+        padding: 20px 0;
+    }
+
+    .bedaya-search-input {
+        max-width: 100%;
+        padding: 0.8rem;
+    }
+
+    .bedaya-blog-filters {
+        gap: 0.5rem;
+    }
+
+    .bedaya-filter-select {
+        padding: 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .bedaya-blog-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}

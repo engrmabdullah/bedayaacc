@@ -1,0 +1,881 @@
+﻿@page "/exams/{ExamId:int}/take"
+@using bedayaacc.Components.Layout
+@using bedayaacc.Models
+@using bedayaacc.Services
+@using Microsoft.AspNetCore.Components.Routing
+@inject IExamService ExamService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+@layout ExternalLayout
+
+<style>
+    .question-nav-btn.deferred {
+        outline: 2px dashed #ffc107;
+    }
+
+        .question-nav-btn.deferred::after {
+            content: "★";
+            font-size: .75rem;
+            margin-inline-start: .25rem;
+            color: #ffc107;
+        }
+
+    .option-label.correct {
+        outline: 2px solid #28a745;
+        border-radius: 8px;
+    }
+
+    .explanation-box {
+        background: #f7f9ff;
+        border: 1px dashed #7da1ff;
+        padding: .75rem 1rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+    }
+
+    .question-tools {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        margin: .75rem 0 1rem;
+        flex-wrap: wrap;
+    }
+</style>
+
+<div class="take-exam-page">
+    @if (!examStarted)
+    {
+        <!-- Exam Start Screen -->
+        <div class="exam-start-container">
+            <div class="exam-info-card">
+                <div class="exam-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+
+                <h1 class="exam-title">@exam?.ExamTitleAr</h1>
+                <p class="exam-description">@exam?.DescriptionAr</p>
+
+                <div class="exam-details">
+                    <div class="detail-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <strong>المدة</strong>
+                            <span>@exam?.DurationMinutes دقيقة</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-question-circle"></i>
+                        <div>
+                            <strong>عدد الأسئلة</strong>
+                            <span>@exam?.TotalQuestions سؤال</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-star"></i>
+                        <div>
+                            <strong>الدرجة الكلية</strong>
+                            <span>@exam?.TotalMarks درجة</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <strong>درجة النجاح</strong>
+                            <span>@exam?.PassingMarks درجة</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-instructions">
+                    <h3><i class="fas fa-info-circle"></i> تعليمات الاختبار</h3>
+                    <ul>
+                        <li>اقرأ كل سؤال بعناية قبل الإجابة</li>
+                        <li>يمكنك الانتقال بين الأسئلة في أي وقت</li>
+                        <li>تأكد من الإجابة على جميع الأسئلة</li>
+                        <li>
+                            @if (exam?.ShowResultsImmediately == true)
+                            {
+                                <span>ستظهر النتيجة فوراً بعد التسليم</span>
+                            }
+                            else
+                            {
+                                <span>ستظهر النتيجة لاحقاً</span>
+                            }
+                        </li>
+                        <li>لا يمكن التراجع بعد تسليم الاختبار</li>
+                    </ul>
+                </div>
+
+                @if (exam?.RequirePassword == true && !accessGranted)
+                {
+                    <div class="password-section">
+                        <input type="password"
+                               class="form-control"
+                               placeholder="أدخل كلمة مرور الاختبار"
+                               @bind="examPassword" />
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        @errorMessage
+                    </div>
+                }
+
+                <div class="start-button-container">
+                    <button class="btn btn-lg btn-primary" @onclick="StartExam" disabled="@isStarting">
+                        @if (isStarting)
+                        {
+                            <span class="spinner-sm"></span>
+                            <span>جاري البدء...</span>
+                        }
+                        else
+                        {
+                            <i class="fas fa-play-circle"></i>
+                            <span>بدء الاختبار</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Exam Taking Screen -->
+        <div class="exam-taking-container">
+            <!-- Header with Timer -->
+            <div class="exam-header">
+                <div class="exam-header-info">
+                    <h2>@exam?.ExamTitleAr</h2>
+                    <p>السؤال @(currentQuestionIndex + 1) من @questions.Count</p>
+                </div>
+                <div class="exam-timer">
+                    <i class="fas fa-clock"></i>
+                    <span class="timer-display">@timeRemaining</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="exam-progress">
+                <div class="progress-bar" style="width: @progressPercentage%"></div>
+            </div>
+
+            <!-- Question Navigation -->
+            <div class="question-nav">
+                @for (int i = 0; i < questions.Count; i++)
+                {
+                    var index = i;
+                    var q = questions[index];
+                    var qid = q.QuestionId;
+
+                    var isAnswered =
+                    (userAnswers.TryGetValue(qid, out var opt) && opt.HasValue)
+                    || IsTextAnswered(q);
+
+                    var isDeferred = deferredQuestions.Contains(qid);
+
+                    <button class="question-nav-btn @(index == currentQuestionIndex ? "active" : "") @(isAnswered ? "answered" : "") @(isDeferred ? "deferred" : "")"
+                            @onclick="async () => await GoToQuestion(index)">
+                        @(index + 1)
+                    </button>
+                }
+
+            </div>
+
+            <!-- Current Question -->
+            @if (currentQuestion != null)
+            {
+                <div class="question-container">
+                    <div class="question-header">
+                        <span class="question-number">السؤال @(currentQuestionIndex + 1)</span>
+                        <span class="question-marks">@currentQuestion.Marks درجة</span>
+                    </div>
+
+                    <div class="question-content">
+                        <h3 class="question-text">
+                            @((MarkupString)(currentQuestion.QuestionTextAr ?? string.Empty))
+                        </h3>
+
+
+                        @if (!string.IsNullOrEmpty(currentQuestion.QuestionImageUrl))
+                        {
+                            <img src="@currentQuestion.QuestionImageUrl" alt="صورة السؤال" class="question-image" />
+                        }
+
+                        <div class="answer-section">
+                            @if (currentQuestion.TypeCode == "MCQ" || currentQuestion.TypeCode == "TF")
+                            {
+                                <div class="options-list">
+                                    @foreach (var option in currentQuestion.Options)
+                                    {
+                                        var isSelected = GetSelectedOption(currentQuestion.QuestionId) == option.OptionId;
+                                        var correct = IsCorrectOption(option.OptionId);
+
+                                        <label class="option-label @(isSelected ? "selected" : "") @(correct ? "correct" : "")">
+                                            <input type="radio"
+                                                   name="question-@currentQuestion.QuestionId"
+                                                   value="@option.OptionId"
+                                                   checked="@isSelected"
+                                                   @onchange="() => SelectOption(currentQuestion.QuestionId, option.OptionId)" />
+                                            <span class="option-indicator"></span>
+                                            <span class="option-text">@option.OptionTextAr</span>
+                                        </label>
+                                    }
+                                </div>
+                            }
+                            else if (currentQuestion.TypeCode == "MSQ")
+                            {
+                                <div class="options-list">
+                                    @foreach (var option in currentQuestion.Options)
+                                    {
+                                        var correct = IsCorrectOption(option.OptionId);
+
+                                        <label class="option-label checkbox @(correct ? "correct" : "")">
+                                            <input type="checkbox" />
+                                            <span class="option-indicator"></span>
+                                            <span class="option-text">@option.OptionTextAr</span>
+                                        </label>
+                                    }
+                                </div>
+                            }
+                            else if (currentQuestion.TypeCode == "SHORT")
+                            {
+                                <textarea class="form-control"
+                                          rows="3"
+                                          placeholder="اكتب إجابتك هنا..."
+                                          @bind-value="currentAnswerText"
+                                          @bind-value:event="oninput"></textarea>
+                                @if (currentQuestion != null && IsTextQuestion(currentQuestion))
+                                {
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <small class="text-muted">عدد الحروف: @(currentAnswerText?.Trim().Length ?? 0)</small>
+                                        @if (textValidationErrors.TryGetValue(currentQuestion.QuestionId, out var err))
+                                        {
+                                            <small class="text-danger">@err</small>
+                                        }
+                                    </div>
+                                }
+
+                            }
+                            else if (currentQuestion.TypeCode == "ESSAY")
+                            {
+                                <textarea class="form-control essay-textarea"
+                                          rows="10"
+                                          placeholder="اكتب إجابتك التفصيلية هنا..."
+                                          @bind-value="currentAnswerText"
+                                          @bind-value:event="oninput"></textarea>
+                                @if (currentQuestion != null && IsTextQuestion(currentQuestion))
+                                {
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <small class="text-muted">عدد الحروف: @(currentAnswerText?.Trim().Length ?? 0)</small>
+                                        @if (textValidationErrors.TryGetValue(currentQuestion.QuestionId, out var err))
+                                        {
+                                            <small class="text-danger">@err</small>
+                                        }
+                                    </div>
+                                }
+
+                            }
+                            else if (currentQuestion.TypeCode == "FILLBLANK")
+                            {
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="أكمل الفراغ..."
+                                       @bind-value="currentAnswerText"
+                                       @bind-value:event="oninput" />
+                                @if (currentQuestion != null && IsTextQuestion(currentQuestion))
+                                {
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <small class="text-muted">عدد الحروف: @(currentAnswerText?.Trim().Length ?? 0)</small>
+                                        @if (textValidationErrors.TryGetValue(currentQuestion.QuestionId, out var err))
+                                        {
+                                            <small class="text-danger">@err</small>
+                                        }
+                                    </div>
+                                }
+
+                            }
+
+                            <!-- Tools: Defer + Reveal -->
+                            <div class="question-tools">
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        @onclick="ToggleDeferCurrentQuestion">
+                                    @if (currentQuestion != null && deferredQuestions.Contains(currentQuestion.QuestionId))
+                                    {
+                                        <span>إلغاء التأجيل</span>
+                                    }
+                                    else
+                                    {
+                                        <span>تأجيل السؤال</span>
+                                    }
+                                </button>
+
+                                @if (AllowReveal)
+                                {
+                                    <button class="btn btn-link" @onclick="RevealForCurrentQuestion" disabled="@isRevealing">
+                                        @if (isRevealing)
+                                        {
+                                            <span class="spinner-sm"></span>
+                                            <span>جاري الإظهار…</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-lightbulb"></i>
+                                            <span>اعرض الإجابة والشرح</span>
+                                        }
+                                    </button>
+                                    <small class="text-muted">قد يتم تسجيل عملية الكشف.</small>
+                                }
+                            </div>
+
+                            @if (reveal != null && !string.IsNullOrWhiteSpace(reveal.ExplanationAr))
+                            {
+                                <div class="explanation-box">
+                                    <strong>الشرح:</strong>
+                                    <p>
+
+                                        @((MarkupString)(reveal.ExplanationAr ?? string.Empty))
+                                    </p>
+
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="question-navigation">
+                        <button class="btn btn-secondary"
+                                @onclick="PreviousQuestion"
+                                disabled="@(currentQuestionIndex == 0)">
+                            <i class="fas fa-arrow-right"></i>
+                            <span>السؤال السابق</span>
+                        </button>
+
+                        @if (currentQuestionIndex < questions.Count - 1)
+                        {
+                            <button class="btn btn-primary" @onclick="NextQuestion">
+                                <span>السؤال التالي</span>
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-success" @onclick="ShowSubmitConfirmation">
+                                <i class="fas fa-check-circle"></i>
+                                <span>تسليم الاختبار</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Submit Confirmation Modal -->
+    @if (showSubmitModal)
+    {
+        <div class="modal-overlay" @onclick="HideSubmitModal">
+            <div class="modal-content" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <h3>تأكيد تسليم الاختبار</h3>
+                    <button class="modal-close" @onclick="HideSubmitModal">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="submit-summary">
+                        <div class="summary-item">
+                            <i class="fas fa-check-circle text-success"></i>
+                            <span>تم الإجابة: @answeredCount سؤال</span>
+                        </div>
+                        <div class="summary-item">
+                            <i class="fas fa-times-circle text-danger"></i>
+                            <span>لم يتم الإجابة: @(questions.Count - answeredCount) سؤال</span>
+                        </div>
+                    </div>
+
+                    @if (answeredCount < questions.Count)
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>لم تقم بالإجابة على جميع الأسئلة. هل أنت متأكد من التسليم؟</span>
+                        </div>
+                    }
+
+                    <p class="warning-text">
+                        <strong>تنبيه:</strong> لن تتمكن من التراجع أو تعديل الإجابات بعد التسليم.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="HideSubmitModal">مراجعة الإجابات</button>
+                    <button class="btn btn-success" @onclick="SubmitExam" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner-sm"></span>
+                            <span>جاري التسليم...</span>
+                        }
+                        else
+                        {
+                            <span>تسليم نهائي</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int ExamId { get; set; }
+
+    private Exam? exam;
+    private List<Question> questions = new();
+
+    // Question state
+    private bool examStarted = false;
+    private bool accessGranted = false;
+    private int currentAttemptId = 0;
+    private int currentQuestionIndex = 0;
+    private Question? currentQuestion => questions.ElementAtOrDefault(currentQuestionIndex);
+
+    // Answers
+    private Dictionary<int, int?> userAnswers = new(); // QuestionId -> OptionId (MCQ/TF)
+    private Dictionary<int, string> userAnswerTexts = new(); // QuestionId -> AnswerText (SHORT/ESSAY/FILL)
+    private string currentAnswerText = "";
+
+    // UI state
+    private string examPassword = "";
+    private string errorMessage = "";
+    private string timeRemaining = "00:00";
+    private bool isStarting = false;
+    private bool showSubmitModal = false;
+    private bool isSubmitting = false;
+    private bool hasSubmitted = false;
+
+    // Timing
+    private int currentUserId = 1; // TODO: from auth
+    private DateTime examStartTime;
+    private System.Timers.Timer? timer;
+
+    // Reveal
+    private Dictionary<int, QuestionRevealDto> reveals = new(); // QuestionId -> RevealDto
+    private QuestionRevealDto? reveal; // current
+    private bool isRevealing = false;
+    private bool AllowReveal => (exam?.ShowAnswerDuringExam == true) || (exam?.ShowExplanationDuringExam == true);
+
+    // Defer
+    private HashSet<int> deferredQuestions = new();
+
+    // Navigation intercept
+    private IDisposable? navSubscription;
+
+    private int answeredCount => userAnswers.Count(kv => kv.Value.HasValue)
+                              + userAnswerTexts.Count(kv => !string.IsNullOrWhiteSpace(kv.Value?.Trim()) && kv.Value.Trim().Length >= MinTextChars);
+
+
+    private double progressPercentage => questions.Count > 0 ? (answeredCount * 100.0 / questions.Count) : 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        exam = await ExamService.GetExamAsync(ExamId, currentUserId);
+        if (exam == null)
+        {
+            Navigation.NavigateTo("/exams");
+            return;
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // intercept internal navigation (Blazor)
+            navSubscription = Navigation.RegisterLocationChangingHandler(OnLocationChanging);
+        }
+        base.OnAfterRender(firstRender);
+    }
+
+    private async ValueTask OnLocationChanging(LocationChangingContext context)
+    {
+        if (examStarted && !hasSubmitted)
+        {
+            var allow = await JSRuntime.InvokeAsync<bool>("bedayaExam.confirmLeave");
+            if (!allow)
+            {
+                context.PreventNavigation();
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("bedayaExam.registerBeforeUnload", false);
+            }
+        }
+    }
+
+    private async Task StartExam()
+    {
+        isStarting = true;
+        errorMessage = "";
+
+        var accessResult = await ExamService.CheckAccessAsync(ExamId, currentUserId, examPassword);
+        if (!accessResult.HasAccess)
+        {
+            errorMessage = accessResult.Message;
+            isStarting = false;
+            return;
+        }
+
+        var result = await ExamService.StartExamAsync(ExamId, currentUserId, examPassword);
+        if (!result.Success)
+        {
+            errorMessage = result.Message;
+            isStarting = false;
+            return;
+        }
+
+        currentAttemptId = result.AttemptId;
+        questions = await ExamService.GetExamQuestionsForTakingAsync(ExamId, currentAttemptId);
+        LoadCurrentQuestionAnswer(); // مهمة لعرض نص محفوظ إن وُجد
+
+
+        examStarted = true;
+        examStartTime = DateTime.Now;
+        StartTimer();
+
+        // enable beforeunload guard
+        await JSRuntime.InvokeVoidAsync("bedayaExam.registerBeforeUnload", true);
+
+        isStarting = false;
+    }
+
+    private void StartTimer()
+    {
+        timer = new System.Timers.Timer(1000);
+        timer.Elapsed += (sender, e) =>
+        {
+            InvokeAsync(() =>
+            {
+                var elapsed = DateTime.Now - examStartTime;
+                var remaining = TimeSpan.FromMinutes(exam?.DurationMinutes ?? 60) - elapsed;
+
+                if (remaining.TotalSeconds <= 0)
+                {
+                    timer?.Stop();
+                    _ = AutoSubmitExam();
+                }
+                else
+                {
+                    timeRemaining = $"{remaining.Hours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
+                    StateHasChanged();
+                }
+            });
+        };
+        timer.Start();
+    }
+
+    private void SelectOption(int questionId, int optionId)
+    {
+        userAnswers[questionId] = optionId;
+        _ = SaveCurrentAnswer();
+    }
+
+    private int? GetSelectedOption(int questionId)
+        => userAnswers.TryGetValue(questionId, out var optionId) ? optionId : null;
+
+    private void OnTextAnswerChanged(ChangeEventArgs _)
+    {
+        if (currentQuestion == null) return;
+
+        if (!string.IsNullOrWhiteSpace(currentAnswerText))
+            userAnswerTexts[currentQuestion.QuestionId] = currentAnswerText;
+        else
+            userAnswerTexts.Remove(currentQuestion.QuestionId);
+        // الحفظ الفعلي بيتم عند التنقل/التسليم للحفاظ على الأداء
+    }
+
+    private async Task SaveCurrentAnswer()
+    {
+        if (currentQuestion == null || currentAttemptId <= 0) return;
+
+        // تحديث محلي مؤكد
+        UpdateTextBufferForCurrentQuestion();
+
+        var model = new SubmitAnswerModel
+        {
+            AttemptId = currentAttemptId,
+            QuestionId = currentQuestion.QuestionId,
+            SelectedOptionId = GetSelectedOption(currentQuestion.QuestionId),
+            AnswerText = currentAnswerText
+        };
+
+        await ExamService.SaveAnswerAsync(model);
+    }
+
+
+
+    private async Task GoToQuestion(int index)
+    {
+        UpdateTextBufferForCurrentQuestion();
+
+        if (!await ValidateCurrentQuestionBeforeLeavingAsync())
+            return;
+
+        await SaveCurrentAnswer();
+
+        currentQuestionIndex = index;
+        LoadCurrentQuestionAnswer();
+    }
+
+    private async Task NextQuestion()
+    {
+        if (currentQuestionIndex >= questions.Count - 1) return;
+
+        UpdateTextBufferForCurrentQuestion();
+
+        if (!await ValidateCurrentQuestionBeforeLeavingAsync())
+            return;
+
+        await SaveCurrentAnswer();
+
+        currentQuestionIndex++;
+        LoadCurrentQuestionAnswer();
+    }
+
+    private async Task PreviousQuestion()
+    {
+        if (currentQuestionIndex <= 0) return;
+
+        UpdateTextBufferForCurrentQuestion();
+
+        if (!await ValidateCurrentQuestionBeforeLeavingAsync())
+            return;
+
+        await SaveCurrentAnswer();
+
+        currentQuestionIndex--;
+        LoadCurrentQuestionAnswer();
+    }
+
+
+
+
+    private void LoadCurrentQuestionAnswer()
+    {
+        if (currentQuestion != null)
+        {
+            currentAnswerText = userAnswerTexts.TryGetValue(currentQuestion.QuestionId, out var text) ? text : "";
+            reveal = reveals.TryGetValue(currentQuestion.QuestionId, out var r) ? r : null;
+        }
+    }
+
+
+    private async Task RevealForCurrentQuestion()
+    {
+        if (!AllowReveal || currentQuestion == null || currentAttemptId <= 0) return;
+
+        isRevealing = true;
+        StateHasChanged();
+
+        var data = await ExamService.RevealAnswerAsync(currentAttemptId, currentQuestion.QuestionId);
+        isRevealing = false;
+
+        if (data != null)
+        {
+            reveals[currentQuestion.QuestionId] = data;
+            reveal = data;
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "تعذّر عرض الإجابة الآن.");
+        }
+
+        StateHasChanged();
+    }
+
+    private bool IsCorrectOption(int optionId)
+        => reveal?.ShowAnswer == true && reveal.CorrectOptionIds.Contains(optionId);
+
+    private void ToggleDeferCurrentQuestion()
+    {
+        if (currentQuestion == null) return;
+        var qid = currentQuestion.QuestionId;
+        if (!deferredQuestions.Add(qid))
+            deferredQuestions.Remove(qid);
+    }
+
+    private void ShowSubmitConfirmation()
+    {
+        _ = SaveCurrentAnswer();
+        showSubmitModal = true;
+    }
+
+    private void HideSubmitModal() => showSubmitModal = false;
+
+    private async Task SubmitExam()
+    {
+        if (requireAllAnswered)
+        {
+            var missing = GetUnansweredQuestions();
+            if (missing.Count > 0)
+            {
+                // علّم أخطاء النصوص اللي ناقصة
+                foreach (var q in missing.Where(IsTextQuestion))
+                {
+                    textValidationErrors[q.QuestionId] = $"الإجابة مطلوبة (حد أدنى {MinTextChars} حروف).";
+                }
+                StateHasChanged();
+
+                await JSRuntime.InvokeVoidAsync("alert", $"لا يمكن التسليم. يوجد {missing.Count} سؤال غير مُجاب.");
+                return;
+            }
+        }
+
+        isSubmitting = true;
+
+        var result = await ExamService.SubmitExamAsync(currentAttemptId, currentUserId);
+        timer?.Stop();
+
+        if (result.Success)
+        {
+            hasSubmitted = true;
+            await JSRuntime.InvokeVoidAsync("bedayaExam.registerBeforeUnload", false);
+            Navigation.NavigateTo($"/exams/{ExamId}/results/{currentAttemptId}");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", result.Message);
+            isSubmitting = false;
+        }
+    }
+
+    private async Task AutoSubmitExam()
+    {
+        await JSRuntime.InvokeVoidAsync("alert", "انتهى وقت الاختبار. سيتم التسليم تلقائياً.");
+        await SubmitExam();
+    }
+
+    public void Dispose()
+    {
+        timer?.Stop();
+        timer?.Dispose();
+        navSubscription?.Dispose();
+        _ = JSRuntime.InvokeVoidAsync("bedayaExam.registerBeforeUnload", false);
+    }
+    private void UpdateTextBufferForCurrentQuestion2()
+    {
+        if (currentQuestion == null) return;
+
+        if (!string.IsNullOrWhiteSpace(currentAnswerText))
+            userAnswerTexts[currentQuestion.QuestionId] = currentAnswerText;
+        else
+            userAnswerTexts.Remove(currentQuestion.QuestionId);
+    }
+
+    private void UpdateTextBufferForCurrentQuestion()
+    {
+        if (currentQuestion == null) return;
+        var qid = currentQuestion.QuestionId;
+        var txt = currentAnswerText?.Trim() ?? string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(txt))
+        {
+            userAnswerTexts[qid] = txt;
+            ClearTextError(qid);
+        }
+        else
+        {
+            userAnswerTexts.Remove(qid);
+            // ما بنحطش خطأ هنا تلقائيًا—نستنى لما المستخدم يحاول يسيب السؤال أو يسلّم
+        }
+    }
+
+    // === التحقق من أسئلة النص ===
+    private const int MinTextChars = 2; // الحد الأدنى للحروف لاعتبار الإجابة صالحة (عدّلها لو حابب)
+    private readonly HashSet<string> textTypes = new(new[] { "SHORT", "ESSAY", "FILLBLANK" });
+
+    private bool IsTextQuestion(Question q) => q != null && textTypes.Contains(q.TypeCode ?? string.Empty);
+    private bool IsTextAnswered(Question q)
+    {
+        if (q == null) return false;
+        if (userAnswerTexts.TryGetValue(q.QuestionId, out var t))
+            return !string.IsNullOrWhiteSpace(t?.Trim()) && t.Trim().Length >= MinTextChars;
+        return false;
+    }
+
+    // أخطاء التحقق لكل سؤال نصّي (عرض رسالة تحت الحقل)
+    private Dictionary<int, string> textValidationErrors = new();
+    private void ClearTextError(int qid) => textValidationErrors.Remove(qid);
+
+
+
+    // تحقق قبل مغادرة السؤال الحالي
+    private async Task<bool> ValidateCurrentQuestionBeforeLeavingAsync()
+    {
+        if (currentQuestion == null) return true;
+
+        if (IsTextQuestion(currentQuestion) && !IsTextAnswered(currentQuestion))
+        {
+            var qid = currentQuestion.QuestionId;
+            textValidationErrors[qid] = $"الإجابة مطلوبة (حد أدنى {MinTextChars} حروف).";
+            // اسأل المستخدم إن كان عايز يأجّل ولا يكمّل
+            var skip = await JSRuntime.InvokeAsync<bool>("confirm", "هذا السؤال النصّي بلا إجابة. هل تريد تأجيله والانتقال؟");
+            if (skip)
+            {
+                deferredQuestions.Add(qid);
+                StateHasChanged();
+                return true; // نسمح بالتنقّل مع تأجيل
+            }
+            return false; // امنع التنقّل
+        }
+        return true;
+    }
+
+    private bool requireAllAnswered = true; // واجهة فقط
+
+    private List<Question> GetUnansweredQuestions()
+    {
+        var list = new List<Question>();
+        foreach (var q in questions)
+        {
+            var answered = false;
+            if (q.TypeCode == "MCQ" || q.TypeCode == "TF" || q.TypeCode == "MSQ")
+                answered = userAnswers.TryGetValue(q.QuestionId, out var opt) && opt.HasValue;
+            else if (IsTextQuestion(q))
+                answered = IsTextAnswered(q);
+
+            if (!answered) list.Add(q);
+        }
+        return list;
+    }
+
+
+
+
+}
+
+<script>
+    window.bedayaExam = (function () {
+        let beforeUnloadHandler = function (e) {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+        };
+        return {
+            registerBeforeUnload: function (enable) {
+                try {
+                    if (enable) {
+                        window.addEventListener('beforeunload', beforeUnloadHandler);
+                    } else {
+                        window.removeEventListener('beforeunload', beforeUnloadHandler);
+                    }
+                } catch { /* no-op */ }
+            },
+            confirmLeave: function () {
+                return confirm('هل تريد فعلاً مغادرة صفحة الاختبار؟ لم يتم تسليم إجاباتك بعد.');
+            }
+        };
+    })();
+</script>

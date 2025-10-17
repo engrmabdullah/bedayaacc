@@ -1,0 +1,536 @@
+﻿@page "/instructor/dashboard"
+@attribute [Authorize(Roles = "Instructor")]
+
+@using bedayaacc.Components.Layout
+@using bedayaacc.Services
+@using bedayaacc.Models
+@using bedayaacc.Repositories
+@inject NavigationManager Navigation
+@inject TranslationService TranslationService
+@inject IJSRuntime JSRuntime
+@inject IHttpContextAccessor Http
+@inject IPaymentRepository PaymentRepository
+
+@layout ExternalLayout
+
+<PageTitle>@Tr("Instructor.Nav.Dashboard")</PageTitle>
+
+<div class="bedaya-instructor-page">
+    <!-- Instructor Header -->
+    <section class="bedaya-instructor-header">
+        <div class="bedaya-container">
+            <div class="bedaya-instructor-header-content">
+                <div class="bedaya-instructor-avatar">
+                    <img src="https://placehold.co/140x140/764ba2/ffffff?text=SJ" alt="@Tr("Instructor.Name")" class="bedaya-avatar-image" />
+                    <div class="bedaya-avatar-badge">
+                        <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i>
+                    </div>
+                </div>
+                <div class="bedaya-instructor-info">
+                    <h1 class="bedaya-instructor-name">@Tr("Instructor.Name")</h1>
+                    <p class="bedaya-instructor-title">@Tr("Instructor.Title")</p>
+                    <div class="bedaya-instructor-stats">
+                        <div class="bedaya-instructor-stat">
+                            <span class="bedaya-stat-number">24</span>
+                            <span class="bedaya-stat-label">@Tr("Instructor.Stats.Courses")</span>
+                        </div>
+                        <div class="bedaya-instructor-stat">
+                            <span class="bedaya-stat-number">5,234</span>
+                            <span class="bedaya-stat-label">@Tr("Instructor.Stats.Students")</span>
+                        </div>
+                        <div class="bedaya-instructor-stat">
+                            <span class="bedaya-stat-number">98%</span>
+                            <span class="bedaya-stat-label">@Tr("Instructor.Stats.Rating")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="bedaya-instructor-container">
+        <!-- Instructor Navigation (Tabs) -->
+        <nav class="bedaya-instructor-nav">
+            <div class="bedaya-instructor-nav-item active" onclick="switchInstructorTab('dashboard')">
+                <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+                <span>@Tr("Instructor.Nav.Dashboard")</span>
+            </div>
+            <div class="bedaya-instructor-nav-item" onclick="switchInstructorTab('exams')">
+                <i class="fas fa-file-alt" aria-hidden="true"></i>
+                <span>@Tr("Instructor.Nav.Exams")</span>
+            </div>
+            <div class="bedaya-instructor-nav-item" onclick="switchInstructorTab('payments')">
+                <i class="fas fa-money-check-alt" aria-hidden="true"></i>
+                <span>@Tr("Instructor.Nav.Payments")</span>
+            </div>
+            <div class="bedaya-instructor-nav-item" onclick="switchInstructorTab('settings')">
+                <i class="fas fa-cog" aria-hidden="true"></i>
+                <span>@Tr("Instructor.Nav.Settings")</span>
+            </div>
+        </nav>
+
+        <!-- Instructor Content -->
+        <div class="bedaya-instructor-content">
+            <!-- Dashboard Tab -->
+            <div id="dashboard-tab" class="bedaya-instructor-tab active">
+                <div class="bedaya-instructor-dashboard">
+                    <div class="bedaya-dashboard-overview">
+                        <h3 class="bedaya-section-title">@Tr("Instructor.Dashboard.Title")</h3>
+                        <div class="bedaya-dashboard-grid">
+                            <div class="bedaya-dashboard-card">
+                                <div class="bedaya-dashboard-icon">
+                                    <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                                </div>
+                                <div class="bedaya-dashboard-content">
+                                    <h4 class="bedaya-dashboard-number">24</h4>
+                                    <p class="bedaya-dashboard-label">@Tr("Instructor.Dashboard.Courses")</p>
+                                </div>
+                            </div>
+                            <div class="bedaya-dashboard-card">
+                                <div class="bedaya-dashboard-icon">
+                                    <i class="fas fa-users" aria-hidden="true"></i>
+                                </div>
+                                <div class="bedaya-dashboard-content">
+                                    <h4 class="bedaya-dashboard-number">5,234</h4>
+                                    <p class="bedaya-dashboard-label">@Tr("Instructor.Dashboard.Students")</p>
+                                </div>
+                            </div>
+                            <div class="bedaya-dashboard-card">
+                                <div class="bedaya-dashboard-icon">
+                                    <i class="fas fa-file-alt" aria-hidden="true"></i>
+                                </div>
+                                <div class="bedaya-dashboard-content">
+                                    <h4 class="bedaya-dashboard-number">12</h4>
+                                    <p class="bedaya-dashboard-label">@Tr("Instructor.Dashboard.Exams")</p>
+                                </div>
+                            </div>
+                            <div class="bedaya-dashboard-card">
+                                <div class="bedaya-dashboard-icon">
+                                    <i class="fas fa-chart-line" aria-hidden="true"></i>
+                                </div>
+                                <div class="bedaya-dashboard-content">
+                                    <h4 class="bedaya-dashboard-number">98%</h4>
+                                    <p class="bedaya-dashboard-label">@Tr("Instructor.Dashboard.Rating")</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bedaya-dashboard-charts">
+                        <div class="bedaya-chart-section">
+                            <h4 class="bedaya-chart-title">@Tr("Instructor.Dashboard.Enrollment.Title")</h4>
+                            <div class="bedaya-chart-placeholder">
+                                <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                                <p>@Tr("Instructor.Dashboard.Enrollment.Placeholder")</p>
+                            </div>
+                        </div>
+                        <div class="bedaya-chart-section">
+                            <h4 class="bedaya-chart-title">@Tr("Instructor.Dashboard.Completion.Title")</h4>
+                            <div class="bedaya-chart-placeholder">
+                                <i class="fas fa-chart-pie" aria-hidden="true"></i>
+                                <p>@Tr("Instructor.Dashboard.Completion.Placeholder")</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bedaya-dashboard-quick-actions">
+                        <h4 class="bedaya-section-title">@Tr("Instructor.Dashboard.QuickActions.Title")</h4>
+                        <div class="bedaya-quick-actions-grid">
+                            <button class="bedaya-quick-action" @onclick="NavigateToExams">
+                                <i class="fas fa-plus-circle" aria-hidden="true"></i>
+                                <span>@Tr("Instructor.Dashboard.QuickActions.CreateExam")</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exams Tab -->
+            <div id="exams-tab" class="bedaya-instructor-tab">
+                <div class="bedaya-instructor-exams">
+                    <div class="bedaya-exams-header">
+                        <h3 class="bedaya-section-title">@Tr("Instructor.Exams.Title")</h3>
+                        <button class="bedaya-btn bedaya-btn-primary" @onclick="NavigateToExams">
+                            <i class="fas fa-plus" aria-hidden="true"></i>
+                            @Tr("Instructor.Exams.Create")
+                        </button>
+                    </div>
+
+                    <div class="bedaya-exams-list">
+                        <div class="bedaya-exam-item">
+                            <div class="bedaya-exam-info">
+                                <h4 class="bedaya-exam-title">@Tr("Instructor.Exams.Fundamentals.Title")</h4>
+                                <p class="bedaya-exam-course">@Tr("Instructor.Exams.Fundamentals.Course")</p>
+                                <div class="bedaya-exam-meta">
+                                    <span><i class="fas fa-clock" aria-hidden="true"></i> 90 @Tr("Instructor.Exams.Minutes")</span>
+                                    <span><i class="fas fa-question" aria-hidden="true"></i> 50 @Tr("Instructor.Exams.Questions")</span>
+                                    <span><i class="fas fa-users" aria-hidden="true"></i> 45 @Tr("Instructor.Exams.Attempts")</span>
+                                </div>
+                            </div>
+                            <div class="bedaya-exam-actions">
+                                <button class="bedaya-btn bedaya-btn-ghost" @onclick='() => EditExam("fundamentals")'>
+                                    <i class="fas fa-edit" aria-hidden="true"></i>
+                                    @Tr("Instructor.Exams.Edit")
+                                </button>
+                                <button class="bedaya-btn bedaya-btn-primary" @onclick='() => ViewExamResults("fundamentals")'>
+                                    <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                                    @Tr("Instructor.Exams.Results")
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bedaya-exam-item">
+                            <div class="bedaya-exam-info">
+                                <h4 class="bedaya-exam-title">@Tr("Instructor.Exams.Managerial.Title")</h4>
+                                <p class="bedaya-exam-course">@Tr("Instructor.Exams.Managerial.Course")</p>
+                                <div class="bedaya-exam-meta">
+                                    <span><i class="fas fa-clock" aria-hidden="true"></i> 120 @Tr("Instructor.Exams.Minutes")</span>
+                                    <span><i class="fas fa-question" aria-hidden="true"></i> 75 @Tr("Instructor.Exams.Questions")</span>
+                                    <span><i class="fas fa-users" aria-hidden="true"></i> 32 @Tr("Instructor.Exams.Attempts")</span>
+                                </div>
+                            </div>
+                            <div class="bedaya-exam-actions">
+                                <button class="bedaya-btn bedaya-btn-ghost" @onclick='() => EditExam("managerial")'>
+                                    <i class="fas fa-edit" aria-hidden="true"></i>
+                                    @Tr("Instructor.Exams.Edit")
+                                </button>
+                                <button class="bedaya-btn bedaya-btn-primary" @onclick='() => ViewExamResults("managerial")'>
+                                    <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                                    @Tr("Instructor.Exams.Results")
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bedaya-exam-item">
+                            <div class="bedaya-exam-info">
+                                <h4 class="bedaya-exam-title">@Tr("Instructor.Exams.Tax.Title")</h4>
+                                <p class="bedaya-exam-course">@Tr("Instructor.Exams.Tax.Course")</p>
+                                <div class="bedaya-exam-meta">
+                                    <span><i class="fas fa-clock" aria-hidden="true"></i> 150 @Tr("Instructor.Exams.Minutes")</span>
+                                    <span><i class="fas fa-question" aria-hidden="true"></i> 100 @Tr("Instructor.Exams.Questions")</span>
+                                    <span><i class="fas fa-users" aria-hidden="true"></i> 28 @Tr("Instructor.Exams.Attempts")</span>
+                                </div>
+                            </div>
+                            <div class="bedaya-exam-actions">
+                                <button class="bedaya-btn bedaya-btn-ghost" @onclick='() => EditExam("tax")'>
+                                    <i class="fas fa-edit" aria-hidden="true"></i>
+                                    @Tr("Instructor.Exams.Edit")
+                                </button>
+                                <button class="bedaya-btn bedaya-btn-primary" @onclick='() => ViewExamResults("tax")'>
+                                    <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                                    @Tr("Instructor.Exams.Results")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payments Review Tab -->
+            <div id="payments-tab" class="bedaya-instructor-tab">
+                <div class="bedaya-instructor-payments">
+                    <div class="bedaya-exams-header">
+                        <h3 class="bedaya-section-title">@Tr("Instructor.Payments.Title")</h3>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="bedaya-toolbar" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                        <select class="bedaya-form-select" @onchange="OnPayStatusChanged">
+                            <option value="">@Tr("Instructor.Payments.Filter.All")</option>
+                            <option value="PAID_UNVERIFIED" selected="@("PAID_UNVERIFIED" == payStatusFilter)">@Tr("Instructor.Payments.Filter.Unverified")</option>
+                            <option value="PAID" selected="@("PAID" == payStatusFilter)">@Tr("Instructor.Payments.Filter.Verified")</option>
+                            <option value="FAILED" selected="@("FAILED" == payStatusFilter)">@Tr("Instructor.Payments.Filter.Rejected")</option>
+                        </select>
+
+                        <input type="text"
+                               class="bedaya-form-input"
+                               style="max-width:260px"
+                               placeholder="@Tr("Instructor.Payments.Search.Placeholder")"
+                               @bind="paySearch" @bind:event="oninput" />
+
+                        <button class="bedaya-btn bedaya-btn-primary" @onclick="ReloadPayments">
+                            <i class="fas fa-sync" aria-hidden="true"></i> @Tr("Common.Apply")
+                        </button>
+                    </div>
+
+                    @if (payLoading)
+                    {
+                        <div class="loading-container">
+                            <div class="spinner"></div>
+                            <p>@Tr("Common.Loading")</p>
+                        </div>
+                    }
+                    else if (payments.Count == 0)
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-receipt"></i>
+                            <h3>@Tr("Instructor.Payments.Empty")</h3>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="bedaya-table-wrapper">
+                            <table class="bedaya-table">
+                                <thead>
+                                    <tr>
+                                        <th>@Tr("Instructor.Payments.Table.Student")</th>
+                                        <th>@Tr("Instructor.Payments.Table.Exam")</th>
+                                        <th>@Tr("Instructor.Payments.Table.Amount")</th>
+                                        <th>@Tr("Instructor.Payments.Table.BankRef")</th>
+                                        <th>@Tr("Instructor.Payments.Table.Receipt")</th>
+                                        <th>@Tr("Instructor.Payments.Table.Status")</th>
+                                        <th style="width:230px;">@Tr("Instructor.Payments.Table.Actions")</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var o in payments)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div style="display:flex; flex-direction:column;">
+                                                    <strong>@(o.UserName ?? $"#{o.UserId}")</strong>
+                                                    <small>@o.UserEmail</small>
+                                                </div>
+                                            </td>
+                                            <td>@o.ExamTitle</td>
+                                            <td>@($"{o.PaidAmount:0.##} {o.Currency}")</td>
+                                            <td>@(string.IsNullOrWhiteSpace(o.BankRef) ? "-" : o.BankRef)</td>
+                                            <td>
+                                                @if (!string.IsNullOrWhiteSpace(o.ReceiptUrl))
+                                                {
+                                                    <a href="@o.ReceiptUrl" target="_blank" class="bedaya-link">
+                                                        <i class="fas fa-file-invoice"></i> @Tr("Instructor.Payments.ViewReceipt")
+                                                    </a>
+                                                }
+                                                else
+                                                {
+
+                                                    <span>-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @DisplayStatusPill(o.Status)
+                                            </td>
+                                            <td>
+                                                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                                    <button class="bedaya-btn bedaya-btn-primary"
+                                                            disabled="@(payActing || o.Status == "PAID")"
+                                                            @onclick="() => VerifyOrder(o.OrderId)">
+                                                        <i class="fas fa-check"></i> @Tr("Instructor.Payments.Verify")
+                                                    </button>
+                                                    <button class="bedaya-btn bedaya-btn-ghost"
+                                                            disabled="@(payActing || o.Status == "FAILED")"
+                                                            @onclick="() => RejectOrder(o.OrderId)">
+                                                        <i class="fas fa-times"></i> @Tr("Instructor.Payments.Reject")
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                            <!-- Pager -->
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                                <small>@Tr("Common.Total"): @payTotal</small>
+                                <div style="display:flex; gap:6px; align-items:center;">
+                                    <button class="bedaya-btn bedaya-btn-ghost" @onclick="PrevPayPage" disabled="@(payPage <= 1)">
+                                        <i class="fas fa-chevron-right" style="transform:scaleX(-1)"></i> @Tr("Common.Prev")
+                                    </button>
+                                    <span>@payPage</span>
+                                    <button class="bedaya-btn bedaya-btn-ghost" @onclick="NextPayPage" disabled="@(payments.Count < payPageSize)">
+                                        @Tr("Common.Next") <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings-tab" class="bedaya-instructor-tab">
+                <div class="bedaya-instructor-settings">
+                    <h3 class="bedaya-section-title">@Tr("Instructor.Settings.Title")</h3>
+                    <div class="bedaya-settings-form">
+                        <div class="bedaya-form-group">
+                            <label for="instructor-name">@Tr("Instructor.Settings.Name")</label>
+                            <input type="text" id="instructor-name" class="bedaya-form-input" value="@Tr("Instructor.Name")" />
+                        </div>
+                        <div class="bedaya-form-group">
+                            <label for="instructor-email">@Tr("Instructor.Settings.Email")</label>
+                            <input type="email" id="instructor-email" class="bedaya-form-input" value="@Tr("Instructor.Email")" />
+                        </div>
+                        <div class="bedaya-form-group">
+                            <label for="instructor-title">@Tr("Instructor.Settings.Title")</label>
+                            <input type="text" id="instructor-title" class="bedaya-form-input" value="@Tr("Instructor.Title")" />
+                        </div>
+                        <div class="bedaya-form-group">
+                            <label for="instructor-bio">@Tr("Instructor.Settings.Bio")</label>
+                            <textarea id="instructor-bio" class="bedaya-form-textarea" rows="4" placeholder="@Tr("Instructor.Settings.Bio.Placeholder")">@Tr("Instructor.Settings.Bio.Value")</textarea>
+                        </div>
+                        <div class="bedaya-form-group">
+                            <label class="bedaya-checkbox-container">
+                                <input type="checkbox" checked style="display: none;" />
+                                <span class="bedaya-checkbox-checkmark"></span>
+                                @Tr("Instructor.Settings.Notifications")
+                            </label>
+                        </div>
+                        <div class="bedaya-form-group">
+                            <label class="bedaya-checkbox-container">
+                                <input type="checkbox" checked style="display: none;" />
+                                <span class="bedaya-checkbox-checkmark"></span>
+                                @Tr("Instructor.Settings.EmailUpdates")
+                            </label>
+                        </div>
+                        <button class="bedaya-btn bedaya-btn-primary">
+                            <i class="fas fa-save" aria-hidden="true"></i>
+                            @Tr("Instructor.Settings.Save")
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchInstructorTab(tabName) {
+        const tabs = document.querySelectorAll('.bedaya-instructor-tab');
+        tabs.forEach(tab => tab.classList.remove('active'));
+
+        const navItems = document.querySelectorAll('.bedaya-instructor-nav-item');
+        navItems.forEach(item => item.classList.remove('active'));
+
+        const target = document.getElementById(tabName + '-tab');
+        if (target) target.classList.add('active');
+
+        // استخدم آخر عنصر تم الضغط عليه (inline handler يجعل event متاحًا)
+        if (window.event && window.event.currentTarget) {
+            window.event.currentTarget.classList.add('active');
+        }
+    }
+</script>
+
+@code {
+    private string Tr(string key) => TranslationService.Translate(key);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await TranslationService.EnsureInitAfterRenderAsync();
+        }
+        StateHasChanged();
+    }
+
+    // ===== Navigation =====
+    private void NavigateToExams() => Navigation.NavigateTo("/instructor/exams");
+    private void ViewExamResults(string examId) => Navigation.NavigateTo($"/instructor/exams/1/results");
+    private void EditExam(string examId) => Navigation.NavigateTo($"/instructor/exams/1/questions");
+
+    // ===== Payments Review =====
+    private List<OrderReviewItem> payments = new();
+    private string payStatusFilter = "PAID_UNVERIFIED";
+    private string? paySearch;
+    private int payPage = 1, payPageSize = 10;
+    private int payTotal = 0;
+    private bool payLoading = false;
+    private bool payActing = false;
+
+    private int CurrentInstructorId =>
+        int.TryParse(Http.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPayments();
+    }
+
+    private RenderFragment DisplayStatusPill(string status) => builder =>
+    {
+        var (txt, cls) = status switch
+        {
+            "PAID" => (Tr("Instructor.Payments.Status.Paid"), "badge-success"),
+            "PAID_UNVERIFIED" => (Tr("Instructor.Payments.Status.Unverified"), "badge-warning"),
+            "FAILED" => (Tr("Instructor.Payments.Status.Failed"), "badge-danger"),
+            "PENDING" => (Tr("Instructor.Payments.Status.Pending"), "badge-info"),
+            _ => (status, "badge-neutral")
+        };
+
+        builder.OpenElement(0, "span");
+        builder.AddAttribute(1, "class", $"bedaya-badge {cls}");
+        builder.AddContent(2, txt);
+        builder.CloseElement();
+    };
+
+    private async Task LoadPayments()
+    {
+        payLoading = true;
+        StateHasChanged();
+
+        // يفترض وجود هذه الدالة في الريبو
+        var res = await PaymentRepository.GetOrdersForInstructorAsync(
+            instructorId: CurrentInstructorId,
+            status: string.IsNullOrWhiteSpace(payStatusFilter) ? null : payStatusFilter,
+            page: payPage,
+            pageSize: payPageSize,
+            search: paySearch);
+
+        payments = res.Items;
+        payTotal = res.Total;
+        payLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task ReloadPayments()
+    {
+        payPage = 1;
+        await LoadPayments();
+    }
+
+    private void OnPayStatusChanged(ChangeEventArgs e)
+    {
+        payStatusFilter = e.Value?.ToString() ?? "";
+    }
+
+    private async Task VerifyOrder(int orderId)
+    {
+        var ok = await JSRuntime.InvokeAsync<bool>("confirm", Tr("Instructor.Payments.Confirm.Verify"));
+        if (!ok) return;
+
+        payActing = true; StateHasChanged();
+        var success = await PaymentRepository.MarkOrderVerifiedAsync(orderId, CurrentInstructorId);
+        payActing = false;
+
+        if (!success)
+            await JSRuntime.InvokeVoidAsync("alert", Tr("Instructor.Payments.ActionFailed"));
+
+        await LoadPayments();
+    }
+
+    private async Task RejectOrder(int orderId)
+    {
+        var ok = await JSRuntime.InvokeAsync<bool>("confirm", Tr("Instructor.Payments.Confirm.Reject"));
+        if (!ok) return;
+
+        payActing = true; StateHasChanged();
+        var success = await PaymentRepository.MarkOrderRejectedAsync(orderId, CurrentInstructorId, reason: null);
+        payActing = false;
+
+        if (!success)
+            await JSRuntime.InvokeVoidAsync("alert", Tr("Instructor.Payments.ActionFailed"));
+
+        await LoadPayments();
+    }
+
+    private void PrevPayPage()
+    {
+        if (payPage > 1) { payPage--; _ = LoadPayments(); }
+    }
+    private void NextPayPage()
+    {
+        if (payments.Count >= payPageSize) { payPage++; _ = LoadPayments(); }
+    }
+
+
+}

@@ -1,291 +1,256 @@
 ﻿@page "/courses"
-@using bedayaacc.Components.Courses
 @using bedayaacc.Components.Layout
-@layout ExternalLayout
-@inject bedayaacc.Services.TranslationService T
-@inject bedayaacc.Services.Repositories.ICourseRepository CourseRepo
+@using bedayaacc.Services
+@inject NavigationManager Navigation
+@inject TranslationService TranslationService
+@inject IJSRuntime JSRuntime
 
-<div class="courses-page">
-    <div class="container">
-        <br />
-        <br />
-        <!-- Modern Header Section -->
-        <div class="page-header" data-aos="fade-up">
-            <div class="header-content">
-                <span class="page-badge">[اكتشف]</span>
-                <h1 class="page-title">@T.Translate("Courses.Title")</h1>
-                <p class="page-subtitle">@T.Translate("Courses.Subtitle")</p>
+@layout ExternalLayout
+
+<div class="bedaya-courses-page">
+    <!-- Header Section -->
+    <header class="bedaya-courses-header">
+        <div class="bedaya-container">
+            <div class="bedaya-courses-header-content">
+                <h1 class="bedaya-courses-page-title">@Tr("Courses.Title")</h1>
+                <p class="bedaya-courses-page-subtitle">@Tr("Courses.Subtitle")</p>
             </div>
         </div>
+    </header>
 
-        <!-- Modern Filters Card -->
-        <div class="filters-card" data-aos="fade-up" data-aos-delay="100">
-            <div class="filters-header">
-                <h3>@T.Translate("Courses.FilterTitle")</h3>
-                <button class="btn-reset" @onclick="ResetFilters">
-                    <i class="fas fa-refresh"></i>
-                    <span>@T.Translate("Courses.ClearFilters")</span>
-                </button>
-            </div>
-
-            <div class="filters-grid">
-                <!-- Search Input -->
-                <div class="filter-group">
-                    <label class="filter-label">@T.Translate("Courses.Search")</label>
-                    <div class="search-input">
-                        <i class="fas fa-search"></i>
-                        <input class="form-input"
-                               @bind="_filter.Query"
-                               @bind:event="oninput"
-                               placeholder="@T.Translate("Courses.SearchPlaceholder")" />
-                    </div>
-                </div>
-
-                <!-- Level Filter -->
-                <div class="filter-group">
-                    <label class="filter-label">@T.Translate("Courses.Level")</label>
-                    <select class="form-select" @bind="_levelStr">
-                        <option value="">@T.Translate("Courses.All")</option>
-                        <option value="Beginner">@T.Translate("Courses.Beginner")</option>
-                        <option value="Intermediate">@T.Translate("Courses.Intermediate")</option>
-                        <option value="Advanced">@T.Translate("Courses.Advanced")</option>
-                    </select>
-                </div>
-
-                <!-- Price Filter -->
-                <div class="filter-group">
-                    <label class="filter-label">@T.Translate("Courses.Price")</label>
-                    <select class="form-select" @bind="_priceStr">
-                        <option value="">@T.Translate("Courses.All")</option>
-                        <option value="free">@T.Translate("Courses.Free")</option>
-                        <option value="paid">@T.Translate("Courses.Paid")</option>
-                    </select>
-                </div>
-
-                <!-- Track Filter -->
-                <div class="filter-group">
-                    <label class="filter-label">@T.Translate("Courses.FilterByTrack")</label>
-                    <select class="form-select" @bind="_selectedTrack">
-                        <option value="">@T.Translate("Courses.All")</option>
-                        @foreach (var tr in _tracks)
-                        {
-                            <option value="@tr.Slug">@tr.Title(T.CurrentLanguage)</option>
-                        }
-                    </select>
-                </div>
-
-                <!-- Tag Filter -->
-                <div class="filter-group">
-                    <label class="filter-label">@T.Translate("Courses.FilterByTag")</label>
-                    <select class="form-select" @bind="_selectedTag">
-                        <option value="">@T.Translate("Courses.All")</option>
-                        @foreach (var tag in _allTags.OrderBy(x => x))
-                        {
-                            <option value="@tag">@tag</option>
-                        }
-                    </select>
-                </div>
-
-                <!-- Apply Button -->
-                <div class="filter-group">
-                    <button class="btn btn-primary" @onclick="ApplyFilter">
-                        <i class="fas fa-filter"></i>
-                        <span>@T.Translate("Courses.ApplyFilters")</span>
+    <!-- Filter Section -->
+    <section class="bedaya-courses-filter">
+        <div class="bedaya-container">
+            <div class="bedaya-courses-filter-content">
+                <div class="bedaya-courses-search">
+                    <input type="text" class="bedaya-search-input" placeholder="@Tr("Courses.Search.Placeholder")" />
+                    <button class="bedaya-search-btn">
+                        <i class="fas fa-search" aria-hidden="true"></i>
                     </button>
                 </div>
+
+                <div class="bedaya-courses-filters">
+                    <select class="bedaya-filter-select">
+                        <option value="">@Tr("Courses.Filter.All")</option>
+                        <option value="beginner">@Tr("Courses.Filter.Beginner")</option>
+                        <option value="intermediate">@Tr("Courses.Filter.Intermediate")</option>
+                        <option value="advanced">@Tr("Courses.Filter.Advanced")</option>
+                    </select>
+
+                    <select class="bedaya-filter-select">
+                        <option value="">@Tr("Courses.Filter.Duration")</option>
+                        <option value="short">@Tr("Courses.Filter.Short")</option>
+                        <option value="medium">@Tr("Courses.Filter.Medium")</option>
+                        <option value="long">@Tr("Courses.Filter.Long")</option>
+                    </select>
+
+                    <select class="bedaya-filter-select">
+                        <option value="">@Tr("Courses.Filter.Price")</option>
+                        <option value="free">@Tr("Courses.Filter.Free")</option>
+                        <option value="paid">@Tr("Courses.Filter.Paid")</option>
+                    </select>
+                </div>
             </div>
         </div>
+    </section>
 
-        <!-- Results Section -->
-        @if (_result is null)
-        {
-            <div class="loading-section">
-                <div class="loading-spinner"></div>
-                <p>@T.Translate("Common.Loading")</p>
-            </div>
-        }
-        else if (_result.Total == 0)
-        {
-            <div class="no-results">
-                <div class="no-results-icon">
-                    <i class="fas fa-search"></i>
+    <!-- Courses Grid -->
+    <section class="bedaya-courses-grid-section">
+        <div class="bedaya-container">
+            <div class="bedaya-courses-grid-header">
+                <h2 class="bedaya-courses-grid-title">@Tr("Courses.Available.Title")</h2>
+                <div class="bedaya-courses-count">
+                    <span>@Tr("Courses.Available.Count")</span>
                 </div>
-                <h3>@T.Translate("Courses.NoResults")</h3>
-                <p>@T.Translate("Courses.NoResultsDesc")</p>
-                <button class="btn btn-outline" @onclick="ResetFilters">
-                    @T.Translate("Courses.ShowAll")
+            </div>
+
+            <div class="bedaya-courses-grid">
+                <!-- Course Card 1 -->
+                <div class="bedaya-course-card bedaya-course-card-1">
+                    <div class="bedaya-course-image">
+                        <div class="bedaya-course-image-content">@Tr("Courses.Fundamentals.Image")</div>
+                        <div class="bedaya-course-badge">@Tr("Courses.Fundamentals.Level")</div>
+                    </div>
+                    <div class="bedaya-course-content">
+                        <h3 class="bedaya-course-title">@Tr("Courses.Fundamentals.Title")</h3>
+                        <p class="bedaya-course-desc">@Tr("Courses.Fundamentals.Desc")</p>
+                        <div class="bedaya-course-meta">
+                            <span class="bedaya-course-duration">
+                                <i class="far fa-clock" aria-hidden="true"></i>
+                                @Tr("Courses.Fundamentals.Duration")
+                            </span>
+                            <span class="bedaya-course-students">
+                                <i class="fas fa-users" aria-hidden="true"></i>
+                                2,847
+                            </span>
+                        </div>
+                        <div class="bedaya-course-footer">
+                            <div class="bedaya-course-price">@Tr("Courses.Fundamentals.Price")</div>
+                            <a href="/course/fundamentals" class="bedaya-course-btn">@Tr("Courses.EnrollNow")</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Card 2 -->
+                <div class="bedaya-course-card bedaya-course-card-2">
+                    <div class="bedaya-course-image">
+                        <div class="bedaya-course-image-content">@Tr("Courses.Managerial.Image")</div>
+                        <div class="bedaya-course-badge">@Tr("Courses.Managerial.Level")</div>
+                    </div>
+                    <div class="bedaya-course-content">
+                        <h3 class="bedaya-course-title">@Tr("Courses.Managerial.Title")</h3>
+                        <p class="bedaya-course-desc">@Tr("Courses.Managerial.Desc")</p>
+                        <div class="bedaya-course-meta">
+                            <span class="bedaya-course-duration">
+                                <i class="far fa-clock" aria-hidden="true"></i>
+                                @Tr("Courses.Managerial.Duration")
+                            </span>
+                            <span class="bedaya-course-students">
+                                <i class="fas fa-users" aria-hidden="true"></i>
+                                1,923
+                            </span>
+                        </div>
+                        <div class="bedaya-course-footer">
+                            <div class="bedaya-course-price">@Tr("Courses.Managerial.Price")</div>
+                            <a href="/course/managerial" class="bedaya-course-btn">@Tr("Courses.EnrollNow")</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Card 3 -->
+                <div class="bedaya-course-card bedaya-course-card-3">
+                    <div class="bedaya-course-image">
+                        <div class="bedaya-course-image-content">@Tr("Courses.Tax.Image")</div>
+                        <div class="bedaya-course-badge">@Tr("Courses.Tax.Level")</div>
+                    </div>
+                    <div class="bedaya-course-content">
+                        <h3 class="bedaya-course-title">@Tr("Courses.Tax.Title")</h3>
+                        <p class="bedaya-course-desc">@Tr("Courses.Tax.Desc")</p>
+                        <div class="bedaya-course-meta">
+                            <span class="bedaya-course-duration">
+                                <i class="far fa-clock" aria-hidden="true"></i>
+                                @Tr("Courses.Tax.Duration")
+                            </span>
+                            <span class="bedaya-course-students">
+                                <i class="fas fa-users" aria-hidden="true"></i>
+                                3,456
+                            </span>
+                        </div>
+                        <div class="bedaya-course-footer">
+                            <div class="bedaya-course-price">@Tr("Courses.Tax.Price")</div>
+                            <a href="/course/tax" class="bedaya-course-btn">@Tr("Courses.EnrollNow")</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Card 4 -->
+                <div class="bedaya-course-card bedaya-course-card-4">
+                    <div class="bedaya-course-image">
+                        <div class="bedaya-course-image-content">@Tr("Courses.Advanced.Image")</div>
+                        <div class="bedaya-course-badge">@Tr("Courses.Advanced.Level")</div>
+                    </div>
+                    <div class="bedaya-course-content">
+                        <h3 class="bedaya-course-title">@Tr("Courses.Advanced.Title")</h3>
+                        <p class="bedaya-course-desc">@Tr("Courses.Advanced.Desc")</p>
+                        <div class="bedaya-course-meta">
+                            <span class="bedaya-course-duration">
+                                <i class="far fa-clock" aria-hidden="true"></i>
+                                @Tr("Courses.Advanced.Duration")
+                            </span>
+                            <span class="bedaya-course-students">
+                                <i class="fas fa-users" aria-hidden="true"></i>
+                                1,678
+                            </span>
+                        </div>
+                        <div class="bedaya-course-footer">
+                            <div class="bedaya-course-price">@Tr("Courses.Advanced.Price")</div>
+                            <a href="/course/advanced" class="bedaya-course-btn">@Tr("Courses.EnrollNow")</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Card 5 -->
+                <div class="bedaya-course-card bedaya-course-card-5">
+                    <div class="bedaya-course-image">
+                        <div class="bedaya-course-image-content">@Tr("Courses.International.Image")</div>
+                        <div class="bedaya-course-badge">@Tr("Courses.International.Level")</div>
+                    </div>
+                    <div class="bedaya-course-content">
+                        <h3 class="bedaya-course-title">@Tr("Courses.International.Title")</h3>
+                        <p class="bedaya-course-desc">@Tr("Courses.International.Desc")</p>
+                        <div class="bedaya-course-meta">
+                            <span class="bedaya-course-duration">
+                                <i class="far fa-clock" aria-hidden="true"></i>
+                                @Tr("Courses.International.Duration")
+                            </span>
+                            <span class="bedaya-course-students">
+                                <i class="fas fa-users" aria-hidden="true"></i>
+                                2,123
+                            </span>
+                        </div>
+                        <div class="bedaya-course-footer">
+                            <div class="bedaya-course-price">@Tr("Courses.International.Price")</div>
+                            <a href="/course/international" class="bedaya-course-btn">@Tr("Courses.EnrollNow")</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Card 6 -->
+                <div class="bedaya-course-card bedaya-course-card-6">
+                    <div class="bedaya-course-image">
+                        <div class="bedaya-course-image-content">@Tr("Courses.Forensic.Image")</div>
+                        <div class="bedaya-course-badge">@Tr("Courses.Forensic.Level")</div>
+                    </div>
+                    <div class="bedaya-course-content">
+                        <h3 class="bedaya-course-title">@Tr("Courses.Forensic.Title")</h3>
+                        <p class="bedaya-course-desc">@Tr("Courses.Forensic.Desc")</p>
+                        <div class="bedaya-course-meta">
+                            <span class="bedaya-course-duration">
+                                <i class="far fa-clock" aria-hidden="true"></i>
+                                @Tr("Courses.Forensic.Duration")
+                            </span>
+                            <span class="bedaya-course-students">
+                                <i class="fas fa-users" aria-hidden="true"></i>
+                                1,345
+                            </span>
+                        </div>
+                        <div class="bedaya-course-footer">
+                            <div class="bedaya-course-price">@Tr("Courses.Forensic.Price")</div>
+                            <a href="/course/forensic" class="bedaya-course-btn">@Tr("Courses.EnrollNow")</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pagination -->
+    <section class="bedaya-courses-pagination">
+        <div class="bedaya-container">
+            <div class="bedaya-pagination">
+                <button class="bedaya-pagination-btn bedaya-pagination-prev">
+                    <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                </button>
+                <span class="bedaya-pagination-current">1</span>
+                <span class="bedaya-pagination-separator">/</span>
+                <span class="bedaya-pagination-total">3</span>
+                <button class="bedaya-pagination-btn bedaya-pagination-next">
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
                 </button>
             </div>
-        }
-        else
-        {
-            <!-- Results Header -->
-            <div class="results-header" data-aos="fade-up">
-                <div class="results-count">
-                    <span class="count-number">@_result.Total</span>
-                    <span class="count-label">@T.Translate("Courses.ResultsFound")</span>
-                </div>
-            </div>
-
-            <!-- Courses Grid -->
-            <div class="courses-grid" data-aos="fade-up" data-aos-delay="200">
-                @foreach (var c in _result.Items)
-                {
-                    <div data-aos="fade-up">
-                        <CourseCard Course="c" />
-                    </div>
-                }
-            </div>
-
-            <!-- Modern Pagination -->
-            @if (_result.TotalPages > 1)
-            {
-                <nav class="pagination-nav" data-aos="fade-up">
-                    <div class="pagination-info">
-                        @T.Translate("Courses.Page") @_result.Page @T.Translate("Common.Of") @_result.TotalPages
-                    </div>
-                    <div class="pagination-controls">
-                        <button class="btn-pagination @(_result.Page == 1 ? "disabled" : "")"
-                                @onclick="PrevPage">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-
-                        @for (int i = Math.Max(1, _result.Page - 2); i <= Math.Min(_result.TotalPages, _result.Page + 2); i++)
-                        {
-                            <button class="btn-pagination @(i == _result.Page ? "active" : "")"
-                                    @onclick="(() => GoPage(i))">
-                                @i
-                            </button>
-                        }
-
-                        <button class="btn-pagination @(_result.Page == _result.TotalPages ? "disabled" : "")"
-                                @onclick="NextPage">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </nav>
-            }
-        }
-    </div>
+        </div>
+    </section>
 </div>
 
-@implements IDisposable
-
-
 @code {
-    private bedayaacc.Models.CourseFilter _filter = new();
-    private bedayaacc.Models.PagedResult<bedayaacc.Models.CourseDto>? _result;
-
-    // حقول مساعدة للـselects
-    private string? _levelStr;
-    private string? _priceStr;
-    private string? _selectedTag;
-    private string? _selectedTrack;
-
-    private HashSet<string> _allTags = new();
-    private IReadOnlyList<bedayaacc.Models.CourseTrack> _tracks = Array.Empty<bedayaacc.Models.CourseTrack>();
-
-
-    protected override void OnInitialized()
-    {
-        // اسمع لتغيير اللغة
-        T.OnLanguageChanged += HandleLanguageChanged;
-    }
+    string Tr(string key) => TranslationService.Translate(key);
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await T.EnsureInitAfterRenderAsync();   // نضمن تحديد اللغة (من localStorage)
-            _tracks = await CourseRepo.GetTracksAsync(T.CurrentLanguage);
-            _allTags = await CourseRepo.GetAllTagsAsync();
-            await LoadAsync();                      // حمّل النتائج باللغة الحالية
+            await TranslationService.EnsureInitAfterRenderAsync();
         }
-    }
-
-    private async void HandleLanguageChanged()
-    {
-        try
-        {
-            // لما اللغة تتغير: أعد تحميل النتائج بنفس الفلاتر الحالية لكن بلغة جديدة
-            var latestResult = await CourseRepo.GetAsync(_filter, T.CurrentLanguage);
-            await InvokeAsync(() =>
-            {
-                _result = latestResult;
-                StateHasChanged(); // يجبر الصفحة تعيد الريندر وبالتالي كل @T.Translate تتحدث
-            });
-        }
-        catch
-        {
-            // تجاهل أي خطأ بسيط
-        }
-    }
-
-    private async Task LoadAsync()
-    {
-        _filter.Level = _levelStr switch
-        {
-            "Beginner" => bedayaacc.Models.CourseLevel.Beginner,
-            "Intermediate" => bedayaacc.Models.CourseLevel.Intermediate,
-            "Advanced" => bedayaacc.Models.CourseLevel.Advanced,
-            _ => null
-        };
-
-        _filter.FreeOnly = _priceStr switch
-        {
-            "free" => true,
-            "paid" => false,
-            _ => null
-        };
-
-        _filter.Tag = string.IsNullOrWhiteSpace(_selectedTag) ? null : _selectedTag;
-        _filter.TrackSlug = string.IsNullOrWhiteSpace(_selectedTrack) ? null : _selectedTrack;
-
-        _result = await CourseRepo.GetAsync(_filter, T.CurrentLanguage);
         StateHasChanged();
     }
-
-    private async Task ResetFilters()
-    {
-        _filter = new();
-        _levelStr = _priceStr = _selectedTag = _selectedTrack = null;
-        await LoadAsync();
-    }
-
-
-    private async Task ApplyFilter()
-    {
-        _filter.Page = 1;
-        await LoadAsync();
-    }
-
-    private async Task PrevPage()
-    {
-        if (_filter.Page > 1)
-        {
-            _filter.Page--;
-            await LoadAsync();
-        }
-    }
-
-    private async Task NextPage()
-    {
-        if (_result is not null && _filter.Page < _result.TotalPages)
-        {
-            _filter.Page++;
-            await LoadAsync();
-        }
-    }
-
-    private async Task GoPage(int p)
-    {
-        _filter.Page = p;
-        await LoadAsync();
-    }
-
-    public void Dispose()
-    {
-        T.OnLanguageChanged -= HandleLanguageChanged;
-    }
 }
-

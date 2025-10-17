@@ -1,0 +1,290 @@
+﻿@using bedayaacc.Services
+@inject NavigationManager Navigation
+@inject TranslationService TranslationService
+
+<section class="courses-enhanced">
+    <div class="courses-wave-top-enhanced"></div>
+
+    <div class="courses-container-enhanced">
+        <!-- Section Header -->
+        <div class="courses-header-enhanced">
+            <div class="courses-badge-enhanced">
+                <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                <span>@Tr("Courses.Badge")</span>
+            </div>
+            <h2 class="courses-title-enhanced">@Tr("Courses.Title")</h2>
+            <p class="courses-subtitle-enhanced">@Tr("Courses.Subtitle")</p>
+        </div>
+
+        <!-- Courses Grid -->
+        <div class="courses-grid-enhanced">
+
+            <!-- Course Card 1: Fundamentals -->
+            <div class="course-card-enhanced">
+                <div class="course-image-wrapper-enhanced">
+                    <img src="@Tr("Courses.Fundamentals.Image")"
+                         alt="@Tr("Courses.Fundamentals.Title")"
+                         class="course-image-enhanced" />
+                    <div class="course-image-overlay-enhanced"></div>
+                    <div class="course-badge-enhanced badge-bestseller">
+                        <i class="fas fa-fire" aria-hidden="true"></i>
+                        @Tr("Courses.Bestseller")
+                    </div>
+                </div>
+
+                <div class="course-content-enhanced">
+                    <span class="course-category-enhanced">@Tr("Courses.Fundamentals.Category")</span>
+
+                    <h3 class="course-title-enhanced">@Tr("Courses.Fundamentals.Title")</h3>
+
+                    <div class="course-instructor-enhanced">
+                        <div class="course-instructor-avatar-enhanced">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                        </div>
+                        <div class="course-instructor-name-enhanced">
+                            @Tr("Courses.By") <strong>@Tr("Courses.Fundamentals.Instructor")</strong>
+                        </div>
+                    </div>
+
+                    <p class="course-desc-enhanced">@Tr("Courses.Fundamentals.Desc")</p>
+
+                    <div class="course-rating-enhanced">
+                        <div class="course-stars-enhanced">
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                            <i class="fas fa-star-half-alt" aria-hidden="true"></i>
+                        </div>
+                        <span class="course-rating-number-enhanced">4.8</span>
+                        <span class="course-rating-count-enhanced">(2,547)</span>
+                    </div>
+
+                    <div class="course-meta-enhanced">
+                        <div class="course-meta-item-enhanced">
+                            <i class="far fa-clock" aria-hidden="true"></i>
+                            <span>@Tr("Courses.Fundamentals.Duration")</span>
+                        </div>
+                        <div class="course-meta-item-enhanced">
+                            <i class="fas fa-signal" aria-hidden="true"></i>
+                            <span>@Tr("Courses.Fundamentals.Level")</span>
+                        </div>
+                        <div class="course-meta-item-enhanced">
+                            <i class="fas fa-user-graduate" aria-hidden="true"></i>
+                            <span>3,547 @Tr("Courses.Students")</span>
+                        </div>
+                    </div>
+
+                    <div class="course-footer-enhanced">
+                        <div class="course-price-wrapper-enhanced">
+                            <div class="course-price-enhanced">@Tr("Courses.Fundamentals.Price")</div>
+                            <div class="course-old-price-enhanced">@Tr("Courses.Fundamentals.OldPrice")</div>
+                        </div>
+                        <a href="/courses/fundamentals" class="course-cta-enhanced">
+                            <span>@Tr("Courses.EnrollNow")</span>
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="course-stats-bar-enhanced">
+                    <div class="course-stat-enhanced">
+                        <i class="fas fa-play-circle" aria-hidden="true"></i>
+                        <span><strong>45</strong> @Tr("Courses.Lessons")</span>
+                    </div>
+                    <div class="course-stat-enhanced">
+                        <i class="fas fa-file-alt" aria-hidden="true"></i>
+                        <span><strong>12</strong> @Tr("Courses.Resources")</span>
+                    </div>
+                    <div class="course-stat-enhanced">
+                        <i class="fas fa-certificate" aria-hidden="true"></i>
+                        <span>@Tr("Courses.Certificate")</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Card 2: Managerial -->
+            <div class="course-card-enhanced">
+                <div class="course-image-wrapper-enhanced">
+                    <img src="@Tr("Courses.Managerial.Image")"
+                         alt="@Tr("Courses.Managerial.Title")"
+                         class="course-image-enhanced" />
+                    <div class="course-image-overlay-enhanced"></div>
+                    <div class="course-badge-enhanced badge-new">
+                        <i class="fas fa-sparkles" aria-hidden="true"></i>
+                        @Tr("Courses.New")
+                    </div>
+                </div>
+
+                <div class="course-content-enhanced">
+                    <span class="course-category-enhanced">@Tr("Courses.Managerial.Category")</span>
+
+                    <h3 class="course-title-enhanced">@Tr("Courses.Managerial.Title")</h3>
+
+                    <div class="course-instructor-enhanced">
+                        <div class="course-instructor-avatar-enhanced">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                        </div>
+                        <div class="course-instructor-name-enhanced">
+                            @Tr("Courses.By") <strong>@Tr("Courses.Managerial.Instructor")</strong>
+                        </div>
+                    </div>
+
+                    <p class="course-desc-enhanced">@Tr("Courses.Managerial.Desc")</p>
+
+                    <div class="course-rating-enhanced">
+                        <div class="course-stars-enhanced">
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                        </div>
+                        <span class="course-rating-number-enhanced">5.0</span>
+                        <span class="course-rating-count-enhanced">(1,234)</span>
+                    </div>
+
+                    <div class="course-meta-enhanced">
+                        <div class="course-meta-item-enhanced">
+                            <i class="far fa-clock" aria-hidden="true"></i>
+                            <span>@Tr("Courses.Managerial.Duration")</span>
+                        </div>
+                        <div class="course-meta-item-enhanced">
+                            <i class="fas fa-signal" aria-hidden="true"></i>
+                            <span>@Tr("Courses.Managerial.Level")</span>
+                        </div>
+                        <div class="course-meta-item-enhanced">
+                            <i class="fas fa-user-graduate" aria-hidden="true"></i>
+                            <span>1,892 @Tr("Courses.Students")</span>
+                        </div>
+                    </div>
+
+                    <div class="course-footer-enhanced">
+                        <div class="course-price-wrapper-enhanced">
+                            <div class="course-price-enhanced">@Tr("Courses.Managerial.Price")</div>
+                            <div class="course-old-price-enhanced">@Tr("Courses.Managerial.OldPrice")</div>
+                        </div>
+                        <a href="/courses/managerial" class="course-cta-enhanced">
+                            <span>@Tr("Courses.EnrollNow")</span>
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="course-stats-bar-enhanced">
+                    <div class="course-stat-enhanced">
+                        <i class="fas fa-play-circle" aria-hidden="true"></i>
+                        <span><strong>38</strong> @Tr("Courses.Lessons")</span>
+                    </div>
+                    <div class="course-stat-enhanced">
+                        <i class="fas fa-file-alt" aria-hidden="true"></i>
+                        <span><strong>10</strong> @Tr("Courses.Resources")</span>
+                    </div>
+                    <div class="course-stat-enhanced">
+                        <i class="fas fa-certificate" aria-hidden="true"></i>
+                        <span>@Tr("Courses.Certificate")</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Card 3: Tax -->
+            <div class="course-card-enhanced">
+                <div class="course-image-wrapper-enhanced">
+                    <img src="@Tr("Courses.Tax.Image")"
+                         alt="@Tr("Courses.Tax.Title")"
+                         class="course-image-enhanced" />
+                    <div class="course-image-overlay-enhanced"></div>
+                    <div class="course-badge-enhanced">
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        @Tr("Courses.Popular")
+                    </div>
+                </div>
+
+                <div class="course-content-enhanced">
+                    <span class="course-category-enhanced">@Tr("Courses.Tax.Category")</span>
+
+                    <h3 class="course-title-enhanced">@Tr("Courses.Tax.Title")</h3>
+
+                    <div class="course-instructor-enhanced">
+                        <div class="course-instructor-avatar-enhanced">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                        </div>
+                        <div class="course-instructor-name-enhanced">
+                            @Tr("Courses.By") <strong>@Tr("Courses.Tax.Instructor")</strong>
+                        </div>
+                    </div>
+
+                    <p class="course-desc-enhanced">@Tr("Courses.Tax.Desc")</p>
+
+                    <div class="course-rating-enhanced">
+                        <div class="course-stars-enhanced">
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                        </div>
+                        <span class="course-rating-number-enhanced">4.9</span>
+                        <span class="course-rating-count-enhanced">(1,876)</span>
+                    </div>
+
+                    <div class="course-meta-enhanced">
+                        <div class="course-meta-item-enhanced">
+                            <i class="far fa-clock" aria-hidden="true"></i>
+                            <span>@Tr("Courses.Tax.Duration")</span>
+                        </div>
+                        <div class="course-meta-item-enhanced">
+                            <i class="fas fa-signal" aria-hidden="true"></i>
+                            <span>@Tr("Courses.Tax.Level")</span>
+                        </div>
+                        <div class="course-meta-item-enhanced">
+                            <i class="fas fa-user-graduate" aria-hidden="true"></i>
+                            <span>2,341 @Tr("Courses.Students")</span>
+                        </div>
+                    </div>
+
+                    <div class="course-footer-enhanced">
+                        <div class="course-price-wrapper-enhanced">
+                            <div class="course-price-enhanced">@Tr("Courses.Tax.Price")</div>
+                            <div class="course-old-price-enhanced">@Tr("Courses.Tax.OldPrice")</div>
+                        </div>
+                        <a href="/courses/tax" class="course-cta-enhanced">
+                            <span>@Tr("Courses.EnrollNow")</span>
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="course-stats-bar-enhanced">
+                    <div class="course-stat-enhanced">
+                        <i class="fas fa-play-circle" aria-hidden="true"></i>
+                        <span><strong>52</strong> @Tr("Courses.Lessons")</span>
+                    </div>
+                    <div class="course-stat-enhanced">
+                        <i class="fas fa-file-alt" aria-hidden="true"></i>
+                        <span><strong>15</strong> @Tr("Courses.Resources")</span>
+                    </div>
+                    <div class="course-stat-enhanced">
+                        <i class="fas fa-certificate" aria-hidden="true"></i>
+                        <span>@Tr("Courses.Certificate")</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- View All Button -->
+        <div class="courses-view-all-enhanced">
+            <a href="/courses" class="btn-view-all-enhanced">
+                <span>@Tr("Courses.ViewAll")</span>
+                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="courses-wave-bottom-enhanced"></div>
+</section>
+
+@code {
+    private string Tr(string key) => TranslationService.Translate(key);
+}

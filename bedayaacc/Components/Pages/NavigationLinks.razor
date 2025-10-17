@@ -1,0 +1,98 @@
+﻿@* Add this to your Navigation Menu Component *@
+
+<!-- For Instructor Menu -->
+<div class="instructor-menu-section">
+    <h4>إدارة الاختبارات</h4>
+    <ul class="nav-menu">
+        <li>
+            <NavLink class="nav-link" href="/instructor/exams">
+                <i class="fas fa-file-alt"></i>
+                <span>جميع الاختبارات</span>
+            </NavLink>
+        </li>
+        <li>
+            <NavLink class="nav-link" href="/instructor/exams" Match="NavLinkMatch.Prefix">
+                <i class="fas fa-plus-circle"></i>
+                <span>إنشاء اختبار جديد</span>
+            </NavLink>
+        </li>
+    </ul>
+</div>
+
+<!-- For Student Menu -->
+<div class="student-menu-section">
+    <h4>الاختبارات</h4>
+    <ul class="nav-menu">
+        <li>
+            <NavLink class="nav-link" href="/exams">
+                <i class="fas fa-list"></i>
+                <span>تصفح الاختبارات</span>
+            </NavLink>
+        </li>
+        <li>
+            <NavLink class="nav-link" href="/my-attempts">
+                <i class="fas fa-history"></i>
+                <span>محاولاتي</span>
+            </NavLink>
+        </li>
+    </ul>
+</div>
+
+<style>
+    .instructor-menu-section,
+    .student-menu-section {
+        margin: 1rem 0;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 12px;
+    }
+
+        .instructor-menu-section h4,
+        .student-menu-section h4 {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+        }
+
+    .nav-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .nav-menu li {
+            margin-bottom: 0.25rem;
+        }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        color: #64748b;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+        .nav-link:hover {
+            background: white;
+            color: #764ba2;
+            transform: translateX(-5px);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            color: white;
+            box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
+        }
+
+        .nav-link i {
+            width: 20px;
+            font-size: 1.1rem;
+        }
+</style>

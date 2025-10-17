@@ -1,0 +1,583 @@
+﻿@page "/exams/{ExamId:int}/results/{AttemptId:int}"
+@using bedayaacc.Components.Layout
+@using bedayaacc.Models
+@using bedayaacc.Services
+@using System.Linq
+@inject IExamService ExamService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+@layout ExternalLayout
+
+<style>
+    .badge {
+        display: inline-block;
+        padding: .25rem .5rem;
+        border-radius: .5rem;
+        font-size: .85rem;
+    }
+
+    .badge-info {
+        background: #e7f1ff;
+        color: #0b5ed7;
+    }
+
+    .badge-warning {
+        background: #fff3cd;
+        color: #946200;
+    }
+
+    .badge-success {
+        background: #e6ffed;
+        color: #1e7e34;
+    }
+
+    .badge-danger {
+        background: #fde2e2;
+        color: #a61b1b;
+    }
+
+    .score-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+        gap: .75rem;
+    }
+
+    .score-card {
+        display: flex;
+        gap: .75rem;
+        align-items: center;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        padding: .75rem;
+        background: #fff;
+    }
+
+    .answers-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .answer-card {
+        border: 1px solid #eee;
+        border-radius: 12px;
+        padding: 1rem;
+        background: #fff;
+    }
+
+    .answer-header {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        justify-content: space-between;
+        margin-bottom: .5rem;
+    }
+
+    .question-number {
+        font-weight: 700;
+    }
+
+    .options-review {
+        display: grid;
+        gap: .35rem;
+    }
+
+    .option-review {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        padding: .35rem .5rem;
+        border-radius: .5rem;
+    }
+
+        .option-review.user-selected {
+            background: #f5f7ff;
+        }
+
+        .option-review.correct-option {
+            border: 1px solid #28a745;
+        }
+
+    .results-actions {
+        display: flex;
+        gap: .5rem;
+        margin-top: 1rem;
+    }
+
+    .no-print {
+    }
+
+    @@media print {
+        .no-print {
+            display: none !important;
+        }
+
+        body {
+            direction: rtl;
+        }
+    }
+</style>
+
+<div class="exam-results-page" id="print-root">
+    <div class="exam-container">
+        @if (isLoading)
+        {
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p>جاري تحميل النتائج...</p>
+            </div>
+        }
+        else if (results == null)
+        {
+            <div class="error-state">
+                <i class="fas fa-exclamation-circle"></i>
+                <h3>خطأ في تحميل النتائج</h3>
+                <button class="btn btn-primary" @onclick="GoToExams">العودة للاختبارات</button>
+            </div>
+        }
+        else
+        {
+            <!-- Header -->
+            <div class="results-header" style="margin-bottom:1rem; text-align:center;">
+                @if (manualPendingCount > 0)
+                {
+                    <div class="result-status">
+                        <div class="status-icon" style="font-size:2rem; margin-bottom:.25rem;">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <h1>نتيجة مبدئية — في انتظار المراجعة</h1>
+                        <p class="exam-title">@results.Attempt.ExamTitleAr</p>
+                        <span class="badge badge-info">تم استبعاد الأسئلة المقالية غير المُراجَعة من الحساب</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="result-status @(results.Attempt.IsPassed ? "passed" : "failed")">
+                        <div class="status-icon" style="font-size:2rem; margin-bottom:.25rem;">
+                            @if (results.Attempt.IsPassed)
+                            {
+                                <i class="fas fa-check-circle" style="color:#28a745;"></i>
+                            }
+                            else
+                            {
+                                <i class="fas fa-times-circle" style="color:#dc3545;"></i>
+                            }
+                        </div>
+                        <h1>@(results.Attempt.IsPassed ? "مبروك! لقد نجحت" : "للأسف، لم تنجح")</h1>
+                        <p class="exam-title">@results.Attempt.ExamTitleAr</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Score Summary -->
+            <div class="score-summary">
+                <div class="score-card">
+                    <div class="score-icon"><i class="fas fa-trophy"></i></div>
+                    <div class="score-content">
+                        @if (manualPendingCount > 0)
+                        {
+                            <div class="score-value"><span>@autoObtainedMarks</span> / <span>@autoTotalMarks</span></div>
+                            <div class="score-label">الدرجة المبدئية (باستبعاد المقالية غير المُراجَعة)</div>
+                        }
+                        else
+                        {
+                            <div class="score-value"><span>@results.Attempt.ObtainedMarks</span> / <span>@results.Attempt.TotalMarks</span></div>
+                            <div class="score-label">الدرجة النهائية</div>
+                        }
+                    </div>
+                </div>
+
+                <div class="score-card">
+                    <div class="score-icon"><i class="fas fa-percentage"></i></div>
+                    <div class="score-content">
+                        @if (manualPendingCount > 0)
+                        {
+                            <div class="score-value">@autoProvisionalPercentage.ToString("F1")%</div>
+                            <div class="score-label">النسبة المئوية المبدئية</div>
+                        }
+                        else
+                        {
+                            <div class="score-value">@results.Attempt.Percentage.ToString("F1")%</div>
+                            <div class="score-label">النسبة المئوية</div>
+                        }
+                    </div>
+                </div>
+
+                <div class="score-card">
+                    <div class="score-icon"><i class="fas fa-clock"></i></div>
+                    <div class="score-content">
+                        <div class="score-value">@results.Attempt.TimeSpentMinutes دقيقة</div>
+                        <div class="score-label">الوقت المستغرق</div>
+                    </div>
+                </div>
+
+                <div class="score-card">
+                    <div class="score-icon"><i class="fas fa-check-double"></i></div>
+                    <div class="score-content">
+                        @if (manualPendingCount > 0)
+                        {
+                            <div class="score-value">@autoCorrectCount / @autoTotalQuestions</div>
+                            <div class="score-label">إجابات صحيحة (المحسوبة فقط)</div>
+                        }
+                        else
+                        {
+                            <div class="score-value">@finalCorrectCount / @results.Questions.Count</div>
+                            <div class="score-label">إجابات صحيحة</div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (manualPendingCount > 0)
+            {
+                <div class="alert alert-warning" role="alert" style="margin-top:1rem;">
+                    يوجد <strong>@manualPendingCount</strong> سؤال مقالي قيد المراجعة — مجموع درجاتهم:
+                    <strong>@manualPendingMarks</strong>. سيتم تحديث النتيجة النهائية بعد التصحيح اليدوي.
+                </div>
+            }
+
+            <!-- Performance -->
+            <div class="performance-section" style="margin-top:1rem;">
+                <h2><i class="fas fa-chart-pie"></i> تحليل الأداء @(manualPendingCount > 0 ? "(بدون المقالية غير المُراجَعة)" : "")</h2>
+                <div class="performance-grid" style="display:grid; gap:.75rem;">
+                    <div class="performance-item correct">
+                        <div class="performance-bar" style="height:8px; background:#eee; border-radius:6px; overflow:hidden;">
+                            <div class="bar-fill" style="width:@(correctPct.ToString("F0"))%; height:100%; background:#28a745;"></div>
+                        </div>
+                        <div class="performance-label" style="display:flex; justify-content:space-between;">
+                            <span>إجابات صحيحة</span>
+                            <strong>@(manualPendingCount > 0 ? autoCorrectCount : finalCorrectCount) (@correctPct.ToString("F0")%)</strong>
+                        </div>
+                    </div>
+                    <div class="performance-item incorrect">
+                        <div class="performance-bar" style="height:8px; background:#eee; border-radius:6px; overflow:hidden;">
+                            <div class="bar-fill" style="width:@(incorrectPct.ToString("F0"))%; height:100%; background:#dc3545;"></div>
+                        </div>
+                        <div class="performance-label" style="display:flex; justify-content:space-between;">
+                            <span>إجابات خاطئة</span>
+                            <strong>@(manualPendingCount > 0 ? autoIncorrectCount : finalIncorrectCount) (@incorrectPct.ToString("F0")%)</strong>
+                        </div>
+                    </div>
+                    <div class="performance-item unanswered">
+                        <div class="performance-bar" style="height:8px; background:#eee; border-radius:6px; overflow:hidden;">
+                            <div class="bar-fill" style="width:@(unansweredPct.ToString("F0"))%; height:100%; background:#6c757d;"></div>
+                        </div>
+                        <div class="performance-label" style="display:flex; justify-content:space-between;">
+                            <span>لم يتم الإجابة</span>
+                            <strong>@(manualPendingCount > 0 ? autoUnansweredCount : finalUnansweredCount) (@unansweredPct.ToString("F0")%)</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Answers -->
+            @if (results.Attempt.ShowCorrectAnswers)
+            {
+                <div class="answers-section" style="margin-top:1rem;">
+                    <h2><i class="fas fa-list-alt"></i> الإجابات التفصيلية</h2>
+
+                    <div class="answers-list">
+                        @foreach (var (qr, index) in results.Questions.Select((q, i) => (q, i)))
+                        {
+                            var q = qr.Question;
+                            var ans = qr.UserAnswer;
+
+                            var type = (q.TypeCode ?? string.Empty).ToUpperInvariant();
+                            var isManualType = manualTypes.Contains(type);
+
+                            var hasText = !string.IsNullOrWhiteSpace(ans?.AnswerText);
+                            var isReviewedManually = IsManualReviewed(qr); // شرط المراجعة اليدوية
+                            var isUnanswered = ans == null || (!hasText && isManualType);
+
+                            // للأنواع الآلية فقط
+                            var isCorrectAuto = !isManualType && ans?.IsCorrect == true;
+
+                            <div class="answer-card">
+                                <div class="answer-header">
+                                    <div class="question-number">سؤال @(index + 1)</div>
+
+                                    <div class="answer-status">
+                                        @if (isManualType)
+                                        {
+                                            @if (isUnanswered)
+                                            {
+                                                <span><i class="fas fa-minus-circle"></i> لم يتم الإجابة</span>
+                                            }
+                                            else if (!isReviewedManually)
+                                            {
+                                                <span class="badge badge-warning"><i class="fas fa-hourglass-half"></i> قيد المراجعة</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-success"><i class="fas fa-check"></i> تم التقييم</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            @if (ans == null)
+                                            {
+                                                <span><i class="fas fa-minus-circle"></i> لم يتم الإجابة</span>
+                                            }
+                                            else if (isCorrectAuto)
+                                            {
+                                                <span class="badge badge-success"><i class="fas fa-check"></i> إجابة صحيحة</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-danger"><i class="fas fa-times"></i> إجابة خاطئة</span>
+                                            }
+                                        }
+                                    </div>
+
+                                    <div class="question-marks">
+                                        @if (isManualType && !isReviewedManually)
+                                        {
+                                            <span>— / @q.Marks</span>
+                                        }
+                                        else
+                                        {
+                                            <span>@(ans?.MarksObtained ?? 0) / @q.Marks</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="answer-body">
+                                    <h4 class="question-text">
+                                        @((MarkupString)(q.QuestionTextAr ?? string.Empty))
+                                    </h4>
+                                    @if (!isManualType)
+                                    {
+                                        <div class="options-review">
+                                            @foreach (var op in qr.Options)
+                                            {
+                                                var isUser = ans?.SelectedOptionId == op.OptionId;
+                                                var isRight = op.IsCorrect;
+
+                                                <div class="option-review @(isRight ? "correct-option" : "") @(isUser ? "user-selected" : "")">
+                                                    <span class="option-indicator">
+                                                        @if (isRight)
+                                                        {
+                                                            <i class="fas fa-check text-success"></i>
+                                                        }
+                                                        else if (isUser)
+                                                        {
+                                                            <i class="fas fa-times text-danger"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="far fa-circle"></i>
+                                                        }
+                                                    </span>
+                                                    <span class="option-text">@op.OptionTextAr</span>
+                                                    @if (isUser)
+                                                    {
+                                                        <span class="badge badge-info">إجابتك</span>
+                                                    }
+                                                    @if (isRight)
+                                                    {
+                                                        <span class="badge badge-success">الإجابة الصحيحة</span>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-answer-review">
+                                            <strong>إجابتك:</strong>
+                                            <p class="user-text-answer">@((hasText ? ans!.AnswerText : "—"))</p>
+
+                                            @if (!string.IsNullOrEmpty(ans?.InstructorFeedback))
+                                            {
+                                                <div class="instructor-feedback">
+                                                    <strong><i class="fas fa-comment-alt"></i> ملاحظات المدرس:</strong>
+                                                    <p>@ans.InstructorFeedback</p>
+                                                </div>
+                                            }
+
+                                            @if (!string.IsNullOrEmpty(q.CorrectAnswer))
+                                            {
+                                                <div class="model-answer">
+                                                    <strong><i class="fas fa-lightbulb"></i> الإجابة النموذجية:</strong>
+                                                    <p>@q.CorrectAnswer</p>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Actions -->
+            <div class="results-actions no-print">
+               
+                <button class="btn btn-primary" @onclick="PrintResults">
+                    <i class="fas fa-print"></i>
+                    <span>طباعة النتيجة</span>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@if (Embed)
+{
+    <style>
+        .site-header, .footer-enhanced, .bottom-nav {
+            display: none !important;
+        }
+
+        .site-main {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        body {
+            background: #fff;
+        }
+    </style>
+}
+
+
+@code {
+    [Parameter] public int ExamId { get; set; }
+    [Parameter] public int AttemptId { get; set; }
+    [SupplyParameterFromQuery] public bool Embed { get; set; } // ?embed=1
+
+    private ExamResultsModel? results;
+    private bool isLoading = true;
+    private int currentUserId = 1; // TODO: Get from auth
+
+    private readonly HashSet<string> manualTypes = new(new[] { "SHORT", "ESSAY" });
+
+    // مبدئي/نهائي
+    private int manualPendingCount;
+    private decimal manualPendingMarks;
+
+    // إحصاءات العرض أثناء وجود Pending (تشمل غير المقالية + المقالية المُراجَعة فقط)
+    private int autoTotalQuestions;
+    private int autoCorrectCount;
+    private int autoIncorrectCount;
+    private int autoUnansweredCount;
+
+    private decimal autoTotalMarks;
+    private decimal autoObtainedMarks;
+    private double autoProvisionalPercentage;
+
+    // إحصاءات نهائية (كل الأسئلة) — تُستخدم فقط لو مفيش Pending
+    private int finalCorrectCount;
+    private int finalIncorrectCount;
+    private int finalUnansweredCount;
+
+    // نسب العرض
+    private double correctPct;
+    private double incorrectPct;
+    private double unansweredPct;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadResults();
+    }
+
+    private async Task LoadResults()
+    {
+        isLoading = true;
+        results = await ExamService.GetResultsAsync(AttemptId, currentUserId);
+        if (results != null) ComputeStats();
+        isLoading = false;
+    }
+
+    // نعتبر السؤال المقالي "تمت مراجعته" فقط إذا وُجد Feedback من المدرس (علامة واضحة من غير الاعتماد على 0/Null)
+    private bool IsManualReviewed(QuestionResultModel qr)
+        => !string.IsNullOrWhiteSpace(qr.UserAnswer?.InstructorFeedback);
+
+    private void ComputeStats()
+    {
+        var list = results!.Questions;
+
+        // المقالية غير المُراجَعة = أي سؤال SHORT/ESSAY بلا Feedback
+        var manualAll = list.Where(q => manualTypes.Contains((q.Question.TypeCode ?? "").ToUpperInvariant())).ToList();
+        var manualPending = manualAll.Where(q => !IsManualReviewed(q)).ToList();
+
+        manualPendingCount = manualPending.Count;
+        manualPendingMarks = manualPending.Sum(q => q.Question.Marks);
+
+        // الأسئلة التي تُحسب الآن = كل غير المقالية + المقالية التي تمت مراجعتها فقط
+        var countedNow = list.Where(q =>
+        {
+            var type = (q.Question.TypeCode ?? "").ToUpperInvariant();
+            if (!manualTypes.Contains(type)) return true;
+            return IsManualReviewed(q);
+        }).ToList();
+
+        autoTotalQuestions = countedNow.Count;
+        autoCorrectCount = countedNow.Count(q => q.UserAnswer?.IsCorrect == true);
+        autoIncorrectCount = countedNow.Count(q => q.UserAnswer != null && q.UserAnswer.IsCorrect == false);
+        autoUnansweredCount = countedNow.Count(q => q.UserAnswer == null);
+
+        autoTotalMarks = countedNow.Sum(q => q.Question.Marks);
+        autoObtainedMarks = countedNow.Sum(q => q.UserAnswer?.MarksObtained ?? 0m);
+        autoProvisionalPercentage = autoTotalMarks > 0 ? (double)((autoObtainedMarks / autoTotalMarks) * 100m) : 0.0;
+
+        // النهائي (لو مفيش Pending)
+        finalCorrectCount = list.Count(q => q.UserAnswer?.IsCorrect == true);
+        finalIncorrectCount = list.Count(q => q.UserAnswer != null && q.UserAnswer.IsCorrect == false);
+        finalUnansweredCount = list.Count(q => q.UserAnswer == null);
+
+        if (manualPendingCount > 0)
+        {
+            correctPct = autoTotalQuestions > 0 ? (autoCorrectCount * 100.0 / autoTotalQuestions) : 0.0;
+            incorrectPct = autoTotalQuestions > 0 ? (autoIncorrectCount * 100.0 / autoTotalQuestions) : 0.0;
+            unansweredPct = autoTotalQuestions > 0 ? (autoUnansweredCount * 100.0 / autoTotalQuestions) : 0.0;
+        }
+        else
+        {
+            var total = list.Count;
+            correctPct = total > 0 ? (finalCorrectCount * 100.0 / total) : 0.0;
+            incorrectPct = total > 0 ? (finalIncorrectCount * 100.0 / total) : 0.0;
+            unansweredPct = total > 0 ? (finalUnansweredCount * 100.0 / total) : 0.0;
+        }
+    }
+
+    private void GoToExams() => Navigation.NavigateTo("/exams");
+
+    private async Task PrintResults()
+    {
+        var title = $"نتيجة - {(results?.Attempt?.ExamTitleAr ?? "اختبار")}";
+        await JSRuntime.InvokeVoidAsync("bedayaPrint.printElement", "print-root", title);
+    }
+}
+
+<script>
+        window.bedayaPrint = {
+            printElement: function (elementId, title) {
+                var el = document.getElementById(elementId);
+                if (!el) { window.print(); return; }
+                var styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+                    .map(function (s) { return s.outerHTML; }).join('\n');
+
+                var w = window.open('', '_blank', 'width=1024,height=768');
+                w.document.open();
+                w.document.write(`<!doctype html>
+    <html dir="rtl" lang="ar">
+    <head>
+    <meta charset="utf-8">
+    <title>${title || ''}</title>
+    ${styles}
+    <style>
+      @@media print { .no-print { display: none !important; } }
+      body { margin: 20px; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Naskh Arabic", "Tajawal", sans-serif; }
+    </style>
+    </head>
+    <body>
+      <div>${el.innerHTML}</div>
+      <script>window.addEventListener('load', function(){ window.print(); setTimeout(function(){ window.close(); }, 300); });<\/script>
+    </body>
+    </html>`);
+                w.document.close();
+            }
+        };
+</script>

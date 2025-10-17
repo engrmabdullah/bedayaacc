@@ -1,0 +1,249 @@
+﻿@page "/blog"
+@using bedayaacc.Components.Layout
+@using bedayaacc.Services
+@inject NavigationManager Navigation
+@inject TranslationService TranslationService
+@inject IJSRuntime JSRuntime
+
+@layout ExternalLayout
+
+<div class="bedaya-blog-page">
+    <!-- Header Section -->
+    <header class="bedaya-blog-header">
+        <div class="bedaya-container">
+            <div class="bedaya-blog-header-content">
+                <h1 class="bedaya-blog-page-title">@Tr("Blog.Title")</h1>
+                <p class="bedaya-blog-page-subtitle">@Tr("Blog.Subtitle")</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search and Filter Section -->
+    <section class="bedaya-blog-filter">
+        <div class="bedaya-container">
+            <div class="bedaya-blog-filter-content">
+                <div class="bedaya-blog-search">
+                    <input type="text" class="bedaya-search-input" placeholder="@Tr("Blog.Search.Placeholder")" />
+                    <button class="bedaya-search-btn">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+                <div class="bedaya-blog-filters">
+                    <select class="bedaya-filter-select">
+                        <option value="">@Tr("Blog.Filter.All")</option>
+                        <option value="accounting">@Tr("Blog.Category.Accounting")</option>
+                        <option value="finance">@Tr("Blog.Category.Finance")</option>
+                        <option value="tax">@Tr("Blog.Category.Tax")</option>
+                        <option value="business">@Tr("Blog.Category.Business")</option>
+                    </select>
+
+                    <select class="bedaya-filter-select">
+                        <option value="">@Tr("Blog.Filter.Date")</option>
+                        <option value="newest">@Tr("Blog.Filter.Newest")</option>
+                        <option value="oldest">@Tr("Blog.Filter.Oldest")</option>
+                        <option value="popular">@Tr("Blog.Filter.Popular")</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Grid -->
+    <section class="bedaya-blog-grid-section">
+        <div class="bedaya-container">
+            <div class="bedaya-blog-grid-header">
+                <h2 class="bedaya-blog-grid-title">@Tr("Blog.Recent.Title")</h2>
+                <div class="bedaya-blog-count">
+                    <span>@Tr("Blog.Recent.Count")</span>
+                </div>
+            </div>
+
+            <div class="bedaya-blog-grid">
+                <!-- Blog Post 1 -->
+                <article class="bedaya-blog-card bedaya-blog-card-1">
+                    <div class="bedaya-blog-image">
+                        <img src="https://placehold.co/400x250/667eea/ffffff?text=Accounting+Tips" alt="@Tr("Blog.Post1.Title")" />
+                        <div class="bedaya-blog-category">@Tr("Blog.Category.Accounting")</div>
+                    </div>
+                    <div class="bedaya-blog-content">
+                        <div class="bedaya-blog-meta">
+                            <span class="bedaya-blog-date">
+                                <i class="far fa-calendar" aria-hidden="true"></i>
+                                @Tr("Blog.Post1.Date")
+                            </span>
+                            <span class="bedaya-blog-author">
+                                <i class="far fa-user" aria-hidden="true"></i>
+                                @Tr("Blog.Post1.Author")
+                            </span>
+                        </div>
+                        <h3 class="bedaya-blog-title">@Tr("Blog.Post1.Title")</h3>
+                        <p class="bedaya-blog-excerpt">@Tr("Blog.Post1.Excerpt")</p>
+                        <a href="/blog/post/accounting-tips" class="bedaya-blog-readmore">@Tr("Blog.ReadMore")</a>
+                    </div>
+                </article>
+
+                <!-- Blog Post 2 -->
+                <article class="bedaya-blog-card bedaya-blog-card-2">
+                    <div class="bedaya-blog-image">
+                        <img src="https://placehold.co/400x250/764ba2/ffffff?text=Financial+Planning" alt="@Tr("Blog.Post2.Title")" />
+                        <div class="bedaya-blog-category">@Tr("Blog.Category.Finance")</div>
+                    </div>
+                    <div class="bedaya-blog-content">
+                        <div class="bedaya-blog-meta">
+                            <span class="bedaya-blog-date">
+                                <i class="far fa-calendar" aria-hidden="true"></i>
+                                @Tr("Blog.Post2.Date")
+                            </span>
+                            <span class="bedaya-blog-author">
+                                <i class="far fa-user" aria-hidden="true"></i>
+                                @Tr("Blog.Post2.Author")
+                            </span>
+                        </div>
+                        <h3 class="bedaya-blog-title">@Tr("Blog.Post2.Title")</h3>
+                        <p class="bedaya-blog-excerpt">@Tr("Blog.Post2.Excerpt")</p>
+                        <a href="/blog/post/financial-planning" class="bedaya-blog-readmore">@Tr("Blog.ReadMore")</a>
+                    </div>
+                </article>
+
+                <!-- Blog Post 3 -->
+                <article class="bedaya-blog-card bedaya-blog-card-3">
+                    <div class="bedaya-blog-image">
+                        <img src="https://placehold.co/400x250/667eea/ffffff?text=Tax+Strategies" alt="@Tr("Blog.Post3.Title")" />
+                        <div class="bedaya-blog-category">@Tr("Blog.Category.Tax")</div>
+                    </div>
+                    <div class="bedaya-blog-content">
+                        <div class="bedaya-blog-meta">
+                            <span class="bedaya-blog-date">
+                                <i class="far fa-calendar" aria-hidden="true"></i>
+                                @Tr("Blog.Post3.Date")
+                            </span>
+                            <span class="bedaya-blog-author">
+                                <i class="far fa-user" aria-hidden="true"></i>
+                                @Tr("Blog.Post3.Author")
+                            </span>
+                        </div>
+                        <h3 class="bedaya-blog-title">@Tr("Blog.Post3.Title")</h3>
+                        <p class="bedaya-blog-excerpt">@Tr("Blog.Post3.Excerpt")</p>
+                        <a href="/blog/post/tax-strategies" class="bedaya-blog-readmore">@Tr("Blog.ReadMore")</a>
+                    </div>
+                </article>
+
+                <!-- Blog Post 4 -->
+                <article class="bedaya-blog-card bedaya-blog-card-4">
+                    <div class="bedaya-blog-image">
+                        <img src="https://placehold.co/400x250/764ba2/ffffff?text=Business+Finance" alt="@Tr("Blog.Post4.Title")" />
+                        <div class="bedaya-blog-category">@Tr("Blog.Category.Business")</div>
+                    </div>
+                    <div class="bedaya-blog-content">
+                        <div class="bedaya-blog-meta">
+                            <span class="bedaya-blog-date">
+                                <i class="far fa-calendar" aria-hidden="true"></i>
+                                @Tr("Blog.Post4.Date")
+                            </span>
+                            <span class="bedaya-blog-author">
+                                <i class="far fa-user" aria-hidden="true"></i>
+                                @Tr("Blog.Post4.Author")
+                            </span>
+                        </div>
+                        <h3 class="bedaya-blog-title">@Tr("Blog.Post4.Title")</h3>
+                        <p class="bedaya-blog-excerpt">@Tr("Blog.Post4.Excerpt")</p>
+                        <a href="/blog/post/business-finance" class="bedaya-blog-readmore">@Tr("Blog.ReadMore")</a>
+                    </div>
+                </article>
+
+                <!-- Blog Post 5 -->
+                <article class="bedaya-blog-card bedaya-blog-card-5">
+                    <div class="bedaya-blog-image">
+                        <img src="https://placehold.co/400x250/667eea/ffffff?text=Investment+Tips" alt="@Tr("Blog.Post5.Title")" />
+                        <div class="bedaya-blog-category">@Tr("Blog.Category.Finance")</div>
+                    </div>
+                    <div class="bedaya-blog-content">
+                        <div class="bedaya-blog-meta">
+                            <span class="bedaya-blog-date">
+                                <i class="far fa-calendar" aria-hidden="true"></i>
+                                @Tr("Blog.Post5.Date")
+                            </span>
+                            <span class="bedaya-blog-author">
+                                <i class="far fa-user" aria-hidden="true"></i>
+                                @Tr("Blog.Post5.Author")
+                            </span>
+                        </div>
+                        <h3 class="bedaya-blog-title">@Tr("Blog.Post5.Title")</h3>
+                        <p class="bedaya-blog-excerpt">@Tr("Blog.Post5.Excerpt")</p>
+                        <a href="/blog/post/investment-tips" class="bedaya-blog-readmore">@Tr("Blog.ReadMore")</a>
+                    </div>
+                </article>
+
+                <!-- Blog Post 6 -->
+                <article class="bedaya-blog-card bedaya-blog-card-6">
+                    <div class="bedaya-blog-image">
+                        <img src="https://placehold.co/400x250/764ba2/ffffff?text=Financial+Analysis" alt="@Tr("Blog.Post6.Title")" />
+                        <div class="bedaya-blog-category">@Tr("Blog.Category.Accounting")</div>
+                    </div>
+                    <div class="bedaya-blog-content">
+                        <div class="bedaya-blog-meta">
+                            <span class="bedaya-blog-date">
+                                <i class="far fa-calendar" aria-hidden="true"></i>
+                                @Tr("Blog.Post6.Date")
+                            </span>
+                            <span class="bedaya-blog-author">
+                                <i class="far fa-user" aria-hidden="true"></i>
+                                @Tr("Blog.Post6.Author")
+                            </span>
+                        </div>
+                        <h3 class="bedaya-blog-title">@Tr("Blog.Post6.Title")</h3>
+                        <p class="bedaya-blog-excerpt">@Tr("Blog.Post6.Excerpt")</p>
+                        <a href="/blog/post/financial-analysis" class="bedaya-blog-readmore">@Tr("Blog.ReadMore")</a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="bedaya-blog-newsletter">
+        <div class="bedaya-container">
+            <div class="bedaya-newsletter-content">
+                <div class="bedaya-newsletter-text">
+                    <h3 class="bedaya-newsletter-title">@Tr("Blog.Newsletter.Title")</h3>
+                    <p class="bedaya-newsletter-subtitle">@Tr("Blog.Newsletter.Subtitle")</p>
+                </div>
+                <div class="bedaya-newsletter-form">
+                    <input type="email" class="bedaya-newsletter-input" placeholder="@Tr("Blog.Newsletter.Placeholder")" />
+                    <button class="bedaya-newsletter-btn">@Tr("Blog.Newsletter.Subscribe")</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pagination -->
+    <section class="bedaya-blog-pagination">
+        <div class="bedaya-container">
+            <div class="bedaya-pagination">
+                <button class="bedaya-pagination-btn bedaya-pagination-prev">
+                    <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                </button>
+                <span class="bedaya-pagination-current">1</span>
+                <span class="bedaya-pagination-separator">/</span>
+                <span class="bedaya-pagination-total">3</span>
+                <button class="bedaya-pagination-btn bedaya-pagination-next">
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+</div>
+
+@code {
+    string Tr(string key) => TranslationService.Translate(key);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await TranslationService.EnsureInitAfterRenderAsync();
+        }
+        StateHasChanged();
+    }
+}

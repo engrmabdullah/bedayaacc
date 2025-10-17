@@ -1,0 +1,606 @@
+﻿/* Bedaya Courses Page Styles */
+.bedaya-courses-page {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+    .bedaya-courses-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(circle at 5% 15%, rgba(102, 126, 234, 0.05) 0%, transparent 25%), radial-gradient(circle at 95% 85%, rgba(118, 75, 162, 0.05) 0%, transparent 25%), repeating-linear-gradient(45deg, rgba(102, 126, 234, 0.01) 0px, rgba(102, 126, 234, 0.01) 1px, transparent 1px, transparent 11px), repeating-linear-gradient(-45deg, rgba(118, 75, 162, 0.01) 0px, rgba(118, 75, 162, 0.01) 1px, transparent 1px, transparent 11px);
+        z-index: 0;
+        opacity: 0.5;
+    }
+
+/* Courses Header */
+.bedaya-courses-header {
+    padding: 80px 0 40px;
+    position: relative;
+    z-index: 2;
+}
+
+.bedaya-courses-header-content {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.bedaya-courses-page-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    position: relative;
+    display: inline-block;
+}
+
+    .bedaya-courses-page-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border-radius: 2px;
+        animation: bedaya-growWidth 1s ease-out 0.5s both;
+    }
+
+.bedaya-courses-page-subtitle {
+    font-size: 1.3rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Filter Section */
+.bedaya-courses-filter {
+    padding: 30px 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    z-index: 3;
+}
+
+.bedaya-courses-filter-content {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.bedaya-courses-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.bedaya-search-input {
+    padding: 0.8rem 1rem 0.8rem 3rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    width: 300px;
+    transition: all 0.3s ease;
+    background: white;
+    backdrop-filter: blur(10px);
+}
+
+    .bedaya-search-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+.bedaya-search-btn {
+    position: absolute;
+    left: 1rem;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+    .bedaya-search-btn:hover {
+        color: #667eea;
+    }
+
+.bedaya-courses-filters {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.bedaya-filter-select {
+    padding: 0.8rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+    .bedaya-filter-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+/* Courses Grid Section */
+.bedaya-courses-grid-section {
+    padding: 60px 0;
+    position: relative;
+    z-index: 2;
+}
+
+.bedaya-courses-grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.bedaya-courses-grid-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.bedaya-courses-count {
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Courses Grid */
+.bedaya-courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* Course Card */
+.bedaya-course-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    transform: translateY(0);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+    .bedaya-course-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        transform: scaleX(0);
+        transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 3;
+    }
+
+    .bedaya-course-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.02), rgba(118, 75, 162, 0.02));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1;
+    }
+
+    .bedaya-course-card:hover {
+        transform: translateY(-20px) scale(1.03);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+    }
+
+        .bedaya-course-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .bedaya-course-card:hover::after {
+            opacity: 1;
+        }
+
+.bedaya-course-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.bedaya-course-image-content {
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.bedaya-course-card:hover .bedaya-course-image-content {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: scale(1.1);
+}
+
+.bedaya-course-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    color: #1e293b;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+}
+
+.bedaya-course-content {
+    padding: 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.bedaya-course-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    transition: color 0.3s ease;
+}
+
+.bedaya-course-card:hover .bedaya-course-title {
+    color: #667eea;
+}
+
+.bedaya-course-desc {
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    transition: opacity 0.3s ease;
+}
+
+.bedaya-course-card:hover .bedaya-course-desc {
+    opacity: 0.9;
+}
+
+.bedaya-course-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    transition: transform 0.3s ease;
+}
+
+.bedaya-course-card:hover .bedaya-course-meta {
+    transform: translateX(5px);
+}
+
+.bedaya-course-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.bedaya-course-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.bedaya-course-price {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #667eea;
+    transition: all 0.3s ease;
+}
+
+.bedaya-course-card:hover .bedaya-course-price {
+    transform: scale(1.05);
+    color: #764ba2;
+}
+
+.bedaya-course-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    z-index: 2;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+    .bedaya-course-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+        z-index: -1;
+    }
+
+.bedaya-course-card:hover .bedaya-course-btn::before {
+    left: 100%;
+}
+
+.bedaya-course-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+/* Card-specific animations */
+@keyframes bedaya-card-float-1 {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-3px) rotate(-0.2deg);
+    }
+}
+
+@keyframes bedaya-card-float-2 {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-5px) rotate(0.3deg);
+    }
+}
+
+@keyframes bedaya-card-float-3 {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-4px) rotate(-0.1deg);
+    }
+}
+
+@keyframes bedaya-card-float-4 {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-6px) rotate(0.2deg);
+    }
+}
+
+@keyframes bedaya-card-float-5 {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-2px) rotate(-0.1deg);
+    }
+}
+
+@keyframes bedaya-card-float-6 {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-7px) rotate(0.1deg);
+    }
+}
+
+.bedaya-course-card-1 {
+    animation: bedaya-card-float-1 6s ease-in-out infinite 0s;
+}
+
+.bedaya-course-card-2 {
+    animation: bedaya-card-float-2 6s ease-in-out infinite 0.5s;
+}
+
+.bedaya-course-card-3 {
+    animation: bedaya-card-float-3 6s ease-in-out infinite 1s;
+}
+
+.bedaya-course-card-4 {
+    animation: bedaya-card-float-4 6s ease-in-out infinite 1.5s;
+}
+
+.bedaya-course-card-5 {
+    animation: bedaya-card-float-5 6s ease-in-out infinite 2s;
+}
+
+.bedaya-course-card-6 {
+    animation: bedaya-card-float-6 6s ease-in-out infinite 2.5s;
+}
+
+/* Pagination */
+.bedaya-courses-pagination {
+    padding: 40px 0;
+    position: relative;
+    z-index: 2;
+}
+
+.bedaya-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    background: white;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.bedaya-pagination-btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e2e8f0;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .bedaya-pagination-btn:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+        transform: scale(1.1);
+    }
+
+.bedaya-pagination-current,
+.bedaya-pagination-total {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.bedaya-pagination-separator {
+    color: #64748b;
+}
+
+/* Animations */
+@keyframes bedaya-growWidth {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 100px;
+    }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .bedaya-courses-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .bedaya-courses-header {
+        padding: 60px 0 30px;
+    }
+
+    .bedaya-courses-page-title {
+        font-size: 2.5rem;
+    }
+
+    .bedaya-courses-filter-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .bedaya-search-input {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .bedaya-courses-filters {
+        justify-content: center;
+    }
+
+    .bedaya-courses-grid-header {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+
+    .bedaya-course-footer {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .bedaya-course-price {
+        font-size: 1.4rem;
+    }
+
+    .bedaya-pagination {
+        padding: 1rem;
+        border-radius: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .bedaya-courses-header {
+        padding: 40px 0 20px;
+    }
+
+    .bedaya-courses-page-title {
+        font-size: 2rem;
+    }
+
+    .bedaya-courses-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .bedaya-courses-filter {
+        padding: 20px 0;
+    }
+
+    .bedaya-search-input {
+        max-width: 100%;
+        padding: 0.8rem;
+    }
+
+    .bedaya-courses-filters {
+        gap: 0.5rem;
+    }
+
+    .bedaya-filter-select {
+        padding: 0.6rem;
+        font-size: 0.8rem;
+    }
+}

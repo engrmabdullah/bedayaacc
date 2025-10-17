@@ -1,0 +1,78 @@
+﻿@page "/denied"
+@layout ExternalLayout
+
+@using bedayaacc.Components.Layout
+@using bedayaacc.Services
+@inject TranslationService TranslationService
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<PageTitle>@Tr("Denied.MetaTitle", "Access Denied") - @Tr("Site.Name")</PageTitle>
+
+<div class="bedaya-denied-page">
+    <div class="bedaya-denied-bg"></div>
+
+    <div class="bedaya-denied-container">
+        <div class="bedaya-denied-card" role="alert" aria-live="polite">
+            <div class="bedaya-denied-icon-wrap" aria-hidden="true">
+                <span class="bedaya-denied-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </span>
+            </div>
+
+            <h1 class="bedaya-denied-title">
+                @Tr("Denied.Title", "ليس لديك صلاحية الوصول")
+            </h1>
+
+            <p class="bedaya-denied-subtitle">
+                @Tr("Denied.Subtitle", "هذه الصفحة متاحة لأدوار محددة فقط.")
+            </p>
+
+            <div class="bedaya-denied-reasons">
+                <div class="bedaya-denied-reason">
+                    <i class="fas fa-info-circle" aria-hidden="true"></i>
+                    <span>@Tr("Denied.Reason.NoRole", "قد لا يمتلك حسابك الدور المناسب (مثل: Instructor).")</span>
+                </div>
+                <div class="bedaya-denied-reason">
+                    <i class="fas fa-user-lock" aria-hidden="true"></i>
+                    <span>@Tr("Denied.Reason.NotSignedIn", "أو لست مسجّل دخولًا حاليًا.")</span>
+                </div>
+                <div class="bedaya-denied-tip">
+                    <i class="fas fa-lightbulb" aria-hidden="true"></i>
+                    <span>@Tr("Denied.Suggest", "جرّب تسجيل الدخول بحساب يملك الصلاحية أو عُد إلى الصفحة الرئيسية.")</span>
+                </div>
+            </div>
+
+            <div class="bedaya-denied-actions">
+                <a class="bedaya-btn bedaya-btn-primary" href="/login?ReturnUrl=@Uri.EscapeDataString("/" + Nav.ToBaseRelativePath(Nav.Uri))">
+                    <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+                    <span>@Tr("Denied.Btn.Login", "تسجيل الدخول")</span>
+                </a>
+
+                <a class="bedaya-btn bedaya-btn-ghost" href="/">
+                    <i class="fas fa-home" aria-hidden="true"></i>
+                    <span>@Tr("Denied.Btn.Home", "العودة للرئيسية")</span>
+                </a>
+
+                <button class="bedaya-btn bedaya-btn-ghost" @onclick="GoBack">
+                    <i class="fas fa-arrow-right" style="transform:scaleX(-1)" aria-hidden="true"></i>
+                    <span>@Tr("Denied.Btn.Back", "رجوع")</span>
+                </button>
+
+                <a class="bedaya-btn bedaya-btn-danger" href="/logout" title="@Tr("Denied.Btn.Switch", "تبديل الحساب")">
+                    <i class="fas fa-user-switch" aria-hidden="true"></i>
+                    <span>@Tr("Denied.Btn.Switch", "تبديل الحساب")</span>
+                </a>
+            </div>
+
+            <div class="bedaya-denied-code">403</div>
+        </div>
+    </div>
+</div>
+
+@code {
+    string Tr(string k, string? fallback = null)
+        => TranslationService.Translate(k) is string t && !string.IsNullOrWhiteSpace(t) ? t : (fallback ?? k);
+
+    private async Task GoBack() => await JS.InvokeVoidAsync("history.back");
+}

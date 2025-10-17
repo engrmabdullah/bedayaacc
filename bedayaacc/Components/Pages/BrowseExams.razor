@@ -1,0 +1,519 @@
+﻿@page "/exams"
+
+@using bedayaacc.Components.Layout
+@using bedayaacc.Models
+@using bedayaacc.Services
+@using bedayaacc.Repositories
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Security.Claims
+
+@inject IExamService ExamService
+@inject IPaymentRepository PaymentRepository
+@inject TranslationService TranslationService
+@inject NavigationManager Navigation
+@inject IHttpContextAccessor Http
+
+@layout ExternalLayout
+
+<PageTitle>@Tr("Exams.Browse.Title") - @Tr("Site.Name")</PageTitle>
+
+<div class="browse-exams-page">
+    <div class="exam-container">
+        <!-- Hero Section -->
+        <div class="exams-hero">
+            <div class="hero-content">
+                <h1>@Tr("Exams.Browse.Title")</h1>
+                <p>@Tr("Exams.Browse.Subtitle")</p>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-box">
+                    <i class="fas fa-file-alt"></i>
+                    <div>
+                        <strong>@totalExams</strong>
+                        <span>@Tr("Exams.Browse.Available")</span>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <strong>@completedExams</strong>
+                        <span>@Tr("Exams.Browse.Completed")</span>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <i class="fas fa-trophy"></i>
+                    <div>
+                        <strong>@passedExams</strong>
+                        <span>@Tr("Exams.Browse.Passed")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters & Search -->
+        <div class="exams-toolbar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text"
+                       placeholder="@Tr("Common.Search.Placeholder")"
+                       @bind="searchQuery"
+                       @bind:event="oninput"
+                       @onkeyup="SearchExams" />
+            </div>
+
+            <div class="filter-buttons">
+                <button class="filter-btn @(selectedCategoryId == null ? "active" : "")"
+                        @onclick="() => FilterByCategory(null)">
+                    <i class="fas fa-th"></i>
+                    @Tr("Common.All")
+                </button>
+                @foreach (var category in categories)
+                {
+                    <button class="filter-btn @(selectedCategoryId == category.CategoryId ? "active" : "")"
+                            @onclick="() => FilterByCategory(category.CategoryId)">
+                        <i class="fas fa-folder"></i>
+                        @category.CategoryNameAr
+                    </button>
+                }
+            </div>
+        </div>
+
+        <!-- Loading / Empty / Grid -->
+        @if (isLoading)
+        {
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p>@Tr("Common.LoadingExams")</p>
+            </div>
+        }
+        else if (filteredExams.Count == 0)
+        {
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h3>@Tr("Exams.Empty.NoResults")</h3>
+                <p>@Tr("Exams.Empty.Try")</p>
+            </div>
+        }
+        else
+        {
+            <div class="browse-exams-grid">
+                @foreach (var exam in filteredExams)
+                {
+                    var state = GetAccessState(exam.ExamId);
+
+                    <div class="browse-exam-card">
+                        <div class="exam-card-ribbon">
+                            @if (GetUserAttempts(exam.ExamId) > 0)
+                            {
+                                <span class="ribbon attempted">
+                                    <i class="fas fa-check"></i>
+                                    @Tr("Exams.Ribbon.Attempted")
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="ribbon new">
+                                    <i class="fas fa-star"></i>
+                                    @Tr("Exams.Ribbon.New")
+                                </span>
+                            }
+                        </div>
+
+                        <div class="exam-card-top">
+                            <div class="exam-category-badge">@exam.CategoryNameAr</div>
+                            <h3 class="exam-card-title">@(!string.IsNullOrWhiteSpace(exam.ExamTitleAr) ? exam.ExamTitleAr : exam.ExamTitleEn)</h3>
+                            @if (!string.IsNullOrWhiteSpace(exam.DescriptionAr))
+                            {
+                                <p class="exam-card-description">@exam.DescriptionAr</p>
+                            }
+
+                            <!-- السعر -->
+                            <div class="exam-price">
+                                @if (exam.Price == 0)
+                                {
+                                    <span class="badge badge-success">@Tr("Exams.Price.Free")</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-primary">@FormatPrice(exam.Price)</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="exam-card-meta">
+                            <div class="meta-row">
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>@exam.DurationMinutes @Tr("Exams.Meta.Minutes")</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-question-circle"></i>
+                                    <span>@(exam.TotalQuestions ?? 0) @Tr("Exams.Meta.Questions")</span>
+                                </div>
+                            </div>
+                            <div class="meta-row">
+                                <div class="meta-item">
+                                    <i class="fas fa-star"></i>
+                                    <span>@exam.TotalMarks @Tr("Exams.Meta.Marks")</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>@exam.UniqueStudents @Tr("Exams.Meta.Students")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="exam-card-instructor">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <span>@(string.IsNullOrWhiteSpace(exam.InstructorName) ? "" : exam.InstructorName)</span>
+                        </div>
+
+                        @if (GetLastAttempt(exam.ExamId) != null)
+                        {
+                            var lastAttempt = GetLastAttempt(exam.ExamId);
+                            <div class="exam-last-attempt">
+                                <div class="attempt-score">
+                                    <span class="score-label">@Tr("Exams.LastAttempt")</span>
+                                    <span class="score-value @(lastAttempt!.IsPassed ? "passed" : "failed")">
+                                        @lastAttempt!.Percentage.ToString("F0")%
+                                    </span>
+                                </div>
+                                @if ((exam.MaxAttempts ?? 0) > 0)
+                                {
+                                    <div class="attempts-info">
+                                        @GetUserAttempts(exam.ExamId) / @exam.MaxAttempts @Tr("Exams.Attempts.Unit")
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        <!-- أزرار الوصول -->
+                        <div class="exam-card-actions">
+                            @if (exam.Price == 0)
+                            {
+                                <!-- مجاني -->
+                                @if (CanTakeExamWithAccess(exam, state))
+                                {
+                                    <button class="btn btn-primary btn-block"
+                                            @onclick="() => StartExamGuarded(exam)">
+                                        <i class="fas fa-play-circle"></i>
+                                        @(GetUserAttempts(exam.ExamId) > 0 ? Tr("Exams.Actions.NewAttempt") : Tr("Exams.Actions.Start"))
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-secondary btn-block" disabled>
+                                        <i class="fas fa-lock"></i>
+                                        @Tr("Exams.Actions.MaxAttemptsReached")
+                                    </button>
+                                }
+                            }
+                            else if (!IsAuthenticated)
+                            {
+                                <!-- مدفوع + غير مسجل -->
+                                <button class="btn btn-secondary btn-block"
+                                        @onclick="() => GoLoginForPurchase(exam.ExamId)">
+                                    <i class="fas fa-lock"></i>
+                                    @Tr("Exams.Actions.LoginToPurchase")
+                                </button>
+                            }
+                            else if (state == AccessState.NotPurchased)
+                            {
+                                <!-- مدفوع + مسجل لكن لم يشترِ -->
+                                <button class="btn btn-accent btn-block"
+                                        @onclick="() => GoCheckout(exam.ExamId)">
+                                    <i class="fas fa-credit-card"></i>
+                                    @Tr("Exams.Actions.Purchase")
+                                </button>
+                            }
+                            else if (state == AccessState.PendingVerification)
+                            {
+                                <!-- مدفوع + قيد المراجعة -->
+                                <button class="btn btn-secondary btn-block" disabled>
+                                    <i class="fas fa-hourglass-half"></i>
+                                    @Tr("Exams.Actions.PendingVerification") <!-- مثال: “قيد المراجعة” -->
+                                </button>
+
+                                <button class="btn btn-outline btn-block"
+                                        @onclick="() => GoCheckout(exam.ExamId)">
+                                    <i class="fas fa-receipt"></i>
+                                    @Tr("Exams.Actions.ViewReceipt")
+                                </button>
+                            }
+                            else
+                            {
+                                <!-- مدفوع + تم التحقق Verified -->
+                                @if (CanTakeExamWithAccess(exam, state))
+                                {
+                                    <button class="btn btn-primary btn-block"
+                                            @onclick="() => StartExamGuarded(exam)">
+                                        <i class="fas fa-play-circle"></i>
+                                        @(GetUserAttempts(exam.ExamId) > 0 ? Tr("Exams.Actions.NewAttempt") : Tr("Exams.Actions.Start"))
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-secondary btn-block" disabled>
+                                        <i class="fas fa-lock"></i>
+                                        @Tr("Exams.Actions.MaxAttemptsReached")
+                                    </button>
+                                }
+                            }
+
+                            @if (GetUserAttempts(exam.ExamId) > 0)
+                            {
+                                <button class="btn btn-outline btn-block"
+                                        @onclick="() => ViewHistory(exam.ExamId)">
+                                    <i class="fas fa-history"></i>
+                                    @Tr("Exams.Actions.ViewHistory")
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    // ===== Models / Enums =====
+    private enum AccessState
+    {
+        Free,              // مجاني
+        NotPurchased,      // لم يشترِ بعد
+        PendingVerification, // إيصال مرفوع وقيد المراجعة
+        Verified           // مدفوع ومؤكد
+    }
+
+    // Data
+    private List<Exam> exams = new();
+    private List<Exam> filteredExams = new();
+    private List<ExamCategory> categories = new();
+    private Dictionary<int, List<ExamAttempt>> userAttemptsByExam = new();
+
+    // Access cache (per exam)
+    private readonly Dictionary<int, AccessState> accessByExam = new();
+
+    // UI state
+    private int? selectedCategoryId = null;
+    private string searchQuery = "";
+    private bool isLoading = true;
+
+    // Auth info
+    private bool IsAuthenticated =>
+        Http.HttpContext?.User?.Identity?.IsAuthenticated == true;
+
+    private int CurrentUserId =>
+        int.TryParse(Http.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+
+    // Counters
+    private int totalExams => exams.Count;
+    private int completedExams => userAttemptsByExam.Values.Count(attempts => attempts.Any(a => a.IsCompleted));
+    private int passedExams => userAttemptsByExam.Values.Count(attempts => attempts.Any(a => a.IsPassed));
+
+    private string Tr(string key) => TranslationService.Translate(key);
+
+    // ===== Lifecycle =====
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await TranslationService.EnsureInitAfterRenderAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+
+        // Categories
+        categories = await ExamService.GetCategoriesAsync();
+
+        // Public exams
+        exams = await ExamService.GetAllExamsAsync(isPublic: true, pageSize: 100);
+
+        // Attempts (if logged-in)
+        if (IsAuthenticated)
+        {
+            var allAttempts = await ExamService.GetUserAttemptsAsync(CurrentUserId);
+            userAttemptsByExam = allAttempts
+                .GroupBy(a => a.ExamId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+        }
+        else
+        {
+            userAttemptsByExam.Clear();
+        }
+
+        // Access cache
+        await ComputeAccessStatusesAsync();
+
+        filteredExams = exams;
+        isLoading = false;
+    }
+
+    private async Task ComputeAccessStatusesAsync()
+    {
+        accessByExam.Clear();
+
+        foreach (var e in exams)
+        {
+            var state = AccessState.NotPurchased;
+
+            if (e.Price == 0)
+            {
+                state = AccessState.Free;
+            }
+            else if (!IsAuthenticated)
+            {
+                state = AccessState.NotPurchased;
+            }
+            else
+            {
+                // verified?
+                var verified = await PaymentRepository.HasUserPaidExamAsync(e.ExamId, CurrentUserId);
+                if (verified)
+                {
+                    state = AccessState.Verified;
+                }
+                else
+                {
+                    // pending?
+                    var pending = await PaymentRepository.GetPendingOrderAsync(CurrentUserId, e.ExamId);
+                    state = (pending != null) ? AccessState.PendingVerification : AccessState.NotPurchased;
+                }
+            }
+
+            accessByExam[e.ExamId] = state;
+        }
+    }
+
+    private AccessState GetAccessState(int examId)
+        => accessByExam.TryGetValue(examId, out var s) ? s : AccessState.NotPurchased;
+
+    private void FilterByCategory(int? categoryId)
+    {
+        selectedCategoryId = categoryId;
+        ApplyFilters();
+    }
+
+    private void SearchExams() => ApplyFilters();
+
+    private void ApplyFilters()
+    {
+        filteredExams = exams;
+
+        if (selectedCategoryId.HasValue)
+            filteredExams = filteredExams.Where(e => e.CategoryId == selectedCategoryId.Value).ToList();
+
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            var query = searchQuery.ToLower();
+            filteredExams = filteredExams.Where(e =>
+                (e.ExamTitleAr ?? "").ToLower().Contains(query) ||
+                (e.DescriptionAr ?? "").ToLower().Contains(query) ||
+                (e.CategoryNameAr ?? "").ToLower().Contains(query)
+            ).ToList();
+        }
+
+        StateHasChanged();
+    }
+
+    private int GetUserAttempts(int examId)
+        => userAttemptsByExam.TryGetValue(examId, out var attempts) ? attempts.Count : 0;
+
+    private ExamAttempt? GetLastAttempt(int examId)
+        => userAttemptsByExam.TryGetValue(examId, out var attempts)
+            ? attempts.OrderByDescending(a => a.StartedAt).FirstOrDefault()
+            : null;
+
+    // includes access + attempts guard
+    private bool CanTakeExamWithAccess(Exam exam, AccessState state)
+    {
+        var hasAccess =
+            exam.Price == 0 ? true :
+            state == AccessState.Verified; // لا دخول إلا بعد التحقق
+
+        if (!hasAccess) return false;
+
+        var max = exam.MaxAttempts ?? 0;
+        if (max <= 0) return true; // Unlimited
+        return GetUserAttempts(exam.ExamId) < max;
+    }
+
+    // Quick re-check before navigating
+    private async Task StartExamGuarded(Exam exam)
+    {
+        var freshState = await RefreshAccessStateAsync(exam);
+        if (exam.Price > 0 && freshState != AccessState.Verified)
+        {
+            // غير متحقق → إمّا تسجيل دخول، شراء أو قيد المراجعة
+            if (!IsAuthenticated) { GoLoginForPurchase(exam.ExamId); return; }
+            if (freshState == AccessState.NotPurchased) { GoCheckout(exam.ExamId); return; }
+            // Pending → فقط اعرض صفحة الدفع/الإيصال
+            if (freshState == AccessState.PendingVerification) { GoCheckout(exam.ExamId); return; }
+            return;
+        }
+
+        // حارس المحاولات
+        var max = exam.MaxAttempts ?? 0;
+        if (max > 0 && GetUserAttempts(exam.ExamId) >= max)
+            return;
+
+        Navigation.NavigateTo($"/exams/{exam.ExamId}/take");
+    }
+
+    private async Task<AccessState> RefreshAccessStateAsync(Exam e)
+    {
+        AccessState state;
+        if (e.Price == 0)
+        {
+            state = AccessState.Free;
+        }
+        else if (!IsAuthenticated)
+        {
+            state = AccessState.NotPurchased;
+        }
+        else
+        {
+            var verified = await PaymentRepository.HasUserPaidExamAsync(e.ExamId, CurrentUserId);
+            if (verified)
+                state = AccessState.Verified;
+            else
+                state = (await PaymentRepository.GetPendingOrderAsync(CurrentUserId, e.ExamId)) != null
+                    ? AccessState.PendingVerification
+                    : AccessState.NotPurchased;
+        }
+
+        accessByExam[e.ExamId] = state;
+        StateHasChanged();
+        return state;
+    }
+
+    private void GoLoginForPurchase(int examId)
+    {
+        var returnUrl = $"/exams?buy={examId}";
+        Navigation.NavigateTo($"/login?ReturnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+    }
+
+    private void GoCheckout(int examId)
+    {
+        Navigation.NavigateTo($"/exams/{examId}/checkout");
+    }
+
+    private void ViewHistory(int examId)
+    {
+        Navigation.NavigateTo($"/exams/{examId}/history");
+    }
+
+    private static string FormatPrice(decimal price)
+        => string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:0.##} {1}", price, "EGP");
+}

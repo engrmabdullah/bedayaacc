@@ -1,0 +1,297 @@
+﻿@page "/login"
+@attribute [AllowAnonymous]
+
+@using bedayaacc.Components.Layout
+@using bedayaacc.Models
+@using bedayaacc.Services
+@using bedayaacc.Repositories
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+
+@inject NavigationManager Navigation
+@inject TranslationService TranslationService
+@inject IJSRuntime JSRuntime
+@inject bedayaacc.Repositories.IAuthenticationService AuthService
+@inject IHttpContextAccessor Http
+@inject IUserRepository UserRepository
+@inject LoginTicketStore TicketStore
+
+@layout ExternalLayout
+
+<PageTitle>@Tr("Login.Title") - @Tr("Site.Name")</PageTitle>
+
+<div class="login-page-enhanced">
+    <div class="login-container-enhanced">
+        <!-- Form Section -->
+        <div class="login-form-section-enhanced">
+            <!-- Header -->
+            <div class="login-header-enhanced">
+                <div class="login-logo-enhanced">
+                    <div class="login-logo-icon-enhanced">
+                        <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                    </div>
+                    <h1 class="login-title-enhanced">@Tr("Login.Title")</h1>
+                </div>
+                <p class="login-subtitle-enhanced">@Tr("Login.Subtitle")</p>
+            </div>
+
+            <!-- Form -->
+            <EditForm Model="loginModel" OnValidSubmit="HandleLogin" class="login-form-enhanced">
+                <DataAnnotationsValidator />
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="login-alert-enhanced login-alert-error-enhanced">
+                        <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                        <span>@errorMessage</span>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(successMessage))
+                {
+                    <div class="login-alert-enhanced login-alert-success-enhanced">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i>
+                        <span>@successMessage</span>
+                    </div>
+                }
+
+                <!-- Email -->
+                <div class="login-form-group-enhanced">
+                    <label for="email" class="login-form-label-enhanced">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                        <span>@Tr("Login.Email")</span>
+                    </label>
+                    <InputText id="email"
+                               type="email"
+                               class="login-form-input-enhanced"
+                               @bind-Value="loginModel.Email"
+                               placeholder="@Tr("Login.Email.Placeholder")" />
+                    <ValidationMessage For="@(() => loginModel.Email)" class="login-validation-message-enhanced" />
+                </div>
+
+                <!-- Password -->
+                <div class="login-form-group-enhanced">
+                    <label for="password" class="login-form-label-enhanced">
+                        <i class="fas fa-lock" aria-hidden="true"></i>
+                        <span>@Tr("Login.Password")</span>
+                    </label>
+                    <div class="login-password-container-enhanced">
+                        <InputText id="password"
+                                   type="@(showPassword ? "text" : "password")"
+                                   class="login-form-input-enhanced"
+                                   @bind-Value="loginModel.Password"
+                                   placeholder="@Tr("Login.Password.Placeholder")" />
+                        <button type="button"
+                                class="register-password-toggle-enhanced"
+                                @onclick="TogglePasswordVisibility"
+                                title="@Tr("Login.Password.Toggle")">
+                            <i class="@(showPassword ? "fas fa-eye-slash" : "fas fa-eye")" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <ValidationMessage For="@(() => loginModel.Password)" class="login-validation-message-enhanced" />
+                </div>
+
+                <!-- Options -->
+                <div class="login-form-options-enhanced">
+                    <label class="login-checkbox-container-enhanced">
+                        <InputCheckbox @bind-Value="loginModel.RememberMe" />
+                        <span class="login-checkbox-checkmark-enhanced"></span>
+                        <span>@Tr("Login.Remember")</span>
+                    </label>
+                    <a href="/forgot-password" class="login-forgot-password-enhanced">
+                        @Tr("Login.Forgot")
+                    </a>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="login-btn-enhanced" disabled="@isSubmitting">
+                    @if (isSubmitting)
+                    {
+                        <span class="login-spinner-enhanced"></span>
+                        <span>@Tr("Login.Submitting")</span>
+                    }
+                    else
+                    {
+                        <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+                        <span>@Tr("Login.Submit")</span>
+                    }
+                </button>
+            </EditForm>
+
+            <!-- Footer -->
+            <div class="login-footer-enhanced">
+                <p class="login-footer-text-enhanced">
+                    @Tr("Login.Register.Question")
+                    <a href="/register" class="login-link-enhanced">@Tr("Login.Register.Link")</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Image Section -->
+        <div class="login-image-section-enhanced">
+            <div class="login-image-content-enhanced">
+                <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                <h3 class="login-image-title-enhanced">@Tr("Login.Image.Title")</h3>
+                <p class="login-image-subtitle-enhanced">@Tr("Login.Image.Subtitle")</p>
+
+                <div class="login-image-features-enhanced">
+                    <div class="login-image-feature-enhanced">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i>
+                        <span>@Tr("Login.Feature1")</span>
+                    </div>
+                    <div class="login-image-feature-enhanced">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i>
+                        <span>@Tr("Login.Feature2")</span>
+                    </div>
+                    <div class="login-image-feature-enhanced">
+                        <i class="fas fa-check-circle" aria-hidden="true"></i>
+                        <span>@Tr("Login.Feature3")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "ReturnUrl")] public string? ReturnUrl { get; set; }
+
+    private LoginModel loginModel = new();
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+    private bool isSubmitting;
+    private bool showPassword;
+
+    private string Tr(string key) => TranslationService.Translate(key);
+
+    protected override void OnInitialized()
+    {
+        // لو المستخدم مسجّل بالفعل، رجّعه مباشرة
+        var user = Http.HttpContext?.User;
+        if (user?.Identity?.IsAuthenticated == true)
+        {
+            var roles = user.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
+            var target = ResolveTarget(ReturnUrl, GetRedirectUrlByRole(roles));
+            Navigation.NavigateTo(target, forceLoad: true);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await TranslationService.EnsureInitAfterRenderAsync();
+            StateHasChanged();
+        }
+    }
+
+    private void TogglePasswordVisibility() => showPassword = !showPassword;
+
+    private async Task HandleLogin()
+    {
+        isSubmitting = true;
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+        StateHasChanged();
+
+        try
+        {
+            var result = await AuthService.LoginAsync(loginModel);
+
+            if (result.Success && result.User != null)
+            {
+                var roles = await AuthService.GetUserRolesAsync(result.User.UserId);
+
+                var target = ResolveTarget(ReturnUrl, GetRedirectUrlByRole(roles));
+
+                var token = TicketStore.Create(new LoginTicket(
+                    result.User.UserId,
+                    result.User.FirstName ?? string.Empty,
+                    result.User.LastName ?? string.Empty,
+                    result.User.Email,
+                    roles,
+                    loginModel.RememberMe,
+                    DateTimeOffset.UtcNow.AddMinutes(2)
+                ));
+
+                Navigation.NavigateTo(
+                    $"/auth/callback?token={Uri.EscapeDataString(token)}&target={Uri.EscapeDataString(target)}",
+                    forceLoad: true
+                );
+                return;
+            }
+
+            errorMessage = result.Message ?? Tr("Login.Error.Message");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Login exception: {ex}");
+            errorMessage = Tr("Login.Error.Message");
+        }
+        finally
+        {
+            isSubmitting = false;
+            StateHasChanged();
+        }
+    }
+
+
+    private async Task SignInUserAsync(User user, List<string> roles, bool rememberMe)
+    {
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+            new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}".Trim()),
+            new(ClaimTypes.Email, user.Email ?? string.Empty)
+        };
+        foreach (var r in roles) claims.Add(new Claim(ClaimTypes.Role, r));
+
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        var props = new AuthenticationProperties
+        {
+            IsPersistent = rememberMe,
+            ExpiresUtc = DateTimeOffset.UtcNow.AddDays(rememberMe ? 30 : 1)
+        };
+
+        var ip = Http.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+        var ua = Http.HttpContext?.Request.Headers["User-Agent"].ToString();
+        _ = UserRepository.UpdateLastLoginAsync(user.UserId, ip, ua);
+
+        await Http.HttpContext!.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal,
+            props);
+    }
+
+    private string GetRedirectUrlByRole(List<string> roles)
+    {
+        if (roles.Contains("Admin")) return "/admin/dashboard";
+        if (roles.Contains("Instructor")) return "/instructor/dashboard";
+        if (roles.Contains("Support")) return "/support/dashboard";
+        if (roles.Contains("Student")) return "/student/dashboard";
+        return "/";
+    }
+
+    // حارس ضد Open Redirect + منع الرجوع لـ /login
+    private static bool IsSafeLocalUrl(string? url)
+        => !string.IsNullOrWhiteSpace(url)
+           && url.StartsWith("/")
+           && !url.StartsWith("//")
+           && !url.StartsWith("/\\")
+           && !url.StartsWith("/login", StringComparison.OrdinalIgnoreCase);
+
+    private static string ResolveTarget(string? returnUrl, string? roleRedirect)
+    {
+        var decoded = string.IsNullOrWhiteSpace(returnUrl) ? null : Uri.UnescapeDataString(returnUrl);
+        if (IsSafeLocalUrl(decoded)) return decoded!;
+        if (!string.IsNullOrWhiteSpace(roleRedirect)) return roleRedirect!;
+        return "/";
+    }
+
+    private async Task HandleGoogleLogin() => await JSRuntime.InvokeVoidAsync("alert", "Google login coming soon!");
+    private async Task HandleFacebookLogin() => await JSRuntime.InvokeVoidAsync("alert", "Facebook login coming soon!");
+}

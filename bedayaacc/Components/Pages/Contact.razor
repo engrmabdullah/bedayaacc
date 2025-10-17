@@ -1,0 +1,245 @@
+﻿@page "/contact"
+@using System.ComponentModel.DataAnnotations
+@using bedayaacc.Components.Layout
+@using bedayaacc.Services
+@using Microsoft.AspNetCore.Components.Forms
+@inject NavigationManager Navigation
+@inject TranslationService TranslationService
+@inject IJSRuntime JSRuntime
+
+@layout ExternalLayout
+
+<div class="bedaya-contact-page">
+    <!-- Hero Section -->
+    <section class="bedaya-contact-hero">
+        <div class="bedaya-container">
+            <div class="bedaya-contact-hero-content">
+                <h1 class="bedaya-contact-title">@Tr("Contact.Title")</h1>
+                <p class="bedaya-contact-subtitle">@Tr("Contact.Subtitle")</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="bedaya-contact-container">
+        <!-- Contact Form -->
+        <section class="bedaya-contact-form-section">
+            <div class="bedaya-contact-form-card">
+                <h2 class="bedaya-contact-form-title">@Tr("Contact.Form.Title")</h2>
+
+                <EditForm Model="contactModel" OnValidSubmit="HandleContactSubmit" class="bedaya-contact-form">
+                    <DataAnnotationsValidator />
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="bedaya-alert bedaya-alert-error">
+                            <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                            @errorMessage
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="bedaya-alert bedaya-alert-success">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i>
+                            @successMessage
+                        </div>
+                    }
+
+                    <div class="bedaya-form-row">
+                        <div class="bedaya-form-group">
+                            <label for="name" class="bedaya-form-label">
+                                <i class="fas fa-user" aria-hidden="true"></i>
+                                @Tr("Contact.Form.Name")
+                            </label>
+                            <InputText id="name" class="bedaya-form-input" @bind-Value="contactModel.Name" placeholder="@Tr("Contact.Form.Name.Placeholder")" />
+                            <ValidationMessage For="@(() => contactModel.Name)" class="bedaya-validation-message" />
+                        </div>
+
+                        <div class="bedaya-form-group">
+                            <label for="email" class="bedaya-form-label">
+                                <i class="fas fa-envelope" aria-hidden="true"></i>
+                                @Tr("Contact.Form.Email")
+                            </label>
+                            <InputText id="email" class="bedaya-form-input" @bind-Value="contactModel.Email" placeholder="@Tr("Contact.Form.Email.Placeholder")" />
+                            <ValidationMessage For="@(() => contactModel.Email)" class="bedaya-validation-message" />
+                        </div>
+                    </div>
+
+                    <div class="bedaya-form-group">
+                        <label for="subject" class="bedaya-form-label">
+                            <i class="fas fa-tag" aria-hidden="true"></i>
+                            @Tr("Contact.Form.Subject")
+                        </label>
+                        <InputText id="subject" class="bedaya-form-input" @bind-Value="contactModel.Subject" placeholder="@Tr("Contact.Form.Subject.Placeholder")" />
+                        <ValidationMessage For="@(() => contactModel.Subject)" class="bedaya-validation-message" />
+                    </div>
+
+                    <div class="bedaya-form-group">
+                        <label for="message" class="bedaya-form-label">
+                            <i class="fas fa-comment" aria-hidden="true"></i>
+                            @Tr("Contact.Form.Message")
+                        </label>
+                        <InputTextArea id="message" class="bedaya-form-textarea" @bind-Value="contactModel.Message" placeholder="@Tr("Contact.Form.Message.Placeholder")" rows="6"></InputTextArea>
+                        <ValidationMessage For="@(() => contactModel.Message)" class="bedaya-validation-message" />
+                    </div>
+
+                    <button type="submit" class="bedaya-btn bedaya-btn-primary bedaya-contact-btn" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <span class="bedaya-spinner"></span>
+                        }
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                        @Tr("Contact.Form.Submit")
+                    </button>
+                </EditForm>
+            </div>
+        </section>
+
+        <!-- Contact Info -->
+        <section class="bedaya-contact-info-section">
+            <div class="bedaya-contact-info-card">
+                <h2 class="bedaya-contact-info-title">@Tr("Contact.Info.Title")</h2>
+
+                <div class="bedaya-contact-info-grid">
+                    <div class="bedaya-contact-info-item">
+                        <div class="bedaya-contact-info-icon">
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        </div>
+                        <div class="bedaya-contact-info-content">
+                            <h3>@Tr("Contact.Info.Address")</h3>
+                            <p>@Tr("Contact.Info.Address.Value")</p>
+                        </div>
+                    </div>
+
+                    <div class="bedaya-contact-info-item">
+                        <div class="bedaya-contact-info-icon">
+                            <i class="fas fa-phone" aria-hidden="true"></i>
+                        </div>
+                        <div class="bedaya-contact-info-content">
+                            <h3>@Tr("Contact.Info.Phone")</h3>
+                            <p>@Tr("Contact.Info.Phone.Value")</p>
+                        </div>
+                    </div>
+
+                    <div class="bedaya-contact-info-item">
+                        <div class="bedaya-contact-info-icon">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                        </div>
+                        <div class="bedaya-contact-info-content">
+                            <h3>@Tr("Contact.Info.Email")</h3>
+                            <p>@Tr("Contact.Info.Email.Value")</p>
+                        </div>
+                    </div>
+
+                    <div class="bedaya-contact-info-item">
+                        <div class="bedaya-contact-info-icon">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                        </div>
+                        <div class="bedaya-contact-info-content">
+                            <h3>@Tr("Contact.Info.Hours")</h3>
+                            <p>@Tr("Contact.Info.Hours.Value")</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Social Links -->
+                <div class="bedaya-contact-social">
+                    <h3>@Tr("Contact.Social.Title")</h3>
+                    <div class="bedaya-contact-social-links">
+                        <a href="#" class="bedaya-social-link bedaya-social-facebook" title="@Tr("Contact.Social.Facebook")">
+                            <i class="fab fa-facebook-f" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="bedaya-social-link bedaya-social-twitter" title="@Tr("Contact.Social.Twitter")">
+                            <i class="fab fa-twitter" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="bedaya-social-link bedaya-social-instagram" title="@Tr("Contact.Social.Instagram")">
+                            <i class="fab fa-instagram" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="bedaya-social-link bedaya-social-linkedin" title="@Tr("Contact.Social.LinkedIn")">
+                            <i class="fab fa-linkedin-in" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Map Section -->
+    <section class="bedaya-contact-map">
+        <div class="bedaya-container">
+            <div class="bedaya-contact-map-content">
+                <h2 class="bedaya-contact-map-title">@Tr("Contact.Map.Title")</h2>
+                <p class="bedaya-contact-map-subtitle">@Tr("Contact.Map.Subtitle")</p>
+                <div class="bedaya-contact-map-placeholder">
+                    <i class="fas fa-map-marked-alt" aria-hidden="true"></i>
+                    <p>@Tr("Contact.Map.Placeholder")</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@code {
+    private ContactModel contactModel = new ContactModel();
+    private string errorMessage = "";
+    private string successMessage = "";
+    private bool isSubmitting = false;
+
+    public class ContactModel
+    {
+        [Required(ErrorMessage = "Name is required")]
+        [StringLength(100, ErrorMessage = "Name must be less than 100 characters")]
+        public string Name { get; set; } = "";
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address")]
+        public string Email { get; set; } = "";
+
+        [Required(ErrorMessage = "Subject is required")]
+        [StringLength(200, ErrorMessage = "Subject must be less than 200 characters")]
+        public string Subject { get; set; } = "";
+
+        [Required(ErrorMessage = "Message is required")]
+        [StringLength(1000, ErrorMessage = "Message must be less than 1000 characters")]
+        public string Message { get; set; } = "";
+    }
+
+    private async Task HandleContactSubmit()
+    {
+        isSubmitting = true;
+        errorMessage = "";
+        successMessage = "";
+
+        try
+        {
+            // Simulate contact form submission
+            await Task.Delay(2000);
+
+            // Here you would typically send the contact form to your backend
+            // For now, we'll simulate a successful submission
+            successMessage = Tr("Contact.Success.Message");
+
+            // Reset form after successful submission
+            contactModel = new ContactModel();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = Tr("Contact.Error.Message");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private string Tr(string key) => TranslationService.Translate(key);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await TranslationService.EnsureInitAfterRenderAsync();
+        }
+        StateHasChanged();
+    }
+}

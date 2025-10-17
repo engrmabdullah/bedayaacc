@@ -1,23 +1,513 @@
-﻿@inherits LayoutComponentBase
+﻿@using bedayaacc.Services
+@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+@implements IDisposable
+
+@code {
+    private bool isMobileMenuOpen = false;
+    private bool isScrolled = false;
+    private bool isBottomNavVisible = false;
+
+    // سهل تغييره لاحقًا
+    private const string LoginUrl = "/login";
+    private const string RegisterUrl = "/register";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await TranslationService.EnsureInitAfterRenderAsync();
+            await JSRuntime.InvokeVoidAsync("initializeScrollHandler", DotNetObjectReference.Create(this));
+        }
+        StateHasChanged();
+    }
+
+    string Tr(string k) => TranslationService.Translate(k);
+
+    private async Task SetAr()
+    {
+        await TranslationService.SetLanguageAsync("ar");
+        StateHasChanged();
+    }
+
+    private async Task SetEn()
+    {
+        await TranslationService.SetLanguageAsync("en");
+        StateHasChanged();
+    }
+
+    private void ToggleMobileMenu()
+    {
+        isMobileMenuOpen = !isMobileMenuOpen;
+        isBottomNavVisible = !isMobileMenuOpen; // Toggle bottom nav visibility
+    }
+
+    [JSInvokable]
+    public void OnScroll(bool scrolled)
+    {
+        isScrolled = scrolled;
+        InvokeAsync(StateHasChanged);
+    }
+
+    protected override void OnInitialized()
+    {
+        Nav.LocationChanged += HandleLocationChanged;
+    }
+
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        isMobileMenuOpen = false;
+        isBottomNavVisible = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= HandleLocationChanged;
+    }
+
+
+    private string newsletterEmail = string.Empty;
+    private string newsletterMessage = string.Empty;
+
+    private async Task HandleNewsletterSubmit()
+    {
+        if (!string.IsNullOrWhiteSpace(newsletterEmail))
+        {
+            // TODO: Add newsletter subscription logic here
+            // await NewsletterService.Subscribe(newsletterEmail);
+
+            newsletterMessage = Tr("Footer.SubscribeSuccess");
+            newsletterEmail = string.Empty;
+
+            // Clear message after 3 seconds
+            await Task.Delay(3000);
+            newsletterMessage = string.Empty;
+            StateHasChanged();
+        }
+    }
+}
+
+<div class="site-wrapper @(TranslationService.CurrentLanguage == "ar" ? "rtl" : "ltr")">
+    <!-- Header -->
+    <header class="site-header @(isScrolled ? "scrolled" : "")" role="banner">
+        <div class="header-background"></div>
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo" aria-label="Home">
+                    <div class="logo-icon">
+                        <i class="fas fa-calculator" aria-hidden="true"></i>
+                    </div>
+                </a>
+
+                <nav class="desktop-nav" aria-label="Primary">
+                    <a href="/" class="nav-link">
+                        <i class="fas fa-home" aria-hidden="true"></i>
+                        <span>@Tr("Nav.Home")</span>
+                    </a>
+                    <a href="/about" class="nav-link">
+                        <i class="fas fa-book" aria-hidden="true"></i>
+                        <span>@Tr("Nav.About")</span>
+                    </a>
+                    <a href="/courses" class="nav-link">
+                        <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                        <span>@Tr("Nav.Courses")</span>
+                    </a>
+                    <a href="/blog" class="nav-link">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                        <span>@Tr("Nav.Blog")</span>
+                    </a>
+
+                    <a href="/contact" class="nav-link">
+                        <i class="fas fa-phone" aria-hidden="true"></i>
+                        <span>@Tr("Nav.Contact")</span>
+                    </a>
+                </nav>
+
+                <div class="header-actions">
+                    <div class="lang-switcher" aria-label="Language">
+                        <button class="lang-btn @(TranslationService.CurrentLanguage == "en" ? "active" : "")"
+                                @onclick="SetEn" aria-pressed="@(TranslationService.CurrentLanguage == "en")">
+                            EN
+                        </button>
+                        <button class="lang-btn @(TranslationService.CurrentLanguage == "ar" ? "active" : "")"
+                                @onclick="SetAr" aria-pressed="@(TranslationService.CurrentLanguage == "ar")">
+                            AR
+                        </button>
+                    </div>
+
+                    <div class="auth-actions">
+                        <a href="@LoginUrl" class="btn btn-ghost">@Tr("Nav.Login")</a>
+                        <a href="@RegisterUrl" class="btn btn-primary">@Tr("Nav.Register")</a>
+                    </div>
+
+                    <button class="mobile-menu-toggle @(isMobileMenuOpen ? "active" : "")"
+                            @onclick="ToggleMobileMenu" aria-label="Toggle menu" aria-expanded="@(isMobileMenuOpen)">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-nav @(isMobileMenuOpen ? "open" : "")" aria-hidden="@(!isMobileMenuOpen)">
+        <div class="mobile-nav-backdrop" @onclick="ToggleMobileMenu"></div>
+        <div class="mobile-nav-content" role="dialog" aria-modal="true" aria-label="Menu">
+            <div class="mobile-nav-header">
+                <div class="mobile-logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-calculator" aria-hidden="true"></i>
+                    </div>
+                    <span>@Tr("Site.Name")</span>
+                </div>
+                <button class="mobile-close" @onclick="ToggleMobileMenu" aria-label="Close menu">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="mobile-nav-links">
+                <a href="/" class="mobile-nav-link" @onclick="ToggleMobileMenu">
+                    <span><i class="fas fa-home" aria-hidden="true"></i> @Tr("Nav.Home")</span>
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </a>
+                <a href="/courses" class="mobile-nav-link" @onclick="ToggleMobileMenu">
+                    <span><i class="fas fa-graduation-cap" aria-hidden="true"></i> @Tr("Nav.Courses")</span>
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </a>
+                <a href="/instructors" class="mobile-nav-link" @onclick="ToggleMobileMenu">
+                    <span><i class="fas fa-users" aria-hidden="true"></i> @Tr("Nav.Instructors")</span>
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </a>
+                <a href="/resources" class="mobile-nav-link" @onclick="ToggleMobileMenu">
+                    <span><i class="fas fa-book" aria-hidden="true"></i> @Tr("Nav.Resources")</span>
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </a>
+                <a href="/contact" class="mobile-nav-link" @onclick="ToggleMobileMenu">
+                    <span><i class="fas fa-phone" aria-hidden="true"></i> @Tr("Nav.Contact")</span>
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </a>
+            </div>
+
+            <div class="mobile-auth">
+                <a href="@LoginUrl" class="mobile-auth-btn" @onclick="ToggleMobileMenu">@Tr("Nav.Login")</a>
+                <a href="@RegisterUrl" class="mobile-auth-btn primary" @onclick="ToggleMobileMenu">@Tr("Nav.Register")</a>
+            </div>
+        </div>
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
+    <!-- Main Content -->
+    <main class="site-main" role="main">
+        <div class="page-transition">
             @Body
-        </article>
+        </div>
     </main>
+
+    <!-- Bottom Navigation for Mobile -->
+    <nav class="bottom-nav" style="@(isBottomNavVisible ? "display: block;" : "display: none;")">
+        <a href="/" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>@Tr("Nav.Home")</span>
+        </a>
+        <a href="/courses" class="bottom-nav-item">
+            <i class="fas fa-book"></i>
+            <span>@Tr("Nav.Courses")</span>
+        </a>
+        <a href="/blog" class="bottom-nav-item">
+            <i class="fas fa-blog"></i>
+            <span>@Tr("Nav.Blog")</span>
+        </a>
+        <a href="/contact" class="bottom-nav-item">
+            <i class="fas fa-envelope"></i>
+            <span>@Tr("Nav.Contact")</span>
+        </a>
+    </nav>
+
+    <!-- Footer -->
+
+
+    <footer class="footer-enhanced" role="contentinfo">
+
+
+
+
+        <div class="footer-container-enhanced">
+            <!-- Main Footer Content -->
+            <div class="footer-main-enhanced">
+
+                <!-- Brand Section -->
+                <div class="footer-brand-enhanced">
+                    <a href="/" class="footer-logo-enhanced">
+                        <div class="footer-logo-icon-enhanced">
+                            <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                        </div>
+                        <span class="footer-logo-text-enhanced">@Tr("Site.Name")</span>
+                    </a>
+
+                    <p class="footer-description-enhanced">
+                        @Tr("Site.Description")
+                    </p>
+
+                    <!-- Contact Info -->
+                    <div class="footer-contact-enhanced">
+                        <div class="footer-contact-item-enhanced">
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                            <span>@Tr("Footer.Address")</span>
+                        </div>
+                        <a href="tel:+201234567890" class="footer-contact-item-enhanced">
+                            <i class="fas fa-phone" aria-hidden="true"></i>
+                            <span>@Tr("Footer.Phone")</span>
+                        </a>
+                        <a href="mailto:info@bedaya.com" class="footer-contact-item-enhanced">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                            <span>@Tr("Footer.Email")</span>
+                        </a>
+                    </div>
+
+                    <!-- Social Links -->
+                    <div class="footer-social-enhanced">
+                        <a href="#" class="footer-social-link-enhanced facebook"
+                           title="Facebook" aria-label="Facebook">
+                            <i class="fab fa-facebook-f" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="footer-social-link-enhanced twitter"
+                           title="Twitter" aria-label="Twitter">
+                            <i class="fab fa-twitter" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="footer-social-link-enhanced instagram"
+                           title="Instagram" aria-label="Instagram">
+                            <i class="fab fa-instagram" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="footer-social-link-enhanced linkedin"
+                           title="LinkedIn" aria-label="LinkedIn">
+                            <i class="fab fa-linkedin-in" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="footer-social-link-enhanced youtube"
+                           title="YouTube" aria-label="YouTube">
+                            <i class="fab fa-youtube" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="footer-social-link-enhanced whatsapp"
+                           title="WhatsApp" aria-label="WhatsApp">
+                            <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                        </a>
+                    </div>
+
+                    <!-- Optional: Payment Methods -->
+                    @* 
+                <div class="footer-payment-enhanced">
+                    <span class="footer-payment-label-enhanced">@Tr("Footer.PaymentMethods")</span>
+                    <div class="footer-payment-icons-enhanced">
+                        <div class="footer-payment-icon-enhanced">
+                            <i class="fab fa-cc-visa" aria-hidden="true"></i>
+                        </div>
+                        <div class="footer-payment-icon-enhanced">
+                            <i class="fab fa-cc-mastercard" aria-hidden="true"></i>
+                        </div>
+                        <div class="footer-payment-icon-enhanced">
+                            <i class="fab fa-cc-paypal" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                *@
+                </div>
+
+                <!-- Quick Links -->
+                <div class="footer-section-enhanced">
+                    <h4 class="footer-section-title-enhanced">@Tr("Footer.QuickLinks")</h4>
+                    <ul class="footer-links-list-enhanced">
+                        <li>
+                            <a href="/" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Nav.Home")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/about" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Nav.About")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/courses" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Nav.Courses")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/blog" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Nav.Blog")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/events" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Nav.Events")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/contact" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Nav.Contact")</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Courses -->
+                <div class="footer-section-enhanced">
+                    <h4 class="footer-section-title-enhanced">@Tr("Footer.Courses")</h4>
+                    <ul class="footer-links-list-enhanced">
+                        <li>
+                            <a href="/courses/accounting" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Footer.Accounting")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/courses/finance" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Footer.Finance")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/courses/tax" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Footer.Tax")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/courses/management" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Footer.Management")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/courses/excel" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Footer.Excel")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/certificates" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Footer.Certificates")</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="footer-section-enhanced">
+                    <h4 class="footer-section-title-enhanced">@Tr("Footer.Support")</h4>
+                    <ul class="footer-links-list-enhanced">
+                        <li>
+                            <a href="/help" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Footer.HelpCenter")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/faq" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Footer.FAQ")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/terms" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Footer.Terms")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/privacy" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Footer.Privacy")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/refund" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Footer.RefundPolicy")</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/careers" class="footer-link-enhanced">
+                                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                                <span>@Tr("Footer.Careers")</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="footer-newsletter-enhanced">
+                    <h4 class="footer-section-title-enhanced">@Tr("Footer.Newsletter")</h4>
+                    <p class="footer-newsletter-text-enhanced">
+                        @Tr("Footer.NewsletterDesc")
+                    </p>
+
+                    <form class="footer-newsletter-form-enhanced" @onsubmit="HandleNewsletterSubmit">
+                        <input type="email"
+                               class="footer-newsletter-input-enhanced"
+                               placeholder="@Tr("Footer.EmailPlaceholder")"
+                               @bind="newsletterEmail"
+                               required
+                               aria-label="@Tr("Footer.EmailPlaceholder")" />
+
+                        <button type="submit" class="footer-newsletter-btn-enhanced">
+                            <span>@Tr("Footer.Subscribe")</span>
+                            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                        </button>
+                    </form>
+
+                    @if (!string.IsNullOrEmpty(newsletterMessage))
+                    {
+                        <div style="color: #10b981; font-size: 0.85rem; margin-top: 0.8rem;">
+                            @newsletterMessage
+                        </div>
+                    }
+                </div>
+
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom-enhanced">
+                <p class="footer-copyright-enhanced">
+                    &copy; @DateTime.Now.Year @Tr("Site.Name"). @Tr("Footer.Rights")
+                </p>
+
+                <div class="footer-bottom-links-enhanced">
+                    <a href="/terms" class="footer-bottom-link-enhanced">@Tr("Footer.Terms")</a>
+                    <a href="/privacy" class="footer-bottom-link-enhanced">@Tr("Footer.Privacy")</a>
+                    <a href="/cookies" class="footer-bottom-link-enhanced">@Tr("Footer.Cookies")</a>
+                    <a href="/sitemap" class="footer-bottom-link-enhanced">@Tr("Footer.Sitemap")</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top @(isScrolled ? "visible" : "")"
+            onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
+            aria-label="Scroll to top">
+        <i class="fas fa-chevron-up" aria-hidden="true"></i>
+    </button>
 </div>
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+<script>
+    window.initializeScrollHandler = (dotNetObject) => {
+        let isScrolled = false;
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY > 100;
+            if (scrolled !== isScrolled) {
+                isScrolled = scrolled;
+                dotNetObject.invokeMethodAsync('OnScroll', scrolled);
+            }
+        });
+    };
+</script>

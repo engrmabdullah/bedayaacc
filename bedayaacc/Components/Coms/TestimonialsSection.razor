@@ -1,0 +1,175 @@
+﻿@using bedayaacc.Services
+@inject TranslationService TranslationService
+
+<section class="testimonials-enhanced">
+    <i class="fas fa-quote-right testimonials-quote-bg-enhanced" aria-hidden="true"></i>
+
+    <div class="testimonials-container-enhanced">
+        <!-- Section Header -->
+        <div class="testimonials-header-enhanced">
+            <div class="testimonials-badge-enhanced">
+                <i class="fas fa-star" aria-hidden="true"></i>
+                <span>@Tr("Testimonials.Badge")</span>
+            </div>
+            <h2 class="testimonials-title-enhanced">@Tr("Testimonials.Title")</h2>
+            <p class="testimonials-subtitle-enhanced">@Tr("Testimonials.Subtitle")</p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="testimonials-stats-enhanced">
+            <div class="testimonials-stat-item-enhanced">
+                <div class="testimonials-stat-icon-enhanced">
+                    <i class="fas fa-users" aria-hidden="true"></i>
+                </div>
+                <div class="testimonials-stat-number-enhanced">10K+</div>
+                <div class="testimonials-stat-label-enhanced">@Tr("Testimonials.Stats.Students")</div>
+            </div>
+            <div class="testimonials-stat-item-enhanced">
+                <div class="testimonials-stat-icon-enhanced">
+                    <i class="fas fa-star" aria-hidden="true"></i>
+                </div>
+                <div class="testimonials-stat-number-enhanced">4.9</div>
+                <div class="testimonials-stat-label-enhanced">@Tr("Testimonials.Stats.Rating")</div>
+            </div>
+            <div class="testimonials-stat-item-enhanced">
+                <div class="testimonials-stat-icon-enhanced">
+                    <i class="fas fa-trophy" aria-hidden="true"></i>
+                </div>
+                <div class="testimonials-stat-number-enhanced">98%</div>
+                <div class="testimonials-stat-label-enhanced">@Tr("Testimonials.Stats.Satisfaction")</div>
+            </div>
+        </div>
+
+        <!-- Testimonials Grid -->
+        <div class="testimonials-grid-enhanced">
+            @foreach (var testimonial in GetTestimonials())
+            {
+                <div class="testimonial-card-enhanced">
+                    <i class="fas fa-quote-right testimonial-quote-icon-enhanced" aria-hidden="true"></i>
+
+                    <!-- Rating Stars -->
+                    <div class="testimonial-rating-enhanced">
+                        @for (int i = 0; i < 5; i++)
+                        {
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                        }
+                    </div>
+
+                    <!-- Content -->
+                    <p class="testimonial-content-enhanced">
+                        "@Tr(testimonial.ContentKey)"
+                    </p>
+
+                    <!-- Author Section -->
+                    <div class="testimonial-author-enhanced">
+                        <div class="testimonial-avatar-enhanced">
+                            @testimonial.Initials
+                            <div class="testimonial-verified-badge-enhanced">
+                                <i class="fas fa-check" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <div class="testimonial-author-info-enhanced">
+                            <div class="testimonial-author-name-enhanced">@Tr(testimonial.NameKey)</div>
+                            <div class="testimonial-author-role-enhanced">@Tr(testimonial.RoleKey)</div>
+                            <div class="testimonial-course-badge-enhanced">@Tr(testimonial.CourseKey)</div>
+                            <div class="testimonial-date-enhanced">
+                                <i class="far fa-calendar-alt" aria-hidden="true"></i>
+                                <span>@Tr(testimonial.DateKey)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Navigation (Optional) -->
+        @* Uncomment if you want navigation arrows
+        <div class="testimonials-nav-enhanced">
+            <button class="testimonials-nav-btn-enhanced" aria-label="Previous">
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>
+            </button>
+            <button class="testimonials-nav-btn-enhanced" aria-label="Next">
+                <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            </button>
+        </div>
+        *@
+    </div>
+</section>
+
+@code {
+    private string Tr(string key) => TranslationService.Translate(key);
+
+    private static readonly List<TestimonialModel> testimonials = new()
+    {
+        new TestimonialModel(
+            "Testimonials.Sarah.Content",
+            "Testimonials.Sarah.Name",
+            "Testimonials.Sarah.Role",
+            "Testimonials.Sarah.Course",
+            "Testimonials.Sarah.Date",
+            "SJ"
+        ),
+        new TestimonialModel(
+            "Testimonials.Ahmed.Content",
+            "Testimonials.Ahmed.Name",
+            "Testimonials.Ahmed.Role",
+            "Testimonials.Ahmed.Course",
+            "Testimonials.Ahmed.Date",
+            "AK"
+        ),
+        new TestimonialModel(
+            "Testimonials.Fatima.Content",
+            "Testimonials.Fatima.Name",
+            "Testimonials.Fatima.Role",
+            "Testimonials.Fatima.Course",
+            "Testimonials.Fatima.Date",
+            "FM"
+        ),
+        new TestimonialModel(
+            "Testimonials.Omar.Content",
+            "Testimonials.Omar.Name",
+            "Testimonials.Omar.Role",
+            "Testimonials.Omar.Course",
+            "Testimonials.Omar.Date",
+            "OH"
+        ),
+        new TestimonialModel(
+            "Testimonials.Laila.Content",
+            "Testimonials.Laila.Name",
+            "Testimonials.Laila.Role",
+            "Testimonials.Laila.Course",
+            "Testimonials.Laila.Date",
+            "LA"
+        ),
+        new TestimonialModel(
+            "Testimonials.Youssef.Content",
+            "Testimonials.Youssef.Name",
+            "Testimonials.Youssef.Role",
+            "Testimonials.Youssef.Course",
+            "Testimonials.Youssef.Date",
+            "YM"
+        )
+    };
+
+    private List<TestimonialModel> GetTestimonials() => testimonials;
+
+    public class TestimonialModel
+    {
+        public string ContentKey { get; set; }
+        public string NameKey { get; set; }
+        public string RoleKey { get; set; }
+        public string CourseKey { get; set; }
+        public string DateKey { get; set; }
+        public string Initials { get; set; }
+
+        public TestimonialModel(string contentKey, string nameKey, string roleKey, string courseKey, string dateKey, string initials)
+        {
+            ContentKey = contentKey;
+            NameKey = nameKey;
+            RoleKey = roleKey;
+            CourseKey = courseKey;
+            DateKey = dateKey;
+            Initials = initials;
+        }
+    }
+}

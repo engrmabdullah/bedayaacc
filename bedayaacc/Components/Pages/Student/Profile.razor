@@ -1,0 +1,697 @@
+﻿@page "/student/dashboard"
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Components.Authorization
+@using bedayaacc.Components.Layout
+@using bedayaacc.Services
+@using bedayaacc.Models
+@using bedayaacc.Helpers
+
+@inject NavigationManager Navigation
+@inject TranslationService TranslationService
+@inject IJSRuntime JSRuntime
+@inject IStudentDashboardService DashboardService
+@inject IExamService ExamService
+
+@layout ExternalLayout
+
+<PageTitle>@displayName</PageTitle>
+
+<div class="bedaya-profile-page">
+    <!-- Profile Header -->
+    <section class="bedaya-profile-header">
+        <div class="bedaya-container">
+            <div class="bedaya-profile-header-content">
+                <div class="bedaya-profile-avatar">
+                    <img src="@avatarUrl" alt="@displayName" class="bedaya-avatar-image" />
+                    <div class="bedaya-avatar-badge"><i class="fas fa-crown" aria-hidden="true"></i></div>
+                </div>
+                <div class="bedaya-profile-info">
+                    <h1 class="bedaya-profile-name">@displayName</h1>
+                    <p class="bedaya-profile-email">@userEmail</p>
+
+                    @if (userRoles?.Count > 0)
+                    {
+                        <div style="margin:.5rem 0; display:flex; gap:.5rem; flex-wrap:wrap">
+                            @foreach (var r in userRoles)
+                            {
+                                <span style="background:#eef2ff;color:#3730a3;padding:.25rem .5rem;border-radius:.5rem;font-size:.85rem">@r</span>
+                            }
+                        </div>
+                    }
+
+                    <div class="bedaya-profile-stats">
+                        <div class="bedaya-profile-stat">
+                            <span class="bedaya-stat-number">@((vm?.Counters?.CompletedAttempts ?? 0))</span>
+                            <span class="bedaya-stat-label">@Tr("Profile.Stats.CompletedAttempts")</span>
+                        </div>
+                        <div class="bedaya-profile-stat">
+                            <span class="bedaya-stat-number">@((vm?.Counters?.PassedAttempts ?? 0))</span>
+                            <span class="bedaya-stat-label">@Tr("Profile.Stats.Certificates")</span>
+                        </div>
+                        <div class="bedaya-profile-stat">
+                            <span class="bedaya-stat-number">@($"{(vm?.Counters?.AvgPercentageAll ?? 0):0}%")</span>
+                            <span class="bedaya-stat-label">@Tr("Profile.Stats.AvgScore")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="bedaya-profile-container">
+        <!-- Tabs Nav -->
+        <nav class="bedaya-profile-nav">
+            <div class="bedaya-profile-nav-item active" onclick="switchTab('overview')">
+                <i class="fas fa-user"></i> @Tr("Profile.Nav.Overview")
+            </div>
+            <div class="bedaya-profile-nav-item" onclick="switchTab('exams')">
+                <i class="fas fa-graduation-cap"></i> @Tr("Profile.Nav.Exams")
+            </div>
+            <div class="bedaya-profile-nav-item" onclick="switchTab('activity')">
+                <i class="fas fa-history"></i> @Tr("Profile.Nav.Activity")
+            </div>
+            <div class="bedaya-profile-nav-item" onclick="switchTab('certificates')">
+                <i class="fas fa-certificate"></i> @Tr("Profile.Nav.Certificates")
+            </div>
+            <div class="bedaya-profile-nav-item" onclick="switchTab('settings')">
+                <i class="fas fa-cog"></i> @Tr("Profile.Nav.Settings")
+            </div>
+            <div class="bedaya-profile-nav-item" onclick="switchTab('stats')">
+                <i class="fas fa-chart-line"></i> @Tr("Profile.Nav.Progress")
+            </div>
+        </nav>
+
+        <!-- Tabs Content -->
+        <div class="bedaya-profile-content">
+            <!-- Overview -->
+            <div id="overview-tab" class="bedaya-profile-tab active">
+                <div class="bedaya-profile-overview">
+                    <div class="bedaya-overview-section">
+                        <h3 class="bedaya-section-title">@Tr("Profile.Overview.Title")</h3>
+                        <div class="bedaya-overview-content">
+                            <div class="bedaya-overview-item"><label>@Tr("Profile.Overview.Name")</label><span>@displayName</span></div>
+                            <div class="bedaya-overview-item"><label>@Tr("Profile.Overview.Email")</label><span>@userEmail</span></div>
+                            <div class="bedaya-overview-item"><label>@Tr("Profile.Overview.Phone")</label><span>@(vm?.Profile?.Phone ?? "-")</span></div>
+                            <div class="bedaya-overview-item"><label>@Tr("Profile.Overview.MemberSince")</label><span>@(vm?.Profile?.CreatedAt.ToString("yyyy-MM-dd"))</span></div>
+                            <div class="bedaya-overview-item">
+                                <label>@Tr("Profile.Overview.Status")</label>
+                                <span class="bedaya-status-active">@(vm?.Profile?.IsActive == true ? Tr("Profile.Status.Active") : Tr("Profile.Status.Inactive"))</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Exams (with ALL available) -->
+            <div id="exams-tab" class="bedaya-profile-tab">
+                <div class="bedaya-profile-courses">
+                    <h3 class="bedaya-section-title">@Tr("Profile.Exams.Title")</h3>
+
+                    <!-- Filters & Search -->
+                    <div class="exams-toolbar" style="display:flex; gap:.75rem; flex-wrap:wrap; align-items:center;">
+                        <div class="search-box" style="position:relative;">
+                            <i class="fas fa-search" style="position:absolute; inset-inline-start:.6rem; top:.7rem; opacity:.6"></i>
+                            <input type="text"
+                                   class="bedaya-form-input"
+                                   style="padding-inline-start:2rem"
+                                   placeholder="@Tr("Common.SearchPlaceholder")"
+                                   @bind="searchQuery"
+                                   @bind:event="oninput"
+                                   @onkeyup="ApplyExamFilters" />
+                        </div>
+
+                        <div class="filter-buttons" style="display:flex; gap:.5rem; flex-wrap:wrap;">
+                            <button class="filter-btn @(selectedCategoryId == null ? "active" : "")"
+                                    @onclick="() => FilterByCategory(null)">
+                                <i class="fas fa-th"></i> @Tr("Common.All")
+                            </button>
+                            @foreach (var category in categories)
+                            {
+                                <button class="filter-btn @(selectedCategoryId == category.CategoryId ? "active" : "")"
+                                        @onclick="() => FilterByCategory(category.CategoryId)">
+                                    <i class="fas fa-folder"></i> @category.CategoryNameAr
+                                </button>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Loading -->
+                    @if (examsLoading)
+                    {
+                        <div class="loading-container"><div class="spinner"></div><p>@Tr("Common.Loading")</p></div>
+                    }
+                    else if (filteredExams.Count == 0)
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-search"></i>
+                            <h3>@Tr("Common.NoResults")</h3>
+                            <p>@Tr("Common.TryDifferentQuery")</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Grid -->
+                        <div class="browse-exams-grid">
+                            @foreach (var ex in filteredExams)
+                            {
+                                var attemptsCount = GetUserAttempts(ex.ExamId);
+                                var lastAttempt = GetLastAttempt(ex.ExamId);
+                                <div class="browse-exam-card">
+                                    <div class="exam-card-ribbon">
+                                        @if (attemptsCount > 0)
+                                        {
+                                            <span class="ribbon attempted"><i class="fas fa-check"></i> @Tr("Exams.Attempted")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="ribbon new"><i class="fas fa-star"></i> @Tr("Common.New")</span>
+                                        }
+                                    </div>
+
+                                    <div class="exam-card-top">
+                                        <div class="exam-category-badge">@ex.CategoryNameAr</div>
+                                        <h3 class="exam-card-title">@ex.ExamTitleAr</h3>
+                                        <p class="exam-card-description">@ex.DescriptionAr</p>
+                                    </div>
+
+                                    <div class="exam-card-meta">
+                                        <div class="meta-row">
+                                            <div class="meta-item"><i class="fas fa-clock"></i><span>@ex.DurationMinutes @Tr("Common.Minutes")</span></div>
+                                            <div class="meta-item"><i class="fas fa-question-circle"></i><span>@ex.TotalQuestions @Tr("Exams.Questions")</span></div>
+                                        </div>
+                                        <div class="meta-row">
+                                            <div class="meta-item"><i class="fas fa-star"></i><span>@ex.TotalMarks @Tr("Exams.Marks")</span></div>
+                                            <div class="meta-item"><i class="fas fa-users"></i><span>@ex.UniqueStudents @Tr("Exams.Students")</span></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="exam-card-instructor">
+                                        <i class="fas fa-chalkboard-teacher"></i> <span>@ex.InstructorName</span>
+                                    </div>
+
+                                    @if (lastAttempt != null)
+                                    {
+                                        <div class="exam-last-attempt">
+                                            <div class="attempt-score">
+                                                <span class="score-label">@Tr("Exams.LastAttempt"):</span>
+                                                <span class="score-value @(lastAttempt.IsPassed ? "passed" : "failed")">
+                                                    @lastAttempt.Percentage.ToString("F0")%
+                                                </span>
+                                            </div>
+                                            @if (ex.MaxAttempts > 0)
+                                            {
+                                                <div class="attempts-info">@attemptsCount / @ex.MaxAttempts @Tr("Exams.Attempts")</div>
+                                            }
+                                        </div>
+                                    }
+
+                                    <div class="exam-card-actions">
+                                        @if (CanTakeExam(ex))
+                                        {
+                                            <button class="btn btn-primary btn-block"
+                                                    @onclick="() => StartExam(ex.ExamId)">
+                                                <i class="fas fa-play-circle"></i>
+                                                @(attemptsCount > 0 ? Tr("Exams.NewAttempt") : Tr("Exams.Start"))
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-secondary btn-block" disabled>
+                                                <i class="fas fa-lock"></i> @Tr("Exams.MaxAttemptsReached")
+                                            </button>
+                                        }
+
+                                        @if (attemptsCount > 0)
+                                        {
+                                            <button class="btn btn-outline btn-block"
+                                                    @onclick="() => ViewHistory(ex.ExamId)">
+                                                <i class="fas fa-history"></i> @Tr("Exams.ViewHistory")
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Activity (TABLE + paging) -->
+            <div id="activity-tab" class="bedaya-profile-tab">
+
+                <div class="bedaya-overview-section">
+                    <h3 class="bedaya-section-title">@Tr("Profile.RecentActivity.Title")</h3>
+                    @if (vm?.RecentActivity == null || vm.RecentActivity.Count == 0)
+                    {
+                        <p style="opacity:.7">@Tr("Profile.RecentActivity.Empty")</p>
+                    }
+                    else
+                    {
+                        <div class="bedaya-activity-list">
+                            @foreach (var a in vm.RecentActivity)
+                            {
+                                <div class="bedaya-activity-item">
+                                    <div class="bedaya-activity-icon">
+                                        <i class="@(a.EventType == "AttemptSubmitted" ? "fas fa-check-circle" :
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               a.EventType == "AttemptStarted" ? "fas fa-play-circle" :
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "fas fa-key")"></i>
+                            </div>
+                            <div class="bedaya-activity-content">
+                                <p>
+                                    @((!string.IsNullOrWhiteSpace(a.ExamTitleAr) ? a.ExamTitleAr : a.ExamTitleEn) ?? "-")
+                                    — <strong>@a.EventType</strong>
+                                    @if (a.Percentage.HasValue)
+                                            {
+                                                <span> • @($"{a.Percentage.Value:0.##}%")</span>
+                                            }
+                                        </p>
+                                        <span class="bedaya-activity-time">@a.EventAt.ToString("yyyy-MM-dd HH:mm")</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div style="margin-top:.5rem">
+                            <button class="bedaya-btn bedaya-btn-ghost" onclick="switchTab('activity')">
+                                @Tr("Profile.RecentActivity.ViewAll")
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Certificates -->
+            <div id="certificates-tab" class="bedaya-profile-tab">
+                <div class="bedaya-profile-certificates">
+                    <h3 class="bedaya-section-title">@Tr("Profile.Certificates.Title")</h3>
+                    @if (vm?.PassedCertificates == null || vm.PassedCertificates.Count == 0)
+                    {
+                        <p style="opacity:.7">@Tr("Profile.Certificates.Empty")</p>
+                    }
+                    else
+                    {
+                        <div class="bedaya-certificates-grid">
+                            @foreach (var c in vm.PassedCertificates)
+                            {
+                                <div class="bedaya-certificate-item">
+                                    <div class="bedaya-certificate-icon"><i class="fas fa-certificate"></i></div>
+                                    <div class="bedaya-certificate-info">
+                                        <h4 class="bedaya-certificate-title">@(!string.IsNullOrWhiteSpace(c.ExamTitleAr) ? c.ExamTitleAr : c.ExamTitleEn)</h4>
+                                        <p class="bedaya-certificate-date">@Tr("Profile.Certificates.Date"): @(c.SubmittedAt?.ToString("yyyy-MM-dd HH:mm") ?? "-")</p>
+                                        <p class="bedaya-certificate-course">@Tr("Profile.Certificates.Score"): @($"{(c.Percentage ?? 0):0.##}%")</p>
+                                    </div>
+                                    <div class="bedaya-certificate-actions">
+                                        <button class="bedaya-btn bedaya-btn-ghost"
+                                                @onclick="() => ViewCertificate(c)">
+                                            @Tr("Profile.Certificates.View")
+                                        </button>
+                                    </div>
+
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Settings -->
+            <div id="settings-tab" class="bedaya-profile-tab">
+                <div class="bedaya-profile-settings">
+                    <h3 class="bedaya-section-title">@Tr("Profile.Settings.Title")</h3>
+                    <div class="bedaya-settings-form">
+                        <div class="bedaya-form-group">
+                            <label for="name">@Tr("Profile.Settings.Name")</label>
+                            <input type="text" id="name" class="bedaya-form-input" value="@displayName" @oninput="e => displayName = e.Value?.ToString() ?? displayName" />
+                        </div>
+                        <div class="bedaya-form-group">
+                            <label for="email">@Tr("Profile.Settings.Email")</label>
+                            <input type="email" id="email" class="bedaya-form-input" value="@userEmail" @oninput="e => userEmail = e.Value?.ToString() ?? userEmail" />
+                        </div>
+                        <div class="bedaya-form-group">
+                            <label for="phone">@Tr("Profile.Settings.Phone")</label>
+                            <input type="tel" id="phone" class="bedaya-form-input" value="@(vm?.Profile?.Phone ?? "")" @oninput="e => vm!.Profile!.Phone = e.Value?.ToString()" />
+                        </div>
+                        <div class="bedaya-form-group">
+                            <label for="bio">@Tr("Profile.Settings.Bio")</label>
+                            <textarea id="bio" class="bedaya-form-textarea" rows="4" placeholder="@Tr("Profile.Settings.Bio.Placeholder")" @oninput="e => vm!.Profile!.Bio = e.Value?.ToString()">@vm?.Profile?.Bio</textarea>
+                        </div>
+                        <div class="bedaya-form-group">
+                            <label class="bedaya-checkbox-container">
+                                <input type="checkbox" checked="@(vm?.Profile?.AcceptMarketing ?? false)" @onchange="e => vm!.Profile!.AcceptMarketing = (bool?)(bool)(e.Value ?? false)" />
+                                <span class="bedaya-checkbox-checkmark"></span>
+                                @Tr("Profile.Settings.Newsletter")
+                            </label>
+                        </div>
+                        <div class="bedaya-form-group">
+                            <label class="bedaya-checkbox-container">
+                                <input type="checkbox" checked />
+                                <span class="bedaya-checkbox-checkmark"></span>
+                                @Tr("Profile.Settings.Notifications")
+                            </label>
+                        </div>
+                        <button class="bedaya-btn bedaya-btn-primary" @onclick="SaveProfile">@Tr("Profile.Settings.Save")</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats (renamed Progress) -->
+            <div id="stats-tab" class="bedaya-profile-tab">
+                <div class="bedaya-profile-progress">
+                    <h3 class="bedaya-section-title">@Tr("Profile.Progress.Title")</h3>
+
+                    <div class="bedaya-progress-overview">
+                        <div class="bedaya-progress-chart">
+                            <div class="bedaya-progress-circle" data-percent="@((int)(vm?.Counters?.AvgPercentageAll ?? 0))">
+                                <svg class="bedaya-progress-svg" viewBox="0 0 100 100">
+                                    <circle class="bedaya-progress-bg" cx="50" cy="50" r="45"></circle>
+                                    <circle class="bedaya-progress-fill" cx="50" cy="50" r="45" stroke-dasharray="283" stroke-dashoffset="0"></circle>
+                                </svg>
+                                <span class="bedaya-progress-percent">@($"{(vm?.Counters?.AvgPercentageAll ?? 0):0}%")</span>
+                            </div>
+                        </div>
+                        <div class="bedaya-progress-info">
+                            <h4>@Tr("Profile.Progress.Overall")</h4>
+                            <p>@Tr("Profile.Progress.Description")</p>
+                        </div>
+                    </div>
+
+                    <div class="bedaya-progress-details" style="margin-top:1rem;">
+                        <h4>@Tr("Profile.Progress.Details.Title")</h4>
+                        <div class="bedaya-progress-stats">
+                            <div class="bedaya-progress-stat"><span class="bedaya-stat-label">@Tr("Profile.Progress.Details.Completed")</span><span class="bedaya-stat-value">@((vm?.Counters?.CompletedAttempts ?? 0))</span></div>
+                            <div class="bedaya-progress-stat"><span class="bedaya-stat-label">@Tr("Profile.Progress.Details.Passed")</span><span class="bedaya-stat-value">@((vm?.Counters?.PassedAttempts ?? 0))</span></div>
+                            <div class="bedaya-progress-stat"><span class="bedaya-stat-label">@Tr("Profile.Progress.Details.InProgress")</span><span class="bedaya-stat-value">@((vm?.Counters?.InProgressCount ?? 0))</span></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:1.5rem;">
+                        <h4>@Tr("Profile.Progress.TableTitle")</h4>
+                        @if (vm?.ExamProgress == null || vm.ExamProgress.Count == 0)
+                        {
+                            <p style="opacity:.7">@Tr("Profile.Progress.Empty")</p>
+                        }
+                        else
+                        {
+                            <table class="bedaya-table" style="width:100%; border-collapse:collapse;">
+                                <thead>
+                                    <tr>
+                                        <th>@Tr("Profile.Progress.Columns.Exam")</th>
+                                        <th>@Tr("Profile.Progress.Columns.Attempts")</th>
+                                        <th>@Tr("Profile.Progress.Columns.Passed")</th>
+                                        <th>@Tr("Profile.Progress.Columns.Best")</th>
+                                        <th>@Tr("Profile.Progress.Columns.Last")</th>
+                                        <th>@Tr("Profile.Progress.Columns.Status")</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var p in vm.ExamProgress)
+                                    {
+                                        <tr>
+                                            <td>@(string.IsNullOrWhiteSpace(p.ExamTitleAr) ? p.ExamTitleEn : p.ExamTitleAr)</td>
+                                            <td>@p.AttemptCount</td>
+                                            <td>@p.PassedCount</td>
+                                            <td>@($"{(p.BestPercentage ?? 0):0.##}%")</td>
+                                            <td>@($"{(p.LastPercentage ?? 0):0.##}%")</td>
+                                            <td>@p.LastStatus</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (showCertModal && !string.IsNullOrWhiteSpace(certUrl))
+{
+    <div class="modal-overlay" @onclick="CloseCertModal" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;">
+        <div class="modal-content" @onclick:stopPropagation="true"
+             style="position:relative; margin:2vh auto; width:min(1200px,95vw); height:96vh; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.2);">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid #eee;">
+                <strong>@Tr("Profile.Certificates.View")</strong>
+                <button class="bedaya-btn bedaya-btn-ghost" @onclick="CloseCertModal" aria-label="Close" style="font-size:1.2rem;">&times;</button>
+            </div>
+
+            <iframe src="@certUrl" loading="lazy"
+                    style="width:100%; height:calc(100% - 54px); border:0;">
+            </iframe>
+        </div>
+    </div>
+}
+
+
+<script>
+    function switchTab(tabName) {
+        const tabs = document.querySelectorAll('.bedaya-profile-tab');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        const navItems = document.querySelectorAll('.bedaya-profile-nav-item');
+        navItems.forEach(item => item.classList.remove('active'));
+
+        const target = document.getElementById(tabName + '-tab');
+        if (target) target.classList.add('active');
+
+        // اضبط الـ nav item
+        const map = {
+            overview: 0, exams: 1, activity: 2, certificates: 3, settings: 4, stats: 5
+        };
+        const idx = map[tabName];
+        if (idx !== undefined) navItems[idx].classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const progressCircles = document.querySelectorAll('.bedaya-progress-circle');
+        progressCircles.forEach(circle => {
+            const percent = Number(circle.getAttribute('data-percent') || "0");
+            const fillCircle = circle.querySelector('.bedaya-progress-fill');
+            const circumference = 283;
+            const offset = circumference - (percent / 100) * circumference;
+            if (fillCircle) fillCircle.style.strokeDashoffset = offset;
+        });
+    });
+</script>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+
+    private StudentDashboardVm vm = new();
+    private string displayName = "";
+    private string userEmail = "";
+    private string initials = "U";
+    private string avatarUrl = "https://placehold.co/120x120/667eea/ffffff?text=U";
+    private List<string> userRoles = new();
+    private int? currentUserId;
+
+    private string Tr(string key) => TranslationService.Translate(key);
+
+    // ===== Activity (paged) =====
+    private List<RecentActivityItemDto> activityItems = new();
+    private bool activityLoading = true;
+    private int activityPage = 1;
+    private int pageSize = 10;
+    private int totalActivity = 0;
+    private int totalActivityPages => Math.Max(1, (int)Math.Ceiling(totalActivity / (double)pageSize));
+
+    // ===== Exams (all available) =====
+    private List<Exam> exams = new();
+    private List<Exam> filteredExams = new();
+    private List<ExamCategory> categories = new();
+    private Dictionary<int, List<ExamAttempt>> userAttemptsByExam = new();
+    private int? selectedCategoryId = null;
+    private string searchQuery = "";
+    private bool examsLoading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var auth = await AuthStateTask;
+        var user = auth.User;
+
+        if (!(user?.Identity?.IsAuthenticated ?? false))
+        {
+            var here = Navigation.ToBaseRelativePath(Navigation.Uri);
+            var returnUrl = "/" + (string.IsNullOrWhiteSpace(here) ? "" : here);
+            Navigation.NavigateTo($"/login?ReturnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+            return;
+        }
+
+        var uid = user.TryGetUserId();
+        if (uid is null)
+        {
+            Navigation.NavigateTo("/login", forceLoad: true);
+            return;
+        }
+        currentUserId = uid.Value;
+
+        // Dashboard snapshot
+        vm = await DashboardService.GetDashboardAsync(uid.Value, recentTop: 10, certTop: 10, upcomingDays: 30);
+
+        displayName = vm.Profile?.FullName
+                      ?? user.Identity?.Name
+                      ?? user.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
+                      ?? "User";
+
+        userEmail = vm.Profile?.Email
+                    ?? user.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+                    ?? "";
+
+        userRoles = user.FindAll(System.Security.Claims.ClaimTypes.Role).Select(r => r.Value).Distinct().ToList();
+
+        initials = MakeInitials(displayName);
+        avatarUrl = $"https://placehold.co/120x120/667eea/ffffff?text={Uri.EscapeDataString(initials)}";
+
+        // Initial Activity page
+        await LoadActivityPage(1);
+
+        // Load All Exams data
+        await LoadExamsData();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) await TranslationService.EnsureInitAfterRenderAsync();
+        StateHasChanged();
+    }
+
+    private static string MakeInitials(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "U";
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpperInvariant();
+        return (parts[0][0].ToString() + parts[^1][0].ToString()).ToUpperInvariant();
+    }
+
+    // ===== Activity paging =====
+    private async Task LoadActivityPage(int page)
+    {
+        if (currentUserId is null) return;
+
+        activityLoading = true;
+        StateHasChanged();
+
+        var res = await DashboardService.GetRecentActivityPageAsync(currentUserId.Value, page, pageSize);
+        activityItems = res.Items;
+        totalActivity = res.TotalCount;
+        activityPage = res.Page;
+
+        activityLoading = false;
+        StateHasChanged();
+    }
+    private async Task PrevActivityPage() { if (activityPage > 1) await LoadActivityPage(activityPage - 1); }
+    private async Task NextActivityPage() { if (activityPage < totalActivityPages) await LoadActivityPage(activityPage + 1); }
+
+    // ===== Exams helpers =====
+    private async Task LoadExamsData()
+    {
+        examsLoading = true;
+        StateHasChanged();
+
+        categories = await ExamService.GetCategoriesAsync();
+        exams = await ExamService.GetAllExamsAsync(isPublic: true, pageSize: 200);
+
+        var allAttempts = await ExamService.GetUserAttemptsAsync(currentUserId!.Value);
+        userAttemptsByExam = allAttempts.GroupBy(a => a.ExamId).ToDictionary(g => g.Key, g => g.ToList());
+
+        filteredExams = exams;
+        examsLoading = false;
+        StateHasChanged();
+    }
+
+    private void FilterByCategory(int? categoryId) { selectedCategoryId = categoryId; ApplyExamFilters(); }
+    private void ApplyExamFilters()
+    {
+        IEnumerable<Exam> query = exams;
+
+        if (selectedCategoryId.HasValue)
+            query = query.Where(e => e.CategoryId == selectedCategoryId.Value);
+
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            var q = searchQuery.Trim().ToLower();
+            query = query.Where(e =>
+                (e.ExamTitleAr ?? "").ToLower().Contains(q) ||
+                (e.DescriptionAr ?? "").ToLower().Contains(q) ||
+                (e.CategoryNameAr ?? "").ToLower().Contains(q));
+        }
+
+        filteredExams = query.ToList();
+        StateHasChanged();
+    }
+
+    private int GetUserAttempts(int examId) => userAttemptsByExam.TryGetValue(examId, out var list) ? list.Count : 0;
+
+    private ExamAttempt? GetLastAttempt(int examId)
+        => userAttemptsByExam.TryGetValue(examId, out var list)
+           ? list.OrderByDescending(a => a.StartedAt).FirstOrDefault()
+           : null;
+
+    private bool CanTakeExam(Exam e)
+    {
+        if (e.MaxAttempts <= 0) return true;
+        return GetUserAttempts(e.ExamId) < e.MaxAttempts;
+    }
+
+    private void StartExam(int examId)
+    {
+        // يبقى داخل نفس تطبيق Blazor (لا يفتح تبويب متصفح جديد)
+        Navigation.NavigateTo($"/exams/{examId}/take");
+    }
+
+    private void ViewHistory(int examId)
+    {
+        Navigation.NavigateTo($"/exams/{examId}/history");
+    }
+
+    // ===== Save Profile =====
+    private async Task SaveProfile()
+    {
+        if (vm?.Profile is null || currentUserId is null) return;
+
+        var dto = new UpdateProfileDto
+        {
+            UserId = currentUserId.Value,
+            FirstName = vm.Profile.FirstName,
+            LastName = vm.Profile.LastName,
+            Email = userEmail,
+            Phone = vm.Profile.Phone,
+            Bio = vm.Profile.Bio,
+            DateOfBirth = vm.Profile.DateOfBirth,
+            Country = vm.Profile.Country,
+            City = vm.Profile.City,
+            AcceptMarketing = (vm.Profile.AcceptMarketing ?? false)
+        };
+
+        var ok = await DashboardService.UpdateProfileAsync(dto);
+        await JSRuntime.InvokeVoidAsync("alert", ok ? Tr("Profile.Settings.Saved") : Tr("Profile.Settings.SaveFailed"));
+    }
+
+    private bool showCertModal;
+    private string? certUrl;
+
+    private void ViewCertificate(PassedCertificateDto c)
+    {
+        if (c is null) return;
+
+        if (c.AttemptId > 0 && c.ExamId > 0)
+        {
+            // بدّل 1 إلى true
+            certUrl = $"/exams/{c.ExamId}/results/{c.AttemptId}?embed=true";
+            showCertModal = true;
+        }
+        else
+        {
+            _ = JSRuntime.InvokeVoidAsync("alert", Tr("Common.UnexpectedError"));
+        }
+    }
+
+
+    private void CloseCertModal()
+    {
+        showCertModal = false;
+        certUrl = null;
+    }
+
+
+}

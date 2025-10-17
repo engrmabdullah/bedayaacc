@@ -1,0 +1,502 @@
+﻿@page "/instructor/exams"
+@attribute [Authorize(Roles = "Instructor")]
+@using bedayaacc.Components.Layout
+@using bedayaacc.Models
+@using bedayaacc.Services
+@using Microsoft.AspNetCore.Components.Forms
+
+@inject IExamService ExamService
+@inject TranslationService TranslationService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+@layout ExternalLayout
+
+<PageTitle>@Tr("Exams.Manage.Title") - @Tr("Site.Name")</PageTitle>
+
+<div class="exam-manage-page">
+    <div class="exam-container">
+        <!-- Header -->
+        <div class="exam-page-header">
+            <div>
+                <h1 class="exam-page-title">@Tr("Exams.Manage.Title")</h1>
+                <p class="exam-page-subtitle">@Tr("Exams.Manage.Subtitle")</p>
+            </div>
+            <button class="btn btn-primary" @onclick="ShowCreateExamModal">
+                <i class="fas fa-plus"></i>
+                @Tr("Exams.Manage.Create")
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="exam-filters">
+            <div class="filter-group">
+                <label>@Tr("Exams.Filter.Category")</label>
+                <select class="filter-select" @bind="selectedCategoryId">
+                    <option value="">@Tr("Common.All")</option>
+                    @foreach (var category in categories)
+                    {
+                        <option value="@category.CategoryId">@category.CategoryNameAr</option>
+                    }
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>@Tr("Exams.Filter.Status")</label>
+                <select class="filter-select" @bind="selectedStatus">
+                    <option value="">@Tr("Common.All")</option>
+                    <option value="public">@Tr("Common.Public")</option>
+                    <option value="private">@Tr("Common.Private")</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary" @onclick="LoadExams">
+                <i class="fas fa-filter"></i>
+                @Tr("Common.ApplyFilter")
+            </button>
+        </div>
+
+        <!-- Loading / Empty / List -->
+        @if (isLoading)
+        {
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p>@Tr("Common.Loading")</p>
+            </div>
+        }
+        else if (exams.Count == 0)
+        {
+            <div class="empty-state">
+                <i class="fas fa-file-alt"></i>
+                <h3>@Tr("Exams.Empty.Title")</h3>
+                <p>@Tr("Exams.Empty.Subtitle")</p>
+                <button class="btn btn-primary" @onclick="ShowCreateExamModal">
+                    @Tr("Exams.Empty.Create")
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="exams-grid">
+                @foreach (var exam in exams)
+                {
+                    <div class="exam-card">
+                        <div class="exam-card-header">
+                            <div class="exam-badge @(exam.IsPublic ? "badge-public" : "badge-private")">
+                                @(exam.IsPublic? Tr("Common.Public") : Tr("Common.Private"))
+                            </div>
+                            <div class="exam-category">@exam.CategoryNameAr</div>
+                        </div>
+
+                        <div class="exam-card-body">
+                            <h3 class="exam-title">@(!string.IsNullOrWhiteSpace(exam.ExamTitleAr) ? exam.ExamTitleAr : exam.ExamTitleEn)</h3>
+                            @if (!string.IsNullOrWhiteSpace(exam.DescriptionAr))
+                            {
+                                <p class="exam-description">@exam.DescriptionAr</p>
+                            }
+
+                            <div class="exam-price">
+                                @if (exam.Price == 0)
+                                {
+                                    <span class="badge badge-success">@Tr("Exams.Price.Free")</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-info">@FormatPrice(exam.Price)</span>
+                                }
+                            </div>
+
+                            <div class="exam-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>@exam.DurationMinutes @Tr("Common.Minutes")</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-question-circle"></i>
+                                    <span>@(exam.TotalQuestions ?? 0) @Tr("Exams.Stats.Questions")</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>@exam.UniqueStudents @Tr("Exams.Stats.Students")</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>@exam.TotalAttempts @Tr("Exams.Stats.Attempts")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="exam-card-footer">
+                            <button class="btn btn-sm btn-outline" @onclick="() => ManageQuestions(exam.ExamId)">
+                                <i class="fas fa-list"></i>
+                                @Tr("Exams.Actions.Questions")
+                            </button>
+                            <button class="btn btn-sm btn-outline" @onclick="() => ViewResults(exam.ExamId)">
+                                <i class="fas fa-chart-bar"></i>
+                                @Tr("Exams.Actions.Results")
+                            </button>
+                            <button class="btn btn-sm btn-outline" @onclick="() => EditExam(exam.ExamId)">
+                                <i class="fas fa-edit"></i>
+                                @Tr("Common.Edit")
+                            </button>
+                            <button class="btn btn-sm btn-danger-outline" @onclick="() => DeleteExam(exam.ExamId)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Create/Edit Exam Modal -->
+    @if (showExamModal)
+    {
+        <div class="modal-overlay" @onclick="HideExamModal">
+            <div class="modal-content" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <h3>@(isEditMode? Tr("Exams.Modal.EditTitle") : Tr("Exams.Modal.CreateTitle"))</h3>
+                    <button class="modal-close" @onclick="HideExamModal">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <EditForm Model="examModel" OnValidSubmit="SaveExam">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="form-grid">
+
+                            <div class="form-group full-width">
+                                <label>@Tr("Exams.Fields.TitleAr") *</label>
+                                <InputText class="form-control" @bind-Value="examModel.ExamTitleAr" />
+                                <ValidationMessage For="@(() => examModel.ExamTitleAr)" />
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>@Tr("Exams.Fields.TitleEn")</label>
+                                <InputText class="form-control" @bind-Value="examModel.ExamTitleEn" />
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>@Tr("Exams.Fields.DescriptionAr")</label>
+                                <InputTextArea class="form-control" rows="3" @bind-Value="examModel.DescriptionAr" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>@Tr("Exams.Fields.Category")</label>
+                                <InputSelect class="form-control" @bind-Value="examModel.CategoryId">
+                                    <option value="">@Tr("Common.Select")</option>
+                                    @foreach (var category in categories)
+                                    {
+                                        <option value="@category.CategoryId">@category.CategoryNameAr</option>
+                                    }
+                                </InputSelect>
+                            </div>
+
+                            <div class="form-group">
+                                <label>@Tr("Exams.Fields.Duration") *</label>
+                                <InputNumber class="form-control" @bind-Value="examModel.DurationMinutes" />
+                                <ValidationMessage For="@(() => examModel.DurationMinutes)" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>@Tr("Exams.Fields.TotalMarks") *</label>
+                                <InputNumber TValue="decimal" class="form-control" @bind-Value="examModel.TotalMarks" />
+                                <ValidationMessage For="@(() => examModel.TotalMarks)" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>@Tr("Exams.Fields.PassingMarks") *</label>
+                                <InputNumber TValue="decimal" class="form-control" @bind-Value="examModel.PassingMarks" />
+                                <ValidationMessage For="@(() => examModel.PassingMarks)" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>@Tr("Exams.Fields.MaxAttempts")</label>
+                                <InputNumber class="form-control" @bind-Value="examModel.MaxAttempts" />
+                                <small>@Tr("Exams.Fields.MaxAttempts.Help")</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>@Tr("Exams.Fields.StartDate")</label>
+                                <InputDate TValue="DateTime?" class="form-control" @bind-Value="examModel.StartDate" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>@Tr("Exams.Fields.EndDate")</label>
+                                <InputDate TValue="DateTime?" class="form-control" @bind-Value="examModel.EndDate" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>@Tr("Exams.Fields.Price")</label>
+                                <InputNumber TValue="decimal" class="form-control" @bind-Value="examModel.Price" />
+                                <small>@Tr("Exams.Fields.Price.Help")</small>
+                                <ValidationMessage For="@(() => examModel.Price)" />
+                            </div>
+
+                            <div class="form-group full-width">
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <InputCheckbox @bind-Value="examModel.IsPublic" />
+                                        <span>@Tr("Exams.Flags.IsPublic")</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <InputCheckbox @bind-Value="examModel.ShowResultsImmediately" />
+                                        <span>@Tr("Exams.Flags.ShowResultsImmediately")</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <InputCheckbox @bind-Value="examModel.ShowCorrectAnswers" />
+                                        <span>@Tr("Exams.Flags.ShowCorrectAnswers")</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <InputCheckbox @bind-Value="examModel.ShuffleQuestions" />
+                                        <span>@Tr("Exams.Flags.ShuffleQuestions")</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <InputCheckbox @bind-Value="examModel.ShuffleOptions" />
+                                        <span>@Tr("Exams.Flags.ShuffleOptions")</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <InputCheckbox @bind-Value="examModel.RequirePassword" />
+                                        <span>@Tr("Exams.Flags.RequirePassword")</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <InputCheckbox @bind-Value="examModel.ShowAnswerDuringExam" />
+                                        <span>@Tr("Exams.Flags.ShowAnswerDuringExam")</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <InputCheckbox @bind-Value="examModel.ShowExplanationDuringExam" />
+                                        <span>@Tr("Exams.Flags.ShowExplanationDuringExam")</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            @if (examModel.RequirePassword && examModel.Price > 0)
+                            {
+                                <div class="form-group full-width">
+                                    <label>@Tr("Exams.Fields.ExamPassword")</label>
+                                    <InputText class="form-control" @bind-Value="examModel.ExamPassword" />
+                                </div>
+                            }
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="HideExamModal">@Tr("Common.Cancel")</button>
+                            <button type="submit" class="btn btn-primary">
+                                @(isEditMode? Tr("Common.SaveChanges") : Tr("Common.Create"))
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    // Data
+    private List<Exam> exams = new();
+    private List<ExamCategory> categories = new();
+
+    // UI state
+    private bool isLoading = true;
+    private bool showExamModal = false;
+    private bool isEditMode = false;
+    private int editingExamId = 0;
+
+    // Filters
+    private string selectedCategoryId = "";
+    private string selectedStatus = "";
+
+    // Form Model
+    private CreateExamModel examModel = new();
+
+    // TODO: Replace with current logged-in instructor id
+    private int currentInstructorId = 1;
+
+    // Translation helper
+    private string Tr(string key) => TranslationService.Translate(key);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+        await LoadExams();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await TranslationService.EnsureInitAfterRenderAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadCategories()
+    {
+        categories = await ExamService.GetCategoriesAsync();
+    }
+
+    private async Task LoadExams()
+    {
+        isLoading = true;
+        StateHasChanged();
+
+        int? categoryId = string.IsNullOrEmpty(selectedCategoryId) ? null : int.Parse(selectedCategoryId);
+        bool? isPublic = selectedStatus == "public" ? true : selectedStatus == "private" ? false : null;
+
+        exams = await ExamService.GetAllExamsAsync(
+            categoryId: categoryId,
+            courseId: null,
+            instructorId: currentInstructorId,
+            isPublic: isPublic
+        );
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ShowCreateExamModal()
+    {
+        examModel = new CreateExamModel
+        {
+            DurationMinutes = 60,
+            TotalMarks = 100,
+            PassingMarks = 50,
+            MaxAttempts = 1,
+            IsPublic = true,
+            ShowResultsImmediately = true,
+            ShowCorrectAnswers = true,
+            ShuffleQuestions = false,
+            ShuffleOptions = false,
+            RequirePassword = false,
+            ShowAnswerDuringExam = false,
+            ShowExplanationDuringExam = false,
+            Price = 0
+        };
+        editingExamId = 0;
+        isEditMode = false;
+        showExamModal = true;
+    }
+
+    private void HideExamModal()
+    {
+        showExamModal = false;
+    }
+
+    private async Task SaveExam()
+    {
+        ExamOperationResult result;
+
+        if (isEditMode)
+        {
+            var update = new UpdateExamModel
+            {
+                ExamId = editingExamId,
+                ExamTitleAr = examModel.ExamTitleAr,
+                ExamTitleEn = examModel.ExamTitleEn,
+                DescriptionAr = examModel.DescriptionAr,
+                DescriptionEn = examModel.DescriptionEn,
+                CategoryId = examModel.CategoryId,
+                CourseId = examModel.CourseId,
+                DurationMinutes = examModel.DurationMinutes,
+                TotalMarks = examModel.TotalMarks,
+                PassingMarks = examModel.PassingMarks,
+                MaxAttempts = examModel.MaxAttempts,
+                StartDate = examModel.StartDate,
+                EndDate = examModel.EndDate,
+                IsPublic = examModel.IsPublic,
+                RequirePassword = examModel.RequirePassword,
+                ExamPassword = examModel.ExamPassword,
+                ShowResultsImmediately = examModel.ShowResultsImmediately,
+                ShowCorrectAnswers = examModel.ShowCorrectAnswers,
+                ShuffleQuestions = examModel.ShuffleQuestions,
+                ShuffleOptions = examModel.ShuffleOptions,
+                ShowAnswerDuringExam = examModel.ShowAnswerDuringExam,
+                ShowExplanationDuringExam = examModel.ShowExplanationDuringExam,
+                Price = examModel.Price
+            };
+
+            result = await ExamService.UpdateExamAsync(update, currentInstructorId);
+        }
+        else
+        {
+            result = await ExamService.CreateExamAsync(examModel, currentInstructorId);
+        }
+
+        if (result.Success)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", Tr("Common.SavedOk"));
+            HideExamModal();
+            await LoadExams();
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", result.Message ?? Tr("Common.SaveFailed"));
+        }
+    }
+
+    private async Task EditExam(int examId)
+    {
+        var exam = await ExamService.GetExamAsync(examId);
+        if (exam is null) return;
+
+        examModel = new CreateExamModel
+        {
+            ExamTitleAr = exam.ExamTitleAr,
+            ExamTitleEn = exam.ExamTitleEn,
+            DescriptionAr = exam.DescriptionAr,
+            DescriptionEn = exam.DescriptionEn,
+            CategoryId = exam.CategoryId,
+            CourseId = exam.CourseId,
+            DurationMinutes = exam.DurationMinutes,
+            TotalMarks = exam.TotalMarks,
+            PassingMarks = exam.PassingMarks,
+            MaxAttempts = exam.MaxAttempts,
+            StartDate = exam.StartDate,
+            EndDate = exam.EndDate,
+            IsPublic = exam.IsPublic,
+            RequirePassword = exam.RequirePassword,
+            ExamPassword = exam.ExamPassword,
+            ShowResultsImmediately = exam.ShowResultsImmediately,
+            ShowCorrectAnswers = exam.ShowCorrectAnswers,
+            ShuffleQuestions = exam.ShuffleQuestions,
+            ShuffleOptions = exam.ShuffleOptions,
+            ShowAnswerDuringExam = exam.ShowAnswerDuringExam,
+            ShowExplanationDuringExam = exam.ShowExplanationDuringExam,
+            Price = exam.Price
+        };
+
+        editingExamId = examId;
+        isEditMode = true;
+        showExamModal = true;
+    }
+
+    private async Task DeleteExam(int examId)
+    {
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", Tr("Exams.Delete.Confirm"));
+        if (!confirmed) return;
+
+        var ok = await ExamService.DeleteExamAsync(examId, currentInstructorId);
+        if (ok)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", Tr("Common.DeletedOk"));
+            await LoadExams();
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", Tr("Common.DeleteFailed"));
+        }
+    }
+
+    private void ManageQuestions(int examId)
+    {
+        Navigation.NavigateTo($"/instructor/exams/{examId}/questions");
+    }
+
+    private void ViewResults(int examId)
+    {
+        Navigation.NavigateTo($"/instructor/exams/{examId}/results");
+    }
+
+    private static string FormatPrice(decimal price)
+        => string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:0.##} {1}", price, "EGP");
+}

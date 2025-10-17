@@ -321,7 +321,7 @@ Tags = new(){ "محاسبة", "أساسيات", "قوائم مالية", "Beginn
             return Task.FromResult(new PagedResult<CourseDto>
             {
                 Items = items,
-                Total = total,
+
                 Page = filter.Page,
                 PageSize = filter.PageSize
             });
@@ -390,7 +390,7 @@ Tags = new(){ "محاسبة", "أساسيات", "قوائم مالية", "Beginn
             return await Task.FromResult(new PagedResult<CourseDto>
             {
                 Items = items,
-                Total = total,
+
                 Page = filter.Page,
                 PageSize = filter.PageSize
             });

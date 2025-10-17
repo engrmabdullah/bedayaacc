@@ -1,0 +1,165 @@
+﻿@using bedayaacc.Services
+@inject TranslationService TranslationService
+@inject IJSRuntime JSRuntime
+
+<section class="stats-enhanced" id="statsSection">
+    <div class="stats-wave-top-enhanced"></div>
+
+    <div class="stats-container-enhanced">
+        <!-- Optional Header -->
+        <div class="stats-header-enhanced">
+            <h2 class="stats-header-title-enhanced">@Tr("Stats.Title")</h2>
+            <p class="stats-header-subtitle-enhanced">@Tr("Stats.Subtitle")</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid-enhanced">
+
+            <!-- Stat 1: Students -->
+            <div class="stat-item-enhanced" data-target="15000">
+                <div class="stat-icon-enhanced">
+                    <i class="fas fa-user-graduate" aria-hidden="true"></i>
+                </div>
+                <span class="stat-number-enhanced" data-count="15000" data-suffix="+">0+</span>
+                <span class="stat-label-enhanced">@Tr("Stats.Students.Label")</span>
+                <span class="stat-description-enhanced">@Tr("Stats.Students.Desc")</span>
+                <div class="stat-progress-enhanced">
+                    <div class="stat-progress-bar-enhanced" style="--progress-width: 95%;"></div>
+                </div>
+            </div>
+
+            <!-- Stat 2: Success Rate -->
+            <div class="stat-item-enhanced" data-target="98">
+                <div class="stat-icon-enhanced">
+                    <i class="fas fa-chart-line" aria-hidden="true"></i>
+                </div>
+                <span class="stat-number-enhanced" data-count="98" data-suffix="%">0%</span>
+                <span class="stat-label-enhanced">@Tr("Stats.SuccessRate.Label")</span>
+                <span class="stat-description-enhanced">@Tr("Stats.SuccessRate.Desc")</span>
+                <div class="stat-progress-enhanced">
+                    <div class="stat-progress-bar-enhanced" style="--progress-width: 98%;"></div>
+                </div>
+            </div>
+
+            <!-- Stat 3: Instructors -->
+            <div class="stat-item-enhanced" data-target="200">
+                <div class="stat-icon-enhanced">
+                    <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i>
+                </div>
+                <span class="stat-number-enhanced" data-count="200" data-suffix="+">0+</span>
+                <span class="stat-label-enhanced">@Tr("Stats.Instructors.Label")</span>
+                <span class="stat-description-enhanced">@Tr("Stats.Instructors.Desc")</span>
+                <div class="stat-progress-enhanced">
+                    <div class="stat-progress-bar-enhanced" style="--progress-width: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- Stat 4: Support -->
+            <div class="stat-item-enhanced" data-target="24">
+                <div class="stat-icon-enhanced">
+                    <i class="fas fa-headset" aria-hidden="true"></i>
+                </div>
+                <span class="stat-number-enhanced" data-count="24" data-suffix="/7">24/7</span>
+                <span class="stat-label-enhanced">@Tr("Stats.Support.Label")</span>
+                <span class="stat-description-enhanced">@Tr("Stats.Support.Desc")</span>
+                <div class="stat-progress-enhanced">
+                    <div class="stat-progress-bar-enhanced" style="--progress-width: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- Optional: Additional Stats -->
+            @* 
+            <div class="stat-item-enhanced" data-target="500">
+                <div class="stat-icon-enhanced">
+                    <i class="fas fa-book" aria-hidden="true"></i>
+                </div>
+                <span class="stat-number-enhanced" data-count="500" data-suffix="+">0+</span>
+                <span class="stat-label-enhanced">@Tr("Stats.Courses.Label")</span>
+                <span class="stat-description-enhanced">@Tr("Stats.Courses.Desc")</span>
+                <div class="stat-progress-enhanced">
+                    <div class="stat-progress-bar-enhanced" style="--progress-width: 90%;"></div>
+                </div>
+            </div>
+            
+            <div class="stat-item-enhanced" data-target="50">
+                <div class="stat-icon-enhanced">
+                    <i class="fas fa-certificate" aria-hidden="true"></i>
+                </div>
+                <span class="stat-number-enhanced" data-count="50" data-suffix="+">0+</span>
+                <span class="stat-label-enhanced">@Tr("Stats.Certificates.Label")</span>
+                <span class="stat-description-enhanced">@Tr("Stats.Certificates.Desc")</span>
+                <div class="stat-progress-enhanced">
+                    <div class="stat-progress-bar-enhanced" style="--progress-width: 85%;"></div>
+                </div>
+            </div>
+            *@
+
+        </div>
+    </div>
+
+    <div class="stats-wave-bottom-enhanced"></div>
+</section>
+
+@code {
+    private string Tr(string key) => TranslationService.Translate(key);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initializeStatsCounter");
+        }
+    }
+}
+
+<script>
+    window.initializeStatsCounter = () => {
+        const statsSection = document.getElementById('statsSection');
+        if (!statsSection) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Animate Numbers
+                    const statNumbers = entry.target.querySelectorAll('.stat-number-enhanced');
+                    statNumbers.forEach(stat => {
+                        const target = parseInt(stat.getAttribute('data-count'));
+                        const suffix = stat.getAttribute('data-suffix') || '';
+                        let count = 0;
+                        const duration = 2000;
+                        const increment = target / (duration / 16);
+
+                        const updateCount = () => {
+                            count += increment;
+                            if (count < target) {
+                                stat.textContent = Math.floor(count) + suffix;
+                                requestAnimationFrame(updateCount);
+                            } else {
+                                stat.textContent = target + suffix;
+                            }
+                        };
+
+                        // Start animation after small delay
+                        setTimeout(updateCount, 300);
+                    });
+
+                    // Animate Progress Bars
+                    const statItems = entry.target.querySelectorAll('.stat-item-enhanced');
+                    statItems.forEach((item, index) => {
+                        setTimeout(() => {
+                            item.classList.add('animated');
+                        }, index * 150);
+                    });
+
+                    // Unobserve after animation
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.3,
+            rootMargin: '0px 0px -100px 0px'
+        });
+
+        observer.observe(statsSection);
+    };
+</script>

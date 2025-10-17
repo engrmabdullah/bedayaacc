@@ -1,0 +1,278 @@
+﻿/* =========================================================
+   Bedaya — Payments Table Styling (Instructor Dashboard)
+   Scope: داخل تبويب .bedaya-instructor-payments فقط
+   ========================================================= */
+
+:root {
+    --bd-card: #fff;
+    --bd-border: #e2e8f0;
+    --bd-muted: #64748b;
+    --bd-text: #0f172a;
+    --bd-primary: #6366f1;
+    --bd-success: #10b981;
+    --bd-warning: #f59e0b;
+    --bd-danger: #ef4444;
+    --bd-info: #0ea5e9;
+    --bd-shadow: 0 6px 24px rgba(15,23,42,.08);
+    --bd-radius: 14px;
+}
+
+/* Wrapper */
+.bedaya-instructor-payments .bedaya-table-wrapper {
+    background: var(--bd-card);
+    border: 1px solid var(--bd-border);
+    border-radius: var(--bd-radius);
+    box-shadow: var(--bd-shadow);
+    overflow: auto;
+}
+
+/* Table */
+.bedaya-instructor-payments .bedaya-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 980px;
+    font-size: 14px;
+}
+
+    /* Header */
+    .bedaya-instructor-payments .bedaya-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #f8fafc;
+        color: var(--bd-muted);
+        font-weight: 800;
+        letter-spacing: .2px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--bd-border);
+        text-align: start;
+    }
+
+    /* Body cells */
+    .bedaya-instructor-payments .bedaya-table tbody td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--bd-border);
+        vertical-align: top;
+    }
+
+    /* Row hover & zebra */
+    .bedaya-instructor-payments .bedaya-table tbody tr {
+        transition: background .12s ease-in-out;
+    }
+
+        .bedaya-instructor-payments .bedaya-table tbody tr:nth-child(odd) {
+            background: #fbfdff;
+        }
+
+        .bedaya-instructor-payments .bedaya-table tbody tr:hover {
+            background: #f1f5f9;
+        }
+
+        /* First/last cell rounding on last row for nicer look */
+        .bedaya-instructor-payments .bedaya-table tbody tr:last-child td:first-child {
+            border-bottom-left-radius: var(--bd-radius);
+        }
+
+        .bedaya-instructor-payments .bedaya-table tbody tr:last-child td:last-child {
+            border-bottom-right-radius: var(--bd-radius);
+        }
+
+    /* Col 1: Student cell (name/email) */
+    .bedaya-instructor-payments .bedaya-table tbody td:nth-child(1) strong {
+        font-weight: 800;
+    }
+
+    .bedaya-instructor-payments .bedaya-table tbody td:nth-child(1) small {
+        color: var(--bd-muted);
+        display: inline-block;
+        max-width: 260px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Col 3: Amount */
+    .bedaya-instructor-payments .bedaya-table tbody td:nth-child(3) {
+        font-weight: 800;
+    }
+
+    /* Col 4: BankRef */
+    .bedaya-instructor-payments .bedaya-table tbody td:nth-child(4) {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        color: #334155;
+    }
+
+/* Receipt link */
+.bedaya-instructor-payments .bedaya-link {
+    font-weight: 700;
+    text-decoration: none;
+    border: 1px dashed #cbd5e1;
+    padding: 6px 10px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+    .bedaya-instructor-payments .bedaya-link:hover {
+        background: #eef2ff;
+        border-style: solid;
+        border-color: #c7d2fe;
+    }
+
+/* Status badge (pill) */
+.bedaya-instructor-payments .bedaya-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    border: 1px solid transparent;
+}
+
+    .bedaya-instructor-payments .bedaya-badge::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+.bedaya-instructor-payments .badge-success {
+    background: #ecfdf5;
+    color: #065f46;
+    border-color: #d1fae5;
+}
+
+    .bedaya-instructor-payments .badge-success::before {
+        background: #10b981;
+    }
+
+.bedaya-instructor-payments .badge-warning {
+    background: #fffbeb;
+    color: #92400e;
+    border-color: #fde68a;
+}
+
+    .bedaya-instructor-payments .badge-warning::before {
+        background: #f59e0b;
+    }
+
+.bedaya-instructor-payments .badge-danger {
+    background: #fef2f2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+    .bedaya-instructor-payments .badge-danger::before {
+        background: #ef4444;
+    }
+
+.bedaya-instructor-payments .badge-info {
+    background: #eff6ff;
+    color: #1e40af;
+    border-color: #bfdbfe;
+}
+
+    .bedaya-instructor-payments .badge-info::before {
+        background: #0ea5e9;
+    }
+
+.bedaya-instructor-payments .badge-neutral {
+    background: #f1f5f9;
+    color: #334155;
+    border-color: #e2e8f0;
+}
+
+    .bedaya-instructor-payments .badge-neutral::before {
+        background: #64748b;
+    }
+
+/* Actions column (buttons spacing) */
+.bedaya-instructor-payments .bedaya-table tbody td:last-child > div {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Compact buttons in table */
+.bedaya-instructor-payments .bedaya-btn {
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.bedaya-instructor-payments .bedaya-btn-primary {
+    background: linear-gradient(135deg, var(--bd-primary), #8b5cf6);
+    color: #fff;
+    box-shadow: var(--bd-shadow);
+}
+
+.bedaya-instructor-payments .bedaya-btn-ghost {
+    background: #f8fafc;
+    border: 1px solid var(--bd-border);
+    color: var(--bd-text);
+}
+
+.bedaya-instructor-payments .bedaya-btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+/* Loading / empty helpers (لو مش عندك في ملف تاني) */
+.bedaya-instructor-payments .loading-container {
+    background: var(--bd-card);
+    border: 1px solid var(--bd-border);
+    border-radius: var(--bd-radius);
+    padding: 24px;
+    text-align: center;
+    box-shadow: var(--bd-shadow);
+}
+
+.bedaya-instructor-payments .empty-state {
+    background: var(--bd-card);
+    border: 1px solid var(--bd-border);
+    border-radius: var(--bd-radius);
+    padding: 24px;
+    text-align: center;
+    color: var(--bd-muted);
+    box-shadow: var(--bd-shadow);
+}
+
+/* Spinner */
+.bedaya-instructor-payments .spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #e5e7eb;
+    border-top-color: var(--bd-primary);
+    border-radius: 50%;
+    display: inline-block;
+    animation: bd-spin .8s linear infinite;
+}
+
+@keyframes bd-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* RTL support */
+:root[dir="rtl"] .bedaya-instructor-payments .bedaya-table thead th {
+    text-align: right;
+}
+
+:root[dir="rtl"] .bedaya-instructor-payments .bedaya-table tbody td:nth-child(3) {
+    text-align: left; /* المبالغ قد تكون أفضل بمحاذاة معاكسة في RTL */
+}
+
+/* Small screens -> استخدم تمرير أفقي (الهيكل يحافظ على الجدول) */
+@media (max-width: 640px) {
+    .bedaya-instructor-payments .bedaya-table {
+        min-width: 760px;
+    }
+}

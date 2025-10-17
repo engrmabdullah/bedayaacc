@@ -1,0 +1,186 @@
+﻿@inherits InputBase<string>
+@using Microsoft.AspNetCore.Components.Forms
+@inject IJSRuntime JS
+
+<div class="rhe @(Disabled ? "rhe-disabled" : "")">
+    <div class="rhe-toolbar">
+        <!-- Inline styles -->
+        <button type="button" class="rhe-btn" title="Bold" @onclick="Bold"><i class="fas fa-bold"></i></button>
+        <button type="button" class="rhe-btn" title="Italic" @onclick="Italic"><i class="fas fa-italic"></i></button>
+        <button type="button" class="rhe-btn" title="Underline" @onclick="Underline"><i class="fas fa-underline"></i></button>
+        <span class="rhe-sep"></span>
+
+        <!-- Headings -->
+        <select class="rhe-select" @onchange="HeadingChanged">
+            <option value="">P</option>
+            <option value="h1">H1</option>
+            <option value="h2">H2</option>
+            <option value="h3">H3</option>
+        </select>
+        <span class="rhe-sep"></span>
+
+        <!-- Lists -->
+        <button type="button" class="rhe-btn" title="Unordered List" @onclick="InsertUL"><i class="fas fa-list-ul"></i></button>
+        <button type="button" class="rhe-btn" title="Ordered List" @onclick="InsertOL"><i class="fas fa-list-ol"></i></button>
+        <span class="rhe-sep"></span>
+
+        <!-- Alignment -->
+        <button type="button" class="rhe-btn" title="Align Left" @onclick="AlignLeft"><i class="fas fa-align-left"></i></button>
+        <button type="button" class="rhe-btn" title="Align Center" @onclick="AlignCenter"><i class="fas fa-align-center"></i></button>
+        <button type="button" class="rhe-btn" title="Align Right" @onclick="AlignRight"><i class="fas fa-align-right"></i></button>
+        <button type="button" class="rhe-btn" title="Justify" @onclick="AlignJustify"><i class="fas fa-align-justify"></i></button>
+        <span class="rhe-sep"></span>
+
+        <!-- Indent / Outdent -->
+        <button type="button" class="rhe-btn" title="Indent" @onclick="Indent"><i class="fas fa-indent"></i></button>
+        <button type="button" class="rhe-btn" title="Outdent" @onclick="Outdent"><i class="fas fa-outdent"></i></button>
+        <span class="rhe-sep"></span>
+
+        <!-- Direction -->
+        <button type="button" class="rhe-btn" title="RTL" @onclick="@(() => SetEditorDir("rtl"))"><i class="fas fa-paragraph"></i><small class="ms-1">RTL</small></button>
+        <button type="button" class="rhe-btn" title="LTR" @onclick="@(() => SetEditorDir("ltr"))"><i class="fas fa-paragraph"></i><small class="ms-1">LTR</small></button>
+        <span class="rhe-sep"></span>
+
+        <!-- Link -->
+        <button type="button" class="rhe-btn" title="Insert Link" @onclick="CreateLink"><i class="fas fa-link"></i></button>
+        <button type="button" class="rhe-btn" title="Remove Link" @onclick="Unlink"><i class="fas fa-unlink"></i></button>
+        <span class="rhe-sep"></span>
+
+        <!-- More -->
+        <button type="button" class="rhe-btn" title="Blockquote" @onclick="Blockquote"><i class="fas fa-quote-right"></i></button>
+        <button type="button" class="rhe-btn" title="Horizontal Rule" @onclick="InsertHr"><i class="fas fa-minus"></i></button>
+        <button type="button" class="rhe-btn" title="Remove Format" @onclick="RemoveFormat"><i class="fas fa-remove-format"></i></button>
+        <span class="rhe-sep"></span>
+
+        <!-- Undo/Redo & Clear -->
+        <button type="button" class="rhe-btn" title="Undo" @onclick="Undo"><i class="fas fa-undo"></i></button>
+        <button type="button" class="rhe-btn" title="Redo" @onclick="Redo"><i class="fas fa-redo"></i></button>
+        <button type="button" class="rhe-btn" title="Clear All" @onclick="ClearAll"><i class="fas fa-eraser"></i></button>
+    </div>
+
+    <div class="rhe-editor @CssClass"
+         style="height:@Height"
+         contenteditable="@(!Disabled)"
+         dir="@_currentDir"
+         placeholder="@Placeholder"
+         @oninput="OnInputAsync"
+         @onblur="OnBlurAsync"
+         @ref="editorRef">
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Placeholder { get; set; } = "";
+    [Parameter] public string Height { get; set; } = "300px";
+    [Parameter] public string Dir { get; set; } = "auto"; // "rtl" | "ltr" | "auto"
+    [Parameter] public bool Disabled { get; set; } = false;
+    [Parameter] public bool UpdateOnBlurOnly { get; set; } = false;
+
+    private ElementReference editorRef;
+    private bool _initialized;
+    private string _lastRenderedHtml = "";
+    private string _currentDir = "auto";
+
+    protected override bool TryParseValueFromString(string? value, out string result, out string validationErrorMessage)
+    {
+        result = value ?? string.Empty;
+        validationErrorMessage = null!;
+        return true;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _currentDir = string.IsNullOrWhiteSpace(Dir) ? "auto" : Dir;
+        await base.OnParametersSetAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await EnsureJsReady();
+            await SetHtmlAsync(CurrentValue ?? string.Empty, force: true);
+            await JS.InvokeVoidAsync("RichHtmlEditor.setDir", editorRef, _currentDir);
+            _initialized = true;
+        }
+        else
+        {
+            if (_initialized && (CurrentValue ?? "") != _lastRenderedHtml)
+                await SetHtmlAsync(CurrentValue ?? string.Empty, force: true);
+        }
+    }
+
+    private Task EnsureJsReady() => JS.InvokeVoidAsync("RichHtmlEditor._ensure").AsTask();
+
+    private Task<string> GetHtmlAsync() => JS.InvokeAsync<string>("RichHtmlEditor.getHtml", editorRef).AsTask();
+
+    private async Task SetHtmlAsync(string html, bool force = false)
+    {
+        if (!force && html == _lastRenderedHtml) return;
+        await JS.InvokeVoidAsync("RichHtmlEditor.setHtml", editorRef, html ?? "");
+        _lastRenderedHtml = html ?? "";
+    }
+
+    private async Task ExecAsync(string cmd, string? arg = null)
+    {
+        if (Disabled) return;
+        await JS.InvokeVoidAsync("RichHtmlEditor.exec", cmd, arg);
+        if (!UpdateOnBlurOnly)
+            await PushValueFromDomAsync();
+    }
+
+    private async Task PushValueFromDomAsync()
+    {
+        var html = await GetHtmlAsync();
+        _lastRenderedHtml = html ?? "";
+        CurrentValue = html ?? "";
+    }
+
+    // ===== toolbar actions =====
+    private Task Bold() => ExecAsync("bold");
+    private Task Italic() => ExecAsync("italic");
+    private Task Underline() => ExecAsync("underline");
+
+    private Task InsertUL() => ExecAsync("insertUnorderedList");
+    private Task InsertOL() => ExecAsync("insertOrderedList");
+
+    private Task AlignLeft() => ExecAsync("justifyLeft");
+    private Task AlignCenter() => ExecAsync("justifyCenter");
+    private Task AlignRight() => ExecAsync("justifyRight");
+    private Task AlignJustify() => ExecAsync("justifyFull");
+
+    private Task Indent() => ExecAsync("indent");
+    private Task Outdent() => ExecAsync("outdent");
+
+    private async Task SetEditorDir(string dir)
+    {
+        _currentDir = dir == "rtl" ? "rtl" : "ltr";
+        await JS.InvokeVoidAsync("RichHtmlEditor.setDir", editorRef, _currentDir);
+    }
+
+    private async Task HeadingChanged(ChangeEventArgs e)
+    {
+        var tag = e.Value?.ToString();
+        await ExecAsync("formatBlock", string.IsNullOrWhiteSpace(tag) ? "p" : tag);
+    }
+
+    private async Task CreateLink()
+    {
+        if (Disabled) return;
+        var url = await JS.InvokeAsync<string>("RichHtmlEditor.prompt", "Enter URL (https://...)");
+        if (string.IsNullOrWhiteSpace(url)) return;
+        await ExecAsync("createLink", url);
+    }
+    private Task Unlink() => ExecAsync("unlink");
+    private Task Blockquote() => ExecAsync("formatBlock", "blockquote");
+    private Task InsertHr() => ExecAsync("insertHorizontalRule");
+    private Task RemoveFormat() => ExecAsync("removeFormat");
+    private Task Undo() => ExecAsync("undo");
+    private Task Redo() => ExecAsync("redo");
+    private Task ClearAll() => SetHtmlAsync(string.Empty);
+
+    // inputs/blur
+    private async Task OnInputAsync(ChangeEventArgs _) { if (!UpdateOnBlurOnly) await PushValueFromDomAsync(); }
+    private async Task OnBlurAsync(FocusEventArgs _) => await PushValueFromDomAsync();
+
+}
