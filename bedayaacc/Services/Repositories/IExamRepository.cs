@@ -52,6 +52,13 @@ namespace bedayaacc.Repositories
         Task<bool> HasUserPaidExamAsync(int examId, int userId);
 
 
+        Task<PagedResult<ExamListItem>> GetExamsAsync(
+          string? search, int? categoryId, bool? isActive, bool? isPublic,
+          int page, int pageSize);
+
+        Task<ExamListItem?> GetByIdAsync(int examId);
+
+
     }
 
     public class ExamRepository : IExamRepository
@@ -1054,6 +1061,158 @@ SELECT CASE WHEN EXISTS(
             return v == 1;
         }
 
+        public async Task<PagedResult<ExamListItem>> GetExamsAsync(
+           string? search, int? categoryId, bool? isActive, bool? isPublic,
+           int page, int pageSize)
+        {
+            var p = new
+            {
+                search = string.IsNullOrWhiteSpace(search) ? null : search!.Trim(),
+                categoryId,
+                isActive,
+                isPublic,
+                offset = (page - 1) * pageSize,
+                pageSize
+            };
 
+            const string sql = @"
+-- صفحة البيانات
+WITH base AS (
+    SELECT e.*,
+           c.CategoryNameAr, c.CategoryNameEn
+    FROM dbo.Exams e
+    LEFT JOIN dbo.ExamCategories c ON c.CategoryId = e.CategoryId
+    WHERE ISNULL(e.IsDeleted,0) = 0
+      AND (@categoryId IS NULL OR e.CategoryId = @categoryId)
+      AND (@isActive  IS NULL OR e.IsActive  = @isActive)
+      AND (@isPublic  IS NULL OR e.IsPublic  = @isPublic)
+      AND (
+            @search IS NULL OR
+            e.ExamTitleAr   LIKE '%' + @search + '%' OR
+            e.ExamTitleEn   LIKE '%' + @search + '%' OR
+            e.DescriptionAr LIKE '%' + @search + '%' OR
+            e.DescriptionEn LIKE '%' + @search + '%' OR
+            c.CategoryNameAr LIKE '%' + @search + '%' OR
+            c.CategoryNameEn LIKE '%' + @search + '%'
+          )
+),
+agg AS (
+    SELECT b.ExamId,
+           COUNT(DISTINCT a.AttemptId)  AS AttemptsCount,
+           COUNT(DISTINCT a.UserId)     AS UniqueStudents
+    FROM base b
+    LEFT JOIN dbo.ExamAttempts a ON a.ExamId = b.ExamId
+    GROUP BY b.ExamId
+)
+SELECT b.ExamId, b.ExamTitleAr, b.ExamTitleEn, b.DescriptionAr, b.DescriptionEn,
+       b.CategoryId, b.CategoryNameAr, b.CategoryNameEn,
+       b.DurationMinutes, b.TotalMarks, b.TotalQuestions, b.MaxAttempts,
+       b.ShowResultsImmediately, b.ShowCorrectAnswers, b.ShuffleQuestions, b.ShuffleOptions,
+       b.StartDate, b.EndDate, b.IsPublic, b.RequirePassword, b.ExamPassword,
+       b.IsActive, b.IsDeleted, b.CreatedAt, b.UpdatedAt, b.Price, b.IsFree,
+       ISNULL(g.AttemptsCount,0)   AS AttemptsCount,
+       ISNULL(g.UniqueStudents,0)  AS UniqueStudents
+FROM base b
+LEFT JOIN agg g ON g.ExamId = b.ExamId
+ORDER BY ISNULL(b.UpdatedAt, b.CreatedAt) DESC, b.ExamId DESC
+OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY;
+
+-- الإجمالي
+WITH base AS (
+    SELECT e.ExamId
+    FROM dbo.Exams e
+    LEFT JOIN dbo.ExamCategories c ON c.CategoryId = e.CategoryId
+    WHERE ISNULL(e.IsDeleted,0) = 0
+      AND (@categoryId IS NULL OR e.CategoryId = @categoryId)
+      AND (@isActive  IS NULL OR e.IsActive  = @isActive)
+      AND (@isPublic  IS NULL OR e.IsPublic  = @isPublic)
+      AND (
+            @search IS NULL OR
+            e.ExamTitleAr   LIKE '%' + @search + '%' OR
+            e.ExamTitleEn   LIKE '%' + @search + '%' OR
+            e.DescriptionAr LIKE '%' + @search + '%' OR
+            e.DescriptionEn LIKE '%' + @search + '%' OR
+            c.CategoryNameAr LIKE '%' + @search + '%' OR
+            c.CategoryNameEn LIKE '%' + @search + '%'
+          )
+)
+SELECT COUNT(*) FROM base;";
+
+            using var c = GetConnection();
+            using var multi = await c.QueryMultipleAsync(sql, p);
+            var items = (await multi.ReadAsync<ExamListItem>()).ToList();
+            var total = await multi.ReadSingleAsync<int>();
+
+            return new PagedResult<ExamListItem>
+            {
+                Items = items,
+                Total = total,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
+        public async Task<ExamListItem?> GetByIdAsync(int examId)
+        {
+            const string sql = @"
+SELECT TOP 1 e.*, c.CategoryNameAr, c.CategoryNameEn
+FROM dbo.Exams e
+LEFT JOIN dbo.ExamCategories c ON c.CategoryId = e.CategoryId
+WHERE e.ExamId = @examId AND ISNULL(e.IsDeleted,0) = 0;
+
+-- stats
+SELECT
+    (SELECT COUNT(DISTINCT AttemptId) FROM dbo.ExamAttempts WHERE ExamId = @examId)  AS AttemptsCount,
+    (SELECT COUNT(DISTINCT UserId)    FROM dbo.ExamAttempts WHERE ExamId = @examId)  AS UniqueStudents;
+";
+            using var c = GetConnection();
+            using var multi = await c.QueryMultipleAsync(sql, new { examId });
+            var exam = await multi.ReadFirstOrDefaultAsync<ExamListItem>();
+            if (exam == null) return null;
+            var stats = await multi.ReadFirstAsync<(int AttemptsCount, int UniqueStudents)>();
+            exam.AttemptsCount = stats.AttemptsCount;
+            exam.UniqueStudents = stats.UniqueStudents;
+            return exam;
+        }
+    }
+
+
+
+    public class ExamListItem
+    {
+        public int ExamId { get; set; }
+        public string? ExamTitleAr { get; set; }
+        public string? ExamTitleEn { get; set; }
+        public string? DescriptionAr { get; set; }
+        public string? DescriptionEn { get; set; }
+        public int? CategoryId { get; set; }
+        public string? CategoryNameAr { get; set; }
+        public string? CategoryNameEn { get; set; }
+        public int? DurationMinutes { get; set; }
+        public int? TotalMarks { get; set; }
+        public int? TotalQuestions { get; set; }
+        public int? MaxAttempts { get; set; }
+        public bool ShowResultsImmediately { get; set; }
+        public bool ShowCorrectAnswers { get; set; }
+        public bool ShuffleQuestions { get; set; }
+        public bool ShuffleOptions { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public bool IsPublic { get; set; }
+        public bool RequirePassword { get; set; }
+        public string? ExamPassword { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public decimal? Price { get; set; }
+        public bool IsFree { get; set; }
+
+        // إحصائيات
+        public int AttemptsCount { get; set; }
+        public int UniqueStudents { get; set; }
+
+        // للعرض السريع
+        public string Title => string.IsNullOrWhiteSpace(ExamTitleAr) ? (ExamTitleEn ?? "") : ExamTitleAr!;
     }
 }

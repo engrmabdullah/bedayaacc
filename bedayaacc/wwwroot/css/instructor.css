@@ -32,7 +32,6 @@
     .bedaya-instructor-page::before {
         content: "";
         position: absolute;
-        inset: 0;
         z-index: 0;
         opacity: .6;
         background-image: radial-gradient(circle at 10% 20%, rgba(118,75,162,.05) 0%, transparent 30%), radial-gradient(circle at 90% 80%, rgba(102,126,234,.05) 0%, transparent 30%), radial-gradient(circle at 50% 50%, rgba(118,75,162,.02) 0%, transparent 50%), repeating-linear-gradient(45deg, rgba(118,75,162,.02) 0 2px, transparent 2px 12px), repeating-linear-gradient(-45deg, rgba(102,126,234,.02) 0 2px, transparent 2px 12px);
@@ -56,14 +55,14 @@
     z-index: 2
 }
 
-/* -------- Header -------- */
+/* -------- Header (optional hero) -------- */
 .bedaya-instructor-header {
-    padding: 100px 0 50px;
+    padding: 40px 0 14px;
     background: linear-gradient(135deg,#ffffff 0%,#f8fafc 100%);
     border-bottom: 2px solid var(--bd-border);
     box-shadow: 0 4px 20px rgba(0,0,0,.05);
     position: relative;
-    z-index: 2;
+    z-index: 2
 }
 
     .bedaya-instructor-header::after {
@@ -73,164 +72,40 @@
         bottom: -2px;
         width: 100%;
         height: 2px;
-        background: linear-gradient(90deg,transparent,#764ba2,#667eea,transparent);
+        background: linear-gradient(90deg,transparent,#764ba2,#667eea,transparent)
     }
 
 .bedaya-instructor-header-content {
     display: flex;
     align-items: center;
-    gap: 2.5rem;
-    padding: 0 2rem;
-    animation: slideInDown .6s ease-out;
-}
-
-@keyframes slideInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-30px)
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0)
-    }
-}
-
-.bedaya-instructor-avatar {
-    position: relative;
-    animation: scaleIn .6s ease-out .2s both
-}
-
-@keyframes scaleIn {
-    from {
-        opacity: 0;
-        transform: scale(.8)
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1)
-    }
-}
-
-.bedaya-avatar-image {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 5px solid #fff;
-    box-shadow: 0 10px 40px rgba(118,75,162,.2);
-    transition: all .4s cubic-bezier(.34,1.56,.64,1);
-}
-
-    .bedaya-avatar-image:hover {
-        transform: scale(1.1) rotate(5deg);
-        box-shadow: 0 15px 50px rgba(118,75,162,.3)
-    }
-
-.bedaya-avatar-badge {
-    position: absolute;
-    right: 5px;
-    bottom: 5px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    color: #fff;
-    background: linear-gradient(135deg,#764ba2,#667eea);
-    border: 3px solid #fff;
-    box-shadow: 0 4px 15px rgba(118,75,162,.4);
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%,100% {
-        transform: scale(1)
-    }
-
-    50% {
-        transform: scale(1.05)
-    }
-}
-
-.bedaya-instructor-info {
-    flex: 1;
-    animation: fadeInRight .6s ease-out .3s both
-}
-
-@keyframes fadeInRight {
-    from {
-        opacity: 0;
-        transform: translateX(-30px)
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0)
-    }
+    gap: 1.5rem;
+    padding: 0 1rem
 }
 
 .bedaya-instructor-name {
-    font-size: 2.5rem;
+    font-size: 1.75rem;
     font-weight: 800;
-    margin: 0 0 .5rem;
+    margin: 0;
     background: linear-gradient(135deg,#1e293b,#764ba2);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-clip: text;
+    background-clip: text
 }
 
 .bedaya-instructor-title {
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: #667eea;
-    margin: 0 0 1.5rem;
+    margin: .25rem 0 0;
     font-weight: 600
-}
-
-.bedaya-instructor-stats {
-    display: flex;
-    gap: 3rem;
-    flex-wrap: wrap
-}
-
-.bedaya-instructor-stat {
-    text-align: center;
-    transition: .3s;
-    cursor: pointer
-}
-
-    .bedaya-instructor-stat:hover {
-        transform: translateY(-5px)
-    }
-
-.bedaya-stat-number {
-    display: block;
-    font-size: 2.2rem;
-    font-weight: 800;
-    margin-bottom: .25rem;
-    background: linear-gradient(135deg,#764ba2,#667eea);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.bedaya-stat-label {
-    display: block;
-    font-size: .95rem;
-    color: var(--bd-muted);
-    font-weight: 600;
-    letter-spacing: .4px
 }
 
 /* -------- Shell -------- */
 .bedaya-instructor-container {
-    width: min(1200px,92vw);
-    margin: -26px auto 40px;
+    margin: 18px auto 40px;
     display: grid;
     grid-template-columns: 280px 1fr;
     gap: 2rem;
-    padding: 0 2rem;
+    padding: 0 1rem;
 }
 
 /* -------- Tabs Nav -------- */
@@ -238,25 +113,25 @@
     background: var(--bd-card);
     border: 1px solid var(--bd-border);
     border-radius: 20px;
-    padding: 1.5rem;
+    padding: 1rem;
     box-shadow: 0 15px 40px rgba(0,0,0,.08);
     position: sticky;
-    top: 2rem;
-    backdrop-filter: blur(10px);
+    top: 1rem;
+    backdrop-filter: blur(10px)
 }
 
 .bedaya-instructor-nav-item {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.25rem;
+    gap: .75rem;
+    padding: .9rem 1rem;
     border-radius: 12px;
     cursor: pointer;
     color: var(--bd-muted);
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: .5rem;
     position: relative;
-    transition: .3s cubic-bezier(.34,1.56,.64,1);
+    transition: .3s cubic-bezier(.34,1.56,.64,1)
 }
 
     .bedaya-instructor-nav-item::before {
@@ -268,7 +143,7 @@
         height: 100%;
         background: linear-gradient(135deg,#764ba2,#667eea);
         transform: scaleY(0);
-        transition: transform .3s;
+        transition: transform .3s
     }
 
     .bedaya-instructor-nav-item:hover {
@@ -295,22 +170,22 @@
         }
 
     .bedaya-instructor-nav-item i {
-        width: 24px;
-        font-size: 1.1rem;
+        width: 22px;
+        font-size: 1.05rem;
         transition: .3s
     }
 
     .bedaya-instructor-nav-item:hover i, .bedaya-instructor-nav-item.active i {
-        transform: scale(1.2)
+        transform: scale(1.15)
     }
 
 /* -------- Tabs Content -------- */
 .bedaya-instructor-content {
     background: linear-gradient(135deg,#ffffff 0%,#f8fafc 100%);
     border-radius: 24px;
-    padding: 2.5rem;
+    padding: 1.5rem;
     box-shadow: 0 20px 60px rgba(0,0,0,.1);
-    border: 1px solid rgba(118,75,162,.1);
+    border: 1px solid rgba(118,75,162,.1)
 }
 
 .bedaya-instructor-tab {
@@ -334,12 +209,33 @@
     }
 }
 
+/* -------- Toolbar -------- */
+.bedaya-toolbar {
+    display: flex;
+    gap: .6rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: .5rem 0 1rem
+}
+
+.bedaya-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: .8rem;
+    background: #eef2ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe
+}
+
 /* -------- Section Title -------- */
 .bedaya-section-title {
-    font-size: 1.75rem;
+    font-size: 1.35rem;
     font-weight: 800;
-    margin: 0 0 2rem;
-    padding-bottom: 1rem;
+    margin: 0 0 1rem;
+    padding-bottom: .6rem;
     background: linear-gradient(135deg,#1e293b,#764ba2);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -354,81 +250,64 @@
         position: absolute;
         bottom: -3px;
         left: 0;
-        width: 80px;
+        width: 70px;
         height: 3px;
         background: linear-gradient(90deg,#764ba2,#667eea);
-        border-radius: 3px;
+        border-radius: 3px
     }
 
 /* -------- Dashboard Cards -------- */
-.bedaya-dashboard-overview {
-    margin-bottom: 2.5rem
-}
-
 .bedaya-dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
-    gap: 1.5rem;
-    margin-bottom: 2.5rem
+    gap: 1rem;
+    margin: .5rem 0 1.25rem
 }
 
 .bedaya-dashboard-card {
     background: linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%);
-    padding: 2rem;
+    padding: 1.25rem;
     border-radius: 16px;
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1rem;
     border: 2px solid transparent;
     position: relative;
     overflow: hidden;
-    transition: .4s cubic-bezier(.34,1.56,.64,1);
+    transition: .35s cubic-bezier(.34,1.56,.64,1);
     cursor: pointer;
 }
 
-    .bedaya-dashboard-card::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(135deg, rgba(118,75,162,.05), rgba(102,126,234,.05));
-        opacity: 0;
-        transition: opacity .3s;
-    }
-
     .bedaya-dashboard-card:hover {
-        transform: translateY(-8px) scale(1.02);
+        transform: translateY(-6px) scale(1.02);
         box-shadow: 0 15px 40px rgba(118,75,162,.2);
         border-color: rgba(118,75,162,.3)
     }
 
-        .bedaya-dashboard-card:hover::before {
-            opacity: 1
-        }
-
 .bedaya-dashboard-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 16px;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
     display: grid;
     place-items: center;
     color: #fff;
     background: linear-gradient(135deg,#667eea,#764ba2);
     box-shadow: 0 8px 20px rgba(118,75,162,.3);
-    transition: .3s;
+    transition: .3s
 }
 
 .bedaya-dashboard-card:hover .bedaya-dashboard-icon {
-    transform: rotate(10deg) scale(1.1)
+    transform: rotate(8deg) scale(1.06)
 }
 
 .bedaya-dashboard-content h4 {
-    font-size: 2rem;
+    font-size: 1.6rem;
     font-weight: 800;
-    margin: 0 0 .25rem
+    margin: 0 0 .15rem
 }
 
 .bedaya-dashboard-content p {
-    font-size: .95rem;
+    font-size: .92rem;
     color: var(--bd-muted);
     margin: 0;
     font-weight: 600
@@ -438,28 +317,28 @@
 .bedaya-dashboard-charts {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin-bottom: 2.5rem
+    gap: 1.25rem;
+    margin: 1rem 0
 }
 
 .bedaya-chart-section {
     background: linear-gradient(135deg,#f8fafc,#f1f5f9);
-    padding: 2rem;
+    padding: 1rem;
     border-radius: 16px;
     border: 2px solid var(--bd-border);
-    transition: .3s;
+    transition: .3s
 }
 
     .bedaya-chart-section:hover {
-        transform: translateY(-5px);
+        transform: translateY(-4px);
         box-shadow: 0 10px 30px rgba(0,0,0,.1);
         border-color: rgba(118,75,162,.3)
     }
 
 .bedaya-chart-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin: 0 0 1.5rem
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin: 0 0 .75rem
 }
 
 .bedaya-chart-placeholder {
@@ -471,31 +350,19 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
-    color: var(--bd-muted);
-    transition: .3s;
+    gap: .6rem;
+    color: var(--bd-muted)
 }
 
-    .bedaya-chart-placeholder:hover {
-        border-color: #764ba2;
-        background: linear-gradient(135deg,#fff,#f8fafc)
-    }
-
     .bedaya-chart-placeholder i {
-        font-size: 2.5rem;
+        font-size: 2rem;
         color: #764ba2;
-        opacity: .6;
-        transition: .3s
-    }
-
-    .bedaya-chart-placeholder:hover i {
-        opacity: 1;
-        transform: scale(1.1)
+        opacity: .7
     }
 
 /* -------- Quick Actions -------- */
 .bedaya-dashboard-quick-actions {
-    margin-top: 14px;
+    margin-top: 10px;
     background: var(--bd-card);
     border: 1px solid var(--bd-border);
     border-radius: 14px;
@@ -506,148 +373,77 @@
 .bedaya-quick-actions-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
-    gap: 1.5rem
+    gap: 1rem
 }
 
 .bedaya-quick-action {
     background: #fff;
     border: 2px solid var(--bd-border);
     border-radius: 16px;
-    padding: 2rem 1.5rem;
+    padding: 1.25rem;
     text-align: center;
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: .75rem;
+    gap: .5rem;
     cursor: pointer;
-    transition: .4s cubic-bezier(.34,1.56,.64,1);
+    transition: .35s cubic-bezier(.34,1.56,.64,1)
 }
-
-    .bedaya-quick-action::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(135deg, rgba(118,75,162,.05), rgba(102,126,234,.05));
-        opacity: 0;
-        transition: opacity .3s
-    }
 
     .bedaya-quick-action:hover {
         border-color: #764ba2;
-        transform: translateY(-8px) scale(1.05);
+        transform: translateY(-6px) scale(1.04);
         box-shadow: 0 15px 40px rgba(118,75,162,.2)
     }
 
-        .bedaya-quick-action:hover::before {
-            opacity: 1
-        }
-
     .bedaya-quick-action i {
-        font-size: 2rem;
-        color: #764ba2;
-        transition: .3s
-    }
-
-    .bedaya-quick-action:hover i {
-        transform: scale(1.2) rotate(10deg)
-    }
-
-    .bedaya-quick-action span {
-        font-size: .95rem;
-        font-weight: 600
-    }
-
-/* -------- Exams / Assignments Blocks -------- */
-.bedaya-exams-header, .bedaya-assignments-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem
-}
-
-.bedaya-exams-list, .bedaya-assignments-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem
-}
-
-.bedaya-exam-item, .bedaya-assignment-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    padding: 2rem;
-    background: linear-gradient(135deg,#f8fafc,#ffffff);
-    border-radius: 16px;
-    border: 2px solid var(--bd-border);
-    transition: .4s cubic-bezier(.34,1.56,.64,1);
-    position: relative;
-    overflow: hidden;
-}
-
-    .bedaya-exam-item::before, .bedaya-assignment-item::before {
-        content: "";
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 5px;
-        height: 100%;
-        background: linear-gradient(135deg,#764ba2,#667eea);
-        transform: scaleX(0);
-        transition: transform .3s;
-    }
-
-    .bedaya-exam-item:hover, .bedaya-assignment-item:hover {
-        transform: translateX(5px);
-        box-shadow: 0 10px 30px rgba(118,75,162,.15);
-        border-color: rgba(118,75,162,.3)
-    }
-
-        .bedaya-exam-item:hover::before, .bedaya-assignment-item:hover::before {
-            transform: scaleX(1)
-        }
-
-.bedaya-exam-info, .bedaya-assignment-info {
-    flex: 1;
-    min-width: 260px
-}
-
-.bedaya-exam-title, .bedaya-assignment-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin: 0 0 .5rem;
-    transition: .3s
-}
-
-.bedaya-exam-item:hover .bedaya-exam-title, .bedaya-assignment-item:hover .bedaya-assignment-title {
-    color: #764ba2
-}
-
-.bedaya-exam-course, .bedaya-assignment-course {
-    font-size: 1rem;
-    color: #667eea;
-    margin: 0 0 .75rem;
-    font-weight: 600
-}
-
-.bedaya-exam-meta, .bedaya-assignment-meta {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    color: var(--bd-muted)
-}
-
-    .bedaya-exam-meta span i, .bedaya-assignment-meta span i {
+        font-size: 1.6rem;
         color: #764ba2
     }
 
-.bedaya-exam-actions, .bedaya-assignment-actions {
+/* -------- Inputs / Form -------- */
+.bedaya-form-group {
     display: flex;
-    gap: .75rem;
-    flex-wrap: wrap
+    flex-direction: column;
+    gap: .5rem;
+    margin-bottom: .75rem
+}
+
+    .bedaya-form-group label {
+        font-weight: 800;
+        color: var(--bd-text);
+        font-size: .92rem
+    }
+
+.bedaya-form-input, .bedaya-form-select, .bedaya-form-textarea {
+    padding: .8rem 1rem;
+    border: 2px solid var(--bd-border);
+    border-radius: 12px;
+    font-size: .95rem;
+    background: #fff;
+    transition: .25s;
+    font-family: inherit
+}
+
+    .bedaya-form-input:focus, .bedaya-form-select:focus, .bedaya-form-textarea:focus {
+        outline: none;
+        border-color: #764ba2;
+        box-shadow: 0 0 0 4px rgba(118,75,162,.12);
+        transform: translateY(-1px)
+    }
+
+.bedaya-form-textarea {
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.6
+}
+
+.bedaya-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem
 }
 
 /* -------- Buttons -------- */
@@ -656,16 +452,16 @@
     align-items: center;
     justify-content: center;
     gap: .5rem;
-    padding: .875rem 1.75rem;
+    padding: .7rem 1.25rem;
     border-radius: 12px;
-    font-size: .95rem;
-    font-weight: 700;
+    font-size: .92rem;
+    font-weight: 800;
     border: none;
     cursor: pointer;
-    transition: .3s cubic-bezier(.34,1.56,.64,1);
+    transition: .25s cubic-bezier(.34,1.56,.64,1);
     position: relative;
     overflow: hidden;
-    user-select: none;
+    user-select: none
 }
 
     .bedaya-btn::before {
@@ -676,9 +472,9 @@
         width: 0;
         height: 0;
         border-radius: 50%;
-        background: rgba(255,255,255,.3);
+        background: rgba(255,255,255,.28);
         transform: translate(-50%,-50%);
-        transition: width .6s, height .6s;
+        transition: width .55s, height .55s
     }
 
     .bedaya-btn:hover::before {
@@ -693,20 +489,20 @@
 }
 
     .bedaya-btn-primary:hover {
-        transform: translateY(-3px);
+        transform: translateY(-2px);
         box-shadow: 0 12px 30px rgba(118,75,162,.4)
     }
 
 .bedaya-btn-ghost {
-    background: transparent;
-    color: #764ba2;
+    background: #f8fafc;
+    color: #4b5563;
     border: 2px solid var(--bd-border)
 }
 
     .bedaya-btn-ghost:hover {
         background: linear-gradient(135deg,#f8fafc,#f1f5f9);
         border-color: #764ba2;
-        transform: translateY(-3px)
+        transform: translateY(-2px)
     }
 
 .bedaya-btn:disabled {
@@ -714,49 +510,7 @@
     cursor: not-allowed
 }
 
-/* -------- Inputs / Form -------- */
-.bedaya-form-group {
-    display: flex;
-    flex-direction: column;
-    gap: .75rem
-}
-
-    .bedaya-form-group label {
-        font-weight: 700;
-        color: var(--bd-text);
-        font-size: .95rem
-    }
-
-.bedaya-form-input, .bedaya-form-select, .bedaya-form-textarea {
-    padding: 1rem 1.25rem;
-    border: 2px solid var(--bd-border);
-    border-radius: 12px;
-    font-size: 1rem;
-    background: #fff;
-    transition: .3s;
-    font-family: inherit;
-}
-
-    .bedaya-form-input:focus, .bedaya-form-select:focus, .bedaya-form-textarea:focus {
-        outline: none;
-        border-color: #764ba2;
-        box-shadow: 0 0 0 4px rgba(118,75,162,.15);
-        transform: translateY(-2px)
-    }
-
-.bedaya-form-textarea {
-    resize: vertical;
-    min-height: 120px;
-    line-height: 1.6
-}
-
-.bedaya-form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem
-}
-
-/* -------- Generic Table (cards & lists) -------- */
+/* -------- Generic Table -------- */
 .bedaya-table-wrapper {
     background: var(--bd-card);
     border: 1px solid var(--bd-border);
@@ -782,7 +536,7 @@
         border-bottom: 1px solid var(--bd-border);
         position: sticky;
         top: 0;
-        z-index: 1;
+        z-index: 1
     }
 
     .bedaya-table tbody td {
@@ -794,7 +548,7 @@
 .bedaya-link {
     color: var(--bd-primary-600);
     text-decoration: none;
-    font-weight: 700
+    font-weight: 800
 }
 
     .bedaya-link:hover {
@@ -843,105 +597,33 @@
     border-color: #e2e8f0
 }
 
-/* -------- Payments Tab — Table Styling (scoped) -------- */
-.bedaya-instructor-payments .bedaya-table-wrapper {
-    background: var(--bd-card)
-}
-
+/* -------- Payments scoped tweaks -------- */
 .bedaya-instructor-payments .bedaya-table {
     min-width: 980px;
     font-size: 14px
 }
 
-    .bedaya-instructor-payments .bedaya-table tbody tr {
-        transition: background .12s ease-in-out
+    .bedaya-instructor-payments .bedaya-table tbody tr:nth-child(odd) {
+        background: #fbfdff
     }
 
-        .bedaya-instructor-payments .bedaya-table tbody tr:nth-child(odd) {
-            background: #fbfdff
-        }
-
-        .bedaya-instructor-payments .bedaya-table tbody tr:hover {
-            background: #f1f5f9
-        }
-
-    .bedaya-instructor-payments .bedaya-table tbody td:nth-child(1) strong {
-        font-weight: 800
+    .bedaya-instructor-payments .bedaya-table tbody tr:hover {
+        background: #f1f5f9
     }
-
-    .bedaya-instructor-payments .bedaya-table tbody td:nth-child(1) small {
-        color: var(--bd-muted);
-        display: inline-block;
-        max-width: 260px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .bedaya-instructor-payments .bedaya-table tbody td:nth-child(3) {
-        font-weight: 800
-    }
-
-    .bedaya-instructor-payments .bedaya-table tbody td:nth-child(4) {
-        font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
-        color: #334155;
-    }
-
-.bedaya-instructor-payments .bedaya-link {
-    font-weight: 700;
-    text-decoration: none;
-    border: 1px dashed #cbd5e1;
-    padding: 6px 10px;
-    border-radius: 10px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-    .bedaya-instructor-payments .bedaya-link:hover {
-        background: #eef2ff;
-        border-style: solid;
-        border-color: #c7d2fe
-    }
-
-.bedaya-instructor-payments .bedaya-table tbody td:last-child > div {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap
-}
-
-.bedaya-instructor-payments .bedaya-btn {
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-weight: 700;
-    border: 1px solid transparent
-}
-
-.bedaya-instructor-payments .bedaya-btn-primary {
-    background: linear-gradient(135deg,var(--bd-primary),#8b5cf6);
-    color: #fff;
-    box-shadow: var(--bd-shadow)
-}
-
-.bedaya-instructor-payments .bedaya-btn-ghost {
-    background: #f8fafc;
-    border: 1px solid var(--bd-border);
-    color: var(--bd-text)
-}
 
 /* -------- Empty & Loading -------- */
 .empty-state, .loading-container {
     background: var(--bd-card);
     border: 1px solid var(--bd-border);
     border-radius: 14px;
-    padding: 28px;
+    padding: 24px;
     text-align: center;
     color: var(--bd-muted);
     box-shadow: var(--bd-shadow)
 }
 
     .empty-state i {
-        font-size: 28px;
+        font-size: 26px;
         margin-bottom: 6px;
         color: var(--bd-primary)
     }
@@ -954,7 +636,7 @@
     border-radius: 50%;
     display: inline-block;
     animation: spin .8s linear infinite;
-    margin-inline: 6px;
+    margin-inline: 6px
 }
 
 @keyframes spin {
@@ -963,11 +645,26 @@
     }
 }
 
-/* -------- Modals -------- */
+.spinner-sm {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #e5e7eb;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin-sm .8s linear infinite
+}
+
+@keyframes spin-sm {
+    to {
+        transform: rotate(360deg)
+    }
+}
+
+/* -------- Modals (generic) -------- */
 .bedaya-modal {
     display: none;
     position: fixed;
-    inset: 0;
     z-index: 1000;
     background: rgba(0,0,0,.6);
     backdrop-filter: blur(5px);
@@ -976,15 +673,25 @@
     animation: fadeIn .3s ease
 }
 
+@keyframes fadeIn {
+    from {
+        opacity: 0
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
 .bedaya-modal-content {
     background: #fff;
-    border-radius: 24px;
+    border-radius: 18px;
     width: 90%;
     max-width: 650px;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 30px 60px rgba(0,0,0,.2);
-    animation: slideUp .4s cubic-bezier(.34,1.56,.64,1);
+    animation: slideUp .35s cubic-bezier(.34,1.56,.64,1)
 }
 
 @keyframes slideUp {
@@ -1003,18 +710,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 2rem;
+    padding: 1.25rem 1.5rem;
     border-bottom: 2px solid var(--bd-border)
 }
 
     .bedaya-modal-header h3 {
         margin: 0;
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         font-weight: 800;
         background: linear-gradient(135deg,#1e293b,#764ba2);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        background-clip: text;
+        background-clip: text
     }
 
 .bedaya-modal-close {
@@ -1025,10 +732,10 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     color: #64748b;
     cursor: pointer;
-    transition: .3s;
+    transition: .25s
 }
 
     .bedaya-modal-close:hover {
@@ -1038,22 +745,64 @@
     }
 
 .bedaya-modal-body {
-    padding: 2rem
+    padding: 1.25rem 1.5rem
 }
 
 .bedaya-modal-footer {
     display: flex;
     justify-content: flex-end;
-    gap: 1rem;
-    padding: 1.5rem 2rem;
+    gap: .6rem;
+    padding: 1rem 1.5rem;
     border-top: 2px solid var(--bd-border);
     background: #f8fafc;
-    border-radius: 0 0 24px 24px
+    border-radius: 0 0 18px 18px
 }
 
-/* -------- Helpers -------- */
-[aria-hidden="true"] {
-    pointer-events: none
+/* -------- Checkbox (custom) -------- */
+.bedaya-checkbox-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none
+}
+
+.bedaya-checkbox-checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--bd-border);
+    border-radius: 6px;
+    display: inline-block;
+    position: relative
+}
+
+.bedaya-checkbox-container input:checked + .bedaya-checkbox-checkmark {
+    border-color: #764ba2;
+    background: linear-gradient(135deg,#764ba2,#667eea)
+}
+
+.bedaya-checkbox-checkmark::after {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 1px;
+    width: 6px;
+    height: 12px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    opacity: 0
+}
+
+.bedaya-checkbox-container input:checked + .bedaya-checkbox-checkmark::after {
+    opacity: 1
+}
+
+/* -------- Small helpers -------- */
+.file-input-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px
 }
 
 .clamp-1 {
@@ -1062,12 +811,16 @@
     white-space: nowrap
 }
 
+[aria-hidden="true"] {
+    pointer-events: none
+}
+
 /* -------- Responsive -------- */
 @media (max-width:1024px) {
     .bedaya-instructor-container {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
-        padding: 0 1.5rem
+        gap: 1rem;
+        padding: 0 1rem
     }
 
     .bedaya-instructor-nav {
@@ -1091,15 +844,11 @@
     .bedaya-instructor-header-content {
         flex-direction: column;
         text-align: center;
-        gap: 1.5rem
-    }
-
-    .bedaya-instructor-stats {
-        justify-content: center
+        gap: 1rem
     }
 
     .bedaya-instructor-content {
-        padding: 2rem
+        padding: 1rem
     }
 
     .bedaya-instructor-nav {
@@ -1109,52 +858,16 @@
     .bedaya-dashboard-grid {
         grid-template-columns: 1fr
     }
-
-    .bedaya-analytics-grid {
-        grid-template-columns: 1fr
-    }
-
-    .bedaya-modal-content {
-        width: 95%;
-        margin: 1rem
-    }
-
-    .bedaya-exam-item, .bedaya-assignment-item {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1.5rem
-    }
 }
 
 @media (max-width:480px) {
-    .bedaya-instructor-header {
-        padding: 60px 0 30px
-    }
-
-    .bedaya-instructor-name {
-        font-size: 2rem
-    }
-
-    .bedaya-instructor-title {
-        font-size: 1.1rem
-    }
-
-    .bedaya-avatar-image {
-        width: 120px;
-        height: 120px
-    }
-
     .bedaya-instructor-nav {
         grid-template-columns: 1fr;
         padding: .75rem
     }
 
-    .bedaya-instructor-content {
-        padding: 1.5rem
-    }
-
     .bedaya-quick-action {
-        padding: 1.5rem 1rem
+        padding: 1rem
     }
 
     .bedaya-modal-footer {
@@ -1173,29 +886,178 @@
         text-align: right
     }
 
-.file-input-wrap {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
+
+/* ===========================================
+   Bedaya — Instructor Dashboard (Stability Patch)
+   Paste BELOW your current CSS (overrides)
+   =========================================== */
+
+/* 1) ثبّت طبقة الخلفية: كمّل أبعادها وخليها non-interactive */
+.bedaya-instructor-page::before {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    will-change: opacity;
 }
 
-.spinner-sm {
-    width: 16px;
-    height: 16px;
-    border: 2px solid #e5e7eb; /* رمادي فاتح */
-    border-top-color: #667eea; /* أزرق/بنفسجي */
-    border-radius: 50%;
-    display: inline-block;
-    animation: spin-sm .8s linear infinite;
-}
+/* 2) قلّل/أوقف أنيميشن الخلفية لتجنب الـ constant repaint */
+@media (prefers-reduced-motion: reduce) {
+    .bedaya-instructor-page::before {
+        animation: none !important;
+    }
 
-@keyframes spin-sm {
-    to {
-        transform: rotate(360deg);
+    * {
+        scroll-behavior: auto !important;
     }
 }
 
-.muted {
-    color: #64748b;
-    font-size: 0.85rem;
+/* على الموبايل استخدم svh لتثبيت الارتفاع وتفادي رعشة شريط العنوان */
+@media (max-width: 1024px) {
+    .bedaya-instructor-page {
+        min-height: 100svh;
+    }
+        /* بدل 100dvh */
+        .bedaya-instructor-page::before {
+            animation: none;
+        }
+    /* نوقف الخلفية المتحركة */
+}
+
+/* (اختياري) بطّئ الأنيميشن على الديسكتوب بدل ما تشتغل بسرعة */
+@media (min-width: 1025px) {
+    .bedaya-instructor-page::before {
+        animation-duration: 45s;
+    }
+}
+
+/* 3) شِل الـ backdrop blur من القائمة الجانبية الـ sticky (بيسبب جِتر مع السكرول) */
+.bedaya-instructor-nav {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: var(--bd-card);
+}
+
+/* 4) فعّل GPU compositing للحاجات اللي عليها hover transforms */
+.bedaya-instructor-nav,
+.bedaya-instructor-nav-item,
+.bedaya-dashboard-card,
+.bedaya-btn,
+.bedaya-chart-section {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+    /* خفّف حركات الـ hover عشان ما يحصل micro-jumps */
+    .bedaya-instructor-nav-item:hover,
+    .bedaya-instructor-nav-item.active {
+        transform: translateX(4px) translateZ(0); /* كان 5px */
+    }
+
+    .bedaya-dashboard-card:hover {
+        transform: translateY(-4px) scale(1.01); /* كان -6px و 1.02 */
+    }
+
+/* 5) اعزل الرسم للحاويات التقيلة (shadows) لتقليل إعادة الطلاء */
+.bedaya-instructor-content,
+.bedaya-table-wrapper,
+.bedaya-dashboard-quick-actions {
+}
+
+/* 6) ثبّت قياسات الحدود لتمنع أي reflow عند hover */
+.bedaya-instructor-nav-item,
+.bedaya-dashboard-card {
+    border-width: 2px;
+}
+
+/* 7) كمّل أبعاد الـ modal overlay لتمنع فليكر عند الفتح */
+.bedaya-modal {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* 8) (اختياري) قلّل الظلال في الأنيميشن لتقليل الحمل أثناء التحويم */
+.bedaya-dashboard-card {
+    transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+
+.bedaya-quick-action {
+    transition: transform .25s cubic-bezier(.34,1.56,.64,1), border-color .25s;
+}
+
+
+/* إلغاء العزل نهائيًا */
+.bedaya-instructor-content,
+.bedaya-table-wrapper,
+.bedaya-dashboard-quick-actions {
+    contain: none !important;
+}
+
+/* لما المودال مفتوح، عطّل العزل ومنع أي قصّ */
+body.modal-open .bedaya-instructor-content,
+body.modal-open .bedaya-table-wrapper,
+body.modal-open .bedaya-dashboard-quick-actions {
+    contain: none !important;
+    overflow: visible !important; /* لو أي حاوية كانت بتقص */
+}
+
+/* تأكيد إن المودال على مستوى الصفحة */
+.bedaya-modal {
+    position: fixed !important;
+    inset: 0 !important; /* top/right/bottom/left = 0 */
+    z-index: 10000 !important; /* أعلى من أي شيء */
+    display: none; /* غيّرها لـ flex عند الفتح */
+}
+
+/* قفل سكرول خلفية الصفحة لما المودال مفتوح */
+body.modal-open {
+    overflow: hidden;
+}
+/* جدول داخل التاب: حاوية تمنع الخروج وتوفّر سكrol داخلي */
+.bedaya-instructor-tab .bedaya-table-wrapper.table-in-tab {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    /* اجعل الحاوية هي منطقة السكrol لتثبيت الـ sticky header داخلها */
+    max-height: clamp(320px, 55vh, 620px);
+    overflow: auto;
+    position: relative;
+    border-radius: 14px; /* قص الحواف داخل التاب */
+    box-shadow: var(--bd-shadow);
+    overscroll-behavior: contain; /* منع سحب الصفحة أثناء التمرير داخل الجدول */
+    contain: layout paint; /* يمنع تأثيرات مرئية تتسرّب خارج الحاوية */
+}
+
+/* تقليل الحد الأدنى للعرض داخل التاب (بدلاً من 940px العمومي) */
+.bedaya-instructor-tab .bedaya-table {
+    min-width: 760px; /* تقدر تقلل/تكبّر الرقم حسب أعمدة جدولك */
+    width: 100%;
+    table-layout: auto;
+}
+
+    /* Sticky header يلتصق داخل نفس الحاوية فقط */
+    .bedaya-instructor-tab .bedaya-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #f8fafc; /* تأكيد الخلفية تحت الـ sticky */
+    }
+
+/* حماية من أي تسرّب ظلال/حدود خارج التاب */
+.bedaya-instructor-tab {
+    overflow: hidden;
+}
+
+/* تحسينات موبايل */
+@media (max-width: 768px) {
+    .bedaya-instructor-tab .bedaya-table {
+        min-width: 640px;
+    }
+
+    .bedaya-instructor-tab .bedaya-table-wrapper.table-in-tab {
+        max-height: clamp(280px, 50vh, 520px);
+    }
 }

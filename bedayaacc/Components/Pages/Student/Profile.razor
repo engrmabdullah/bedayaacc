@@ -3,6 +3,7 @@
 
 @using Microsoft.AspNetCore.Components.Authorization
 @using bedayaacc.Components.Layout
+@using bedayaacc.Repositories
 @using bedayaacc.Services
 @using bedayaacc.Models
 @using bedayaacc.Helpers
@@ -12,6 +13,9 @@
 @inject IJSRuntime JSRuntime
 @inject IStudentDashboardService DashboardService
 @inject IExamService ExamService
+@using System.Security.Claims
+@inject IPaymentRepository PaymentRepository
+@inject IHttpContextAccessor Http
 
 @layout ExternalLayout
 
@@ -208,29 +212,89 @@
                                     }
 
                                     <div class="exam-card-actions">
-                                        @if (CanTakeExam(ex))
+                                        @{
+                                            var state = GetAccessState(ex.ExamId);
+
+                                        }
+
+                                        @if ((ex.Price) == 0)
                                         {
-                                            <button class="btn btn-primary btn-block"
-                                                    @onclick="() => StartExam(ex.ExamId)">
-                                                <i class="fas fa-play-circle"></i>
-                                                @(attemptsCount > 0 ? Tr("Exams.NewAttempt") : Tr("Exams.Start"))
+                                            <!-- مجاني -->
+                                            @if (CanTakeExamWithAccess(ex, state))
+                                            {
+                                                <button class="btn btn-primary btn-block"
+                                                        @onclick="() => StartExamGuarded(ex)">
+                                                    <i class="fas fa-play-circle"></i>
+                                                    @(attemptsCount > 0 ? Tr("Exams.Actions.NewAttempt") : Tr("Exams.Actions.Start"))
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-secondary btn-block" disabled>
+                                                    <i class="fas fa-lock"></i> @Tr("Exams.Actions.MaxAttemptsReached")
+                                                </button>
+                                            }
+                                        }
+                                        else if (!IsAuthenticated)
+                                        {
+                                            <!-- مدفوع + غير مسجل -->
+                                            <button class="btn btn-secondary btn-block"
+                                                    @onclick="() => GoLoginForPurchase(ex.ExamId)">
+                                                <i class="fas fa-lock"></i>
+                                                @Tr("Exams.Actions.LoginToPurchase")
+                                            </button>
+                                        }
+                                        else if (state == AccessState.NotPurchased)
+                                        {
+                                            <!-- مدفوع + لم يشترِ -->
+                                            <button class="btn btn-accent btn-block"
+                                                    @onclick="() => GoCheckout(ex.ExamId)">
+                                                <i class="fas fa-credit-card"></i>
+                                                @Tr("Exams.Actions.Purchase")
+                                            </button>
+                                        }
+                                        else if (state == AccessState.PendingVerification)
+                                        {
+                                            <!-- مدفوع + قيد المراجعة -->
+                                            <button class="btn btn-secondary btn-block" disabled>
+                                                <i class="fas fa-hourglass-half"></i>
+                                                @Tr("Exams.Actions.PendingVerification")
+                                            </button>
+
+                                            <button class="btn btn-outline btn-block"
+                                                    @onclick="() => GoCheckout(ex.ExamId)">
+                                                <i class="fas fa-receipt"></i>
+                                                @Tr("Exams.Actions.ViewReceipt")
                                             </button>
                                         }
                                         else
                                         {
-                                            <button class="btn btn-secondary btn-block" disabled>
-                                                <i class="fas fa-lock"></i> @Tr("Exams.MaxAttemptsReached")
-                                            </button>
+                                            <!-- مدفوع + تم التحقق -->
+                                            @if (CanTakeExamWithAccess(ex, state))
+                                            {
+                                                <button class="btn btn-primary btn-block"
+                                                        @onclick="() => StartExamGuarded(ex)">
+                                                    <i class="fas fa-play-circle"></i>
+                                                    @(attemptsCount > 0 ? Tr("Exams.Actions.NewAttempt") : Tr("Exams.Actions.Start"))
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-secondary btn-block" disabled>
+                                                    <i class="fas fa-lock"></i> @Tr("Exams.Actions.MaxAttemptsReached")
+                                                </button>
+                                            }
                                         }
 
                                         @if (attemptsCount > 0)
                                         {
                                             <button class="btn btn-outline btn-block"
                                                     @onclick="() => ViewHistory(ex.ExamId)">
-                                                <i class="fas fa-history"></i> @Tr("Exams.ViewHistory")
+                                                <i class="fas fa-history"></i> @Tr("Exams.Actions.ViewHistory")
                                             </button>
                                         }
                                     </div>
+
                                 </div>
                             }
                         </div>
@@ -255,8 +319,8 @@
                                 <div class="bedaya-activity-item">
                                     <div class="bedaya-activity-icon">
                                         <i class="@(a.EventType == "AttemptSubmitted" ? "fas fa-check-circle" :
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               a.EventType == "AttemptStarted" ? "fas fa-play-circle" :
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "fas fa-key")"></i>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       a.EventType == "AttemptStarted" ? "fas fa-play-circle" :
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "fas fa-key")"></i>
                             </div>
                             <div class="bedaya-activity-content">
                                 <p>
@@ -573,7 +637,7 @@
 
         var res = await DashboardService.GetRecentActivityPageAsync(currentUserId.Value, page, pageSize);
         activityItems = res.Items;
-        totalActivity = res.TotalCount;
+        totalActivity = res.Total;
         activityPage = res.Page;
 
         activityLoading = false;
@@ -591,13 +655,24 @@
         categories = await ExamService.GetCategoriesAsync();
         exams = await ExamService.GetAllExamsAsync(isPublic: true, pageSize: 200);
 
-        var allAttempts = await ExamService.GetUserAttemptsAsync(currentUserId!.Value);
-        userAttemptsByExam = allAttempts.GroupBy(a => a.ExamId).ToDictionary(g => g.Key, g => g.ToList());
+        if (currentUserId.HasValue)
+        {
+            var allAttempts = await ExamService.GetUserAttemptsAsync(currentUserId.Value);
+            userAttemptsByExam = allAttempts.GroupBy(a => a.ExamId).ToDictionary(g => g.Key, g => g.ToList());
+        }
+        else
+        {
+            userAttemptsByExam.Clear();
+        }
+
+        // NEW: حالات الوصول (الدفع/التحقق)
+        await ComputeAccessStatusesAsync();
 
         filteredExams = exams;
         examsLoading = false;
         StateHasChanged();
     }
+
 
     private void FilterByCategory(int? categoryId) { selectedCategoryId = categoryId; ApplyExamFilters(); }
     private void ApplyExamFilters()
@@ -692,6 +767,133 @@
         showCertModal = false;
         certUrl = null;
     }
+
+    // ===== Access / Payment logic (مثل /exams) =====
+    private enum AccessState
+    {
+        Free,               // مجاني
+        NotPurchased,       // لم يشترِ بعد
+        PendingVerification,// إيصال مرفوع وقيد المراجعة
+        Verified            // مدفوع ومؤكد
+    }
+
+    private readonly Dictionary<int, AccessState> accessByExam = new();
+
+    private bool IsAuthenticated =>
+        Http.HttpContext?.User?.Identity?.IsAuthenticated == true;
+
+    private int CurrentUserId =>
+        int.TryParse(Http.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var id) ? id : 0;
+
+    private AccessState GetAccessState(int examId)
+        => accessByExam.TryGetValue(examId, out var s) ? s : AccessState.NotPurchased;
+
+    // اعدّ الحالات لكل امتحان
+    private async Task ComputeAccessStatusesAsync()
+    {
+        accessByExam.Clear();
+
+        foreach (var e in exams)
+        {
+            AccessState state;
+
+            if ((e.Price) == 0)
+            {
+                state = AccessState.Free;
+            }
+            else if (!IsAuthenticated)
+            {
+                state = AccessState.NotPurchased;
+            }
+            else
+            {
+                var verified = await PaymentRepository.HasUserPaidExamAsync(e.ExamId, CurrentUserId);
+                if (verified)
+                {
+                    state = AccessState.Verified;
+                }
+                else
+                {
+                    var pending = await PaymentRepository.GetPendingOrderAsync(CurrentUserId, e.ExamId);
+                    state = (pending != null) ? AccessState.PendingVerification : AccessState.NotPurchased;
+                }
+            }
+
+            accessByExam[e.ExamId] = state;
+        }
+    }
+
+    private bool CanTakeExamWithAccess(Exam e, AccessState state)
+    {
+        var hasAccess = ((e.Price) == 0) || state == AccessState.Verified;
+        if (!hasAccess) return false;
+
+        var max = e.MaxAttempts ?? 0;
+        if (max <= 0) return true;
+        return GetUserAttempts(e.ExamId) < max;
+    }
+
+    private async Task StartExamGuarded(Exam e)
+    {
+        var fresh = await RefreshAccessStateAsync(e);
+
+        if ((e.Price) > 0 && fresh != AccessState.Verified)
+        {
+            if (!IsAuthenticated) { GoLoginForPurchase(e.ExamId); return; }
+            if (fresh == AccessState.NotPurchased) { GoCheckout(e.ExamId); return; }
+            if (fresh == AccessState.PendingVerification) { GoCheckout(e.ExamId); return; }
+            return;
+        }
+
+        var max = e.MaxAttempts ?? 0;
+        if (max > 0 && GetUserAttempts(e.ExamId) >= max) return;
+
+        Navigation.NavigateTo($"/exams/{e.ExamId}/take");
+    }
+
+    private async Task<AccessState> RefreshAccessStateAsync(Exam e)
+    {
+        AccessState state;
+
+        if ((e.Price) == 0)
+        {
+            state = AccessState.Free;
+        }
+        else if (!IsAuthenticated)
+        {
+            state = AccessState.NotPurchased;
+        }
+        else
+        {
+            var verified = await PaymentRepository.HasUserPaidExamAsync(e.ExamId, CurrentUserId);
+            if (verified)
+                state = AccessState.Verified;
+            else
+                state = (await PaymentRepository.GetPendingOrderAsync(CurrentUserId, e.ExamId)) != null
+                    ? AccessState.PendingVerification
+                    : AccessState.NotPurchased;
+        }
+
+        accessByExam[e.ExamId] = state;
+        StateHasChanged();
+        return state;
+    }
+
+    private void GoLoginForPurchase(int examId)
+    {
+        var returnUrl = $"/student/dashboard";
+        // لو حابب ترجّع المستخدم لنفس التبويب بعد الشراء:
+        // var returnUrl = $"/student/dashboard?tab=exams";
+        Navigation.NavigateTo($"/login?ReturnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
+    }
+
+    private void GoCheckout(int examId)
+    {
+        Navigation.NavigateTo($"/exams/{examId}/checkout");
+    }
+
+    private static string FormatPrice(decimal price)
+        => string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:0.##} {1}", price, "EGP");
 
 
 }

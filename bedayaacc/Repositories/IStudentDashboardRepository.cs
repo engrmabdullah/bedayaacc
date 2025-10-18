@@ -18,5 +18,7 @@ namespace bedayaacc.Repositories
 
         Task<bool> UpdateProfileAsync(UpdateProfileDto dto, CancellationToken ct = default);
 
+
+
     }
 }

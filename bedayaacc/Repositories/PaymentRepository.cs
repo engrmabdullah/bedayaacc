@@ -118,7 +118,7 @@ FROM dbo.ExamOrders o
 JOIN dbo.Exams e 
     ON e.ExamId = o.ExamId 
    AND e.IsDeleted = 0 
-   AND e.InstructorId = @InstructorId
+  
 LEFT JOIN dbo.Users u ON u.UserId = o.UserId
 WHERE o.IsDeleted = 0
   AND (@Status IS NULL OR @Status = '' OR o.Status = @Status)
@@ -147,7 +147,7 @@ FROM dbo.ExamOrders o
 JOIN dbo.Exams e 
     ON e.ExamId = o.ExamId 
    AND e.IsDeleted = 0 
-   AND e.InstructorId = @InstructorId
+   
 LEFT JOIN dbo.Users u ON u.UserId = o.UserId
 WHERE o.IsDeleted = 0
   AND (@Status IS NULL OR @Status = '' OR o.Status = @Status)

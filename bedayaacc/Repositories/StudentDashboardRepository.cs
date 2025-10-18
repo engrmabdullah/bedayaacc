@@ -226,7 +226,7 @@ SELECT
                 {
                     Page = page,
                     PageSize = pageSize,
-                    TotalCount = total,
+                    Total = total,
                     Items = rows
                 };
             }
