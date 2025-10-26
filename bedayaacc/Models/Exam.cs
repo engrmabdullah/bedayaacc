@@ -290,13 +290,13 @@ namespace bedayaacc.Models
     public class CreateQuestionOptionModel
     {
         [Required(ErrorMessage = "نص الخيار بالعربي مطلوب")]
-        [StringLength(1000)]
+
         public string OptionTextAr { get; set; } = string.Empty;
 
-        [StringLength(1000)]
+
         public string? OptionTextEn { get; set; }
 
-        [StringLength(500)]
+
         public string? OptionImageUrl { get; set; }
 
         public bool IsCorrect { get; set; }
